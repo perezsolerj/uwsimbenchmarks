@@ -16,10 +16,13 @@
   <depend package="urdf"/>
   <depend package="urdf_parser"/>
   <depend package="underwater_sensor_msgs"/>
+  <depend package="osgBullet"/>
+  <depend package="osgWorks"/>
   <rosdep name="libxml++-2.6" />
   <rosdep name="boost" />
   <rosdep name="libopenscenegraph" />
   <rosdep name="opengl" />
+
 
   <url>http://www.irs.uji.es/uwsim/</url>
   <export>

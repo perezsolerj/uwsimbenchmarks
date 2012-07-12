@@ -83,6 +83,8 @@ src/InertialMeasurementUnit.cpp
 src/PressureSensor.cpp
 src/DVLSensor.cpp
 src/GPSSensor.cpp
+src/BulletPhysics.cpp
+src/PhysicsBuilder.cpp
 )
 
 rosbuild_add_executable(UWSim  src/main.cpp)

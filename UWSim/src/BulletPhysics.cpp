@@ -1,33 +1,51 @@
-
 #include "BulletPhysics.h"
 
 // Define filter masks
-unsigned int vehicleCollidesWith( COL_OBJECTS );
-unsigned int objectsCollidesWith( COL_OBJECTS | COL_VEHICLE );
+unsigned int vehicleCollidesWith( COL_OBJECTS);
+unsigned int objectsCollidesWith( COL_EVERYTHING  );
 
-void BulletPhysics::MirrorTransformCallback::operator() (osg::Node *node, osg::NodeVisitor *nv)  {
-  OSG_INFO << "ToolPhysicsCallback should update hook transform" << std::endl;
+class MyMotionState : public btMotionState {
+public:
 
-  /* Bullet does not compute localizedWorld to move dynamicObjects, in order to check collisions localizedWorld is eliminated so
-  collisions will be checked in different global coordinates but objects relative positions are OK, so objects should interact
-  fine. */
-  osg::NodePath nodepath=nv->getNodePath();
-  osg::NodePath::iterator loc;
-  int found=0;
-  for(osg::NodePath::iterator i=nodepath.begin();i!=nodepath.end() && !found;++i){
-    if( i[0]->getName()=="localizedWorld"){
-      loc=i;
-      found=1;
-    }
+  MyMotionState(osg::Node * obj, osg::MatrixTransform *root){
+    transf=root;
+    object=obj;
   }
-  nodepath.erase(loc);
 
-  osg::Matrixd m;
-  m = osg::computeLocalToWorld(nodepath );
-		
-  traverse(node,nv);
-  body->getMotionState()->setWorldTransform( osgbCollision::asBtTransform(m) );
-}
+  void setNode(osg::Node *node) {
+        object = node;
+  }
+
+  virtual void getWorldTransform(btTransform &worldTrans) const {
+        worldTrans = osgbCollision::asBtTransform(*getWorldCoords(object));
+  }
+
+  virtual void setWorldTransform(const btTransform &worldTrans){
+    //Object initial position
+    osg::Matrixd * mat= getWorldCoords(transf->getParent(0));
+
+    //Get object position in matrixd
+    osg::Matrixd worldMatrix;
+    btQuaternion rot = worldTrans.getRotation();
+    btVector3 pos = worldTrans.getOrigin();
+    worldMatrix.setTrans(osg::Vec3d(pos.x(),pos.y(),pos.z()));
+    worldMatrix.setRotate(osg::Quat(rot.x(),rot.y(),rot.z(),rot.w()));
+    
+    //matrix transform from object initial position to final position
+    osg::Matrixd rootmat=worldMatrix*(mat->inverse(*mat));
+
+    //Apply transform to object matrix
+    rootmat.setTrans(rootmat.getTrans());
+    rootmat.setRotate(rootmat.getRotate());
+    transf->setMatrix(rootmat);
+
+  }
+
+protected:
+  osg::Node * object;
+  osg::MatrixTransform *transf;
+
+};
 
 void BulletPhysics::stepSimulation(btScalar timeStep, int maxSubSteps=1, btScalar fixedTimeStep=btScalar(1.)/btScalar(60.) ) {
   //dynamicsWorld->debugDrawWorld();
@@ -44,16 +62,16 @@ void BulletPhysics::printManifolds(){
     btCollisionObject* colObj1 = (btCollisionObject*)dispatcher->getManifoldByIndexInternal(i)->getBody1();
     CollisionDataType * nombre=(CollisionDataType *)colObj0->getUserPointer();
     CollisionDataType * nombre2=(CollisionDataType *)colObj1->getUserPointer();
-    double min=99999999999999999;
+    double min=999999;
     for(int j=0;j<dispatcher->getManifoldByIndexInternal(i)->getNumContacts();j++)
 	if(dispatcher->getManifoldByIndexInternal(i)->getContactPoint(j).getDistance() < min)
 	  min=dispatcher->getManifoldByIndexInternal(i)->getContactPoint(j).getDistance();
-    if(min<99999999999999999)
+    if(min<999999)
     std::cout<<i<<" "<<nombre->name<<" "<<" "<<nombre2->name<<" "<<min<<std::endl;
   }
 }
 
-BulletPhysics::BulletPhysics(double rotationOffset[3],double configGravity[3],osgOcean::OceanTechnique* oceanSurf) {
+BulletPhysics::BulletPhysics(double configGravity[3],osgOcean::OceanTechnique* oceanSurf) {
     collisionConfiguration = new btDefaultCollisionConfiguration();
     dispatcher = new btCollisionDispatcher( collisionConfiguration );
     solver = new btSequentialImpulseConstraintSolver;
@@ -67,9 +85,6 @@ BulletPhysics::BulletPhysics(double rotationOffset[3],double configGravity[3],os
     btVector3 gravity(configGravity[0],configGravity[1],configGravity[2]);
     if(configGravity[0]==0 && configGravity[1]==0 && configGravity[2]==0){
       gravity=UWSIM_DEFAULT_GRAVITY;
-      gravity=gravity.rotate(btVector3(1,0,0),rotationOffset[0]);
-      gravity=gravity.rotate(btVector3(0,1,0),rotationOffset[1]);
-      gravity=gravity.rotate(btVector3(0,0,1),rotationOffset[2]);
     }
 
     dynamicsWorld->setGravity( gravity);
@@ -97,38 +112,40 @@ btCollisionShape* BulletPhysics::GetCSFromOSG(osg::Node * node, collisionShapeTy
     return cs;
 }
 
-btRigidBody* BulletPhysics::addObject(osg::MatrixTransform *root, osg::Node *node, btScalar mass, btVector3 inertia, collisionShapeType_t ctype, CollisionDataType * data ) {
+btRigidBody* BulletPhysics::addObject(osg::MatrixTransform *root, osg::Node *node, btScalar mass, btVector3 inertia, collisionShapeType_t ctype, CollisionDataType * data,osg::Node * colShape) {
     
 
-    btCollisionShape* cs=GetCSFromOSG( node, ctype);
+   btCollisionShape* cs;
+   if(colShape==NULL)
+     cs=GetCSFromOSG( node, ctype);
+   else
+     cs=GetCSFromOSG( colShape, ctype);
 
-    osgbDynamics::MotionState* motion = new osgbDynamics::MotionState();
-    osg::Matrix m=root->getMatrix();
-    motion->setTransform( root );
-    //osg::Matrix m=osg::Matrixd::rotate(-M_PI_2,0,0,1);
-    //m.setTrans(0.5,-2.15,-4.70);
-    motion->setParentTransform( m );
-    //btScalar mass( 0.5 );
-    //btVector3 inertia( 0, 0, 0 );
+    MyMotionState* motion = new MyMotionState(node,root);
     cs->calculateLocalInertia( mass, inertia );
     btRigidBody::btRigidBodyConstructionInfo rb( mass, motion, cs, inertia );
     btRigidBody* body = new btRigidBody( rb );
     body->setUserPointer(data);
-    //body->setActivationState( DISABLE_DEACTIVATION );
-    btBroadphaseProxy *bproxy = body->getBroadphaseHandle();
-    if( bproxy ) {
-      bproxy->m_collisionFilterGroup = short( COL_OBJECTS );
-      bproxy->m_collisionFilterMask = short( objectsCollidesWith );
-    } 
-    dynamicsWorld->addRigidBody( body);
 
+    //addRigidBody adds its own collision masks, changing after object creation do not update masks so objects are removed and readded in order to update masks to improve collisions performance.
+    dynamicsWorld->addRigidBody( body);
+    if(data->isVehicle){
+      dynamicsWorld->btCollisionWorld::removeCollisionObject(body);
+      dynamicsWorld->addCollisionObject(body,short( COL_VEHICLE),short(vehicleCollidesWith));
+    }
+    else{
+      dynamicsWorld->btCollisionWorld::removeCollisionObject(body);
+      dynamicsWorld->addCollisionObject(body,short( COL_OBJECTS),short(objectsCollidesWith));
+    }
+
+ 
 
     return( body );
 }
 
-btRigidBody* BulletPhysics::addFloatingObject(osg::MatrixTransform *root, osg::Node *node, btScalar mass, btVector3 inertia, collisionShapeType_t ctype, CollisionDataType * data ) {
+btRigidBody* BulletPhysics::addFloatingObject(osg::MatrixTransform *root, osg::Node *node, btScalar mass, btVector3 inertia, collisionShapeType_t ctype, CollisionDataType * data,osg::Node * colShape ) {
 
-  btRigidBody* floating = addObject(root, node, mass,inertia,ctype,data);
+  btRigidBody* floating = addObject(root, node, mass,inertia,ctype,data,colShape);
   btVector3 min,max;
   floating->getAabb(min,max);
   max=max-min;
@@ -141,49 +158,19 @@ btRigidBody* BulletPhysics::addFloatingObject(osg::MatrixTransform *root, osg::N
   return floating;
 }
 
-btRigidBody* BulletPhysics::addDynamicObject(osg::MatrixTransform *root, osg::Node *node, btScalar mass, btVector3 inertia, collisionShapeType_t ctype, CollisionDataType * data ) {
-	return addObject(root, node, mass,inertia,ctype,data);
+btRigidBody* BulletPhysics::addDynamicObject(osg::MatrixTransform *root, osg::Node *node, btScalar mass, btVector3 inertia, collisionShapeType_t ctype, CollisionDataType * data,osg::Node * colShape ) {
+	return addObject(root, node, mass,inertia,ctype,data,colShape);
 }
 
-btRigidBody* BulletPhysics::addKinematicObject(osg::MatrixTransform *root, osg::Node *node, btScalar mass, btVector3 inertia, collisionShapeType_t ctype, CollisionDataType * data) {
-	btRigidBody *b=addObject(root,node, mass,inertia,ctype,data);
+btRigidBody* BulletPhysics::addKinematicObject(osg::MatrixTransform *root, osg::Node *node, btScalar mass, btVector3 inertia, collisionShapeType_t ctype, CollisionDataType * data,osg::Node * colShape) {
+	btRigidBody *b=addObject(root,node, mass,inertia,ctype,data,colShape);
 	if (b!=NULL) {
-		b->setCollisionFlags( b->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT );
-	}
+	  b->setCollisionFlags( b->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT );
+          b->setActivationState( DISABLE_DEACTIVATION );
+	}  
 	return b;
 }
 
-btRigidBody* BulletPhysics::addKinematicMirrorObject(osg::Node *node, btScalar mass, btVector3 inertia, collisionShapeType_t ctype,osg::Node * colShape=NULL, CollisionDataType * data=NULL ) {
-
-
-	btCollisionShape* cs;
-	if(colShape==NULL)
-	  cs=GetCSFromOSG( node, ctype);
-	else
-	  cs=GetCSFromOSG( colShape, ctype);
-
-	osgbDynamics::MotionState* motion = new osgbDynamics::MotionState();
-	//osg::Matrix m=root->getMatrix();
-	//motion->setTransform( root );
-	//motion->setParentTransform( m );
-	cs->calculateLocalInertia( mass, inertia );
-	btRigidBody::btRigidBodyConstructionInfo rb( mass, motion, cs, inertia );
-	btRigidBody* body = new btRigidBody( rb );
-	body->setCollisionFlags( body->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT );
-	btBroadphaseProxy *bproxy = body->getBroadphaseHandle();
-
-	if( bproxy ) {
-	  bproxy->m_collisionFilterGroup = short( COL_VEHICLE );
-	  bproxy->m_collisionFilterMask = short( vehicleCollidesWith );
-	} 
-	dynamicsWorld->addRigidBody( body);
-    	body->setUserPointer(data);
-body->setActivationState( DISABLE_DEACTIVATION );
-
-	node->setUpdateCallback(new MirrorTransformCallback(body));
-
-	return body;
-}
 
 int BulletPhysics::getNumCollisions(){
   return dispatcher->getNumManifolds();
@@ -216,7 +203,6 @@ void BulletPhysics::processFloatingObjects(){
     //std::cout<<"min:"<<min.x()<<" "<<min.y()<<" "<<min.z()<<" max: "<<max.x()<<" "<<max.y()<<" "<<max.z()<<std::endl;
     
     btVector3 med=(max+min)/2.0;
-    std::cerr << "Pose in world: " << med.x() << " " << med.y() << " " << med.z() << std::endl;
     btVector3 alt=max-min;
     double Adn= alt.x()*alt.y(); //Area de la superficie normal a la direccion de movimiento
     double Ads= floatForces[i]/1027; //Volumen del objeto
