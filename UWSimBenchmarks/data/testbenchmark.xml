@@ -1,0 +1,96 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE benchmark SYSTEM "benchmark.dtd" >
+
+<benchmark>
+  <measures>
+
+    <time>
+      <name>taskTime</name>
+      <startOn>
+        <type>onInit</type>
+        <target> girona500 </target>
+      </startOn>
+      <stopOn>
+         <type>never</type>
+         <target> girona500 </target>
+      </stopOn>
+    </time>
+
+    <collision>
+      <name>Collisions</name>
+      <target> girona500 </target>
+      <startOn>
+	<type>onInit</type>
+      </startOn>
+      <stopOn>
+	<type>never</type>
+      </stopOn>
+    </collision>
+
+    <positionError>
+      <name>positionError</name>
+      <target>blackbox</target>
+      <position>
+        <x>0</x>
+        <y>0</y>
+        <z>3.65</z>
+      </position>
+      <startOn>
+	<type>onInit</type>
+      </startOn>
+      <stopOn>
+	<type>never</type>
+      </stopOn>
+    </positionError>
+
+    <distance>
+      <name>distance</name>
+      <target> girona500 </target>
+      <startOn>
+	<type>onInit</type>
+      </startOn>
+      <stopOn>
+	<type>never</type>
+      </stopOn>
+    </distance>
+
+    <euclideanNorm>
+      <name>euclideanNorm</name>
+      <groundTruth>
+	<value>0.2 </value>
+	<value> 1.5</value>
+	<value> 2.1 </value>
+      </groundTruth>	
+      <target> testtopic </target>
+      <startOn>
+	<type>onInit</type>
+      </startOn>
+      <stopOn>
+	<type>never</type>
+      </stopOn>
+    </euclideanNorm>
+  </measures>
+
+  <startOn>
+     <type>service</type>
+     <target> startBench </target>
+  </startOn>
+
+  <stopOn>
+     <type>never</type>
+     <target> asd</target>
+  </stopOn> 
+    
+  <function>taskTime</function>
+
+  <sceneUpdater> 
+    <sceneFogUpdater>
+      <initialFog>0</initialFog>
+      <finalFog>1</finalFog>
+      <step>0.1</step>
+      <interval>2</interval>
+    </sceneFogUpdater>
+  </sceneUpdater>
+
+</benchmark>

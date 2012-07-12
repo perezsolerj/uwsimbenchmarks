@@ -1,0 +1,16 @@
+<package>
+  <description brief="UWSimBenchmarks">
+
+     UWSimBenchmarks, Benchmarks package for UWSim
+
+  </description>
+  <author>Javier Perez, Mario Prats</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/UWSimBenchmarks</url>
+  <depend package="UWSimPhysics"/>
+  <depend package="std_srvs"/>
+  <rosdep name="libmuparser" />
+</package>
+
+

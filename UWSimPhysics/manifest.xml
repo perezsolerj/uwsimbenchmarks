@@ -1,0 +1,21 @@
+<package>
+  <description brief="UWSimPhysics">
+
+     UWSimPhysics, Physics package for UWSim
+
+  </description>
+  <author>Javier Perez, Mario Prats</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/UWSimPhysics</url>
+  <depend package="UWSim"/>
+  <depend package="osgBullet"/>
+  <depend package="osgWorks"/>
+
+  <export>
+    <cpp cflags="-I${prefix}/src" lflags="-Wl,-rpath,${prefix}/lib  -L${prefix}/lib -luwsimphysics"/>
+  </export>
+
+</package>
+
+

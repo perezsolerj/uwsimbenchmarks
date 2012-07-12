@@ -1,0 +1,66 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE benchmark SYSTEM "benchmark.dtd" >
+
+<benchmark>
+  <measures>
+
+    <euclideanNorm>
+      <name>corners</name>
+      <groundTruth>
+	<value>215</value>
+	<value>149</value>
+	<value>300</value>
+	<value>149</value>
+	<value>300</value>
+	<value>176</value>
+	<value>215</value>
+	<value>176</value>
+      </groundTruth>	
+      <target> cornersTopic </target>
+      <startOn>
+	<type>onInit</type>
+      </startOn>
+      <stopOn>
+	<type>never</type>
+      </stopOn>
+    </euclideanNorm>
+
+    <euclideanNorm>
+      <name>centroid</name>
+      <groundTruth>
+	<value>257.5 </value>
+	<value>162.5</value>
+      </groundTruth>	
+      <target> centroidTopic </target>
+      <startOn>
+	<type>onInit</type>
+      </startOn>
+      <stopOn>
+	<type>never</type>
+      </stopOn>
+    </euclideanNorm>
+
+  </measures>
+
+  <startOn>
+     <type>service</type>
+     <target> startBench </target>
+  </startOn>
+
+  <stopOn>
+     <type>never</type>
+  </stopOn> 
+    
+  <function>corners+centroid</function>
+
+  <sceneUpdater> 
+    <sceneFogUpdater>
+      <initialFog>0</initialFog>
+      <finalFog>1</finalFog>
+      <step>0.05</step>
+      <interval>2</interval>
+    </sceneFogUpdater>
+  </sceneUpdater>
+
+</benchmark>

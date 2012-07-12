@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE benchmark SYSTEM "benchmark.dtd" >
+
+<benchmark>
+  <measures>
+
+    <time>
+      <name>taskTime</name>
+      <startOn>
+        <type>onInit</type>
+      </startOn>
+      <stopOn>
+         <type>never</type>
+      </stopOn>
+    </time>
+
+  </measures>
+
+  <startOn>
+     <type>service</type>
+     <target> startBench </target>
+  </startOn>
+
+  <stopOn>
+     <type>service</type>
+     <target> stopBench </target>
+  </stopOn> 
+    
+  <function>taskTime</function>
+
+  <sceneUpdater> 
+    <none />
+  </sceneUpdater>
+
+</benchmark>
