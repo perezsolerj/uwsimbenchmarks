@@ -176,6 +176,13 @@ void ConfigFile::processSimParams(const xmlpp::Node* node){
 			extractPositionOrColor(child,offsetr);
      		else if(child->get_name()=="gravity")
 			extractPositionOrColor(child,gravity);
+		else if(child->get_name()=="enablePhysics"){
+			extractIntChar(child,enablePhysics);
+			if(enablePhysics != 0 && enablePhysics!=1){
+				OSG_WARN << "ConfigFile::processSimParams: enablePhysics is not a binary value ( 0 1), using default value (1)" << std::endl;
+				enablePhysics=0;
+			}
+		}
 
 	}
 }
@@ -872,6 +879,7 @@ ConfigFile::ConfigFile(const std::string &fName){
 	memset(offsetp,0,3*sizeof(double));
    	memset(gravity,0,3*sizeof(double));
 	camNear=camFar=-1;
+        enablePhysics=0;
 	try
 	{
 		xmlpp::DomParser parser;

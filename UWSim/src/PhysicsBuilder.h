@@ -11,6 +11,8 @@ public:
 public:
 
   PhysicsBuilder(SceneBuilder * scene_builder,ConfigFile config);
+  PhysicsBuilder(){};
+  void loadPhysics(SceneBuilder * scene_builder,ConfigFile config);
 
 };
 

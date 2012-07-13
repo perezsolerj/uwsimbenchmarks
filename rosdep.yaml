@@ -19,4 +19,4 @@ libxml++-2.6:
 libmuparser:
   ubuntu: 
     oneiric: libmuparser0debian1 libmuparser-dev
-
+    lucid: libmuparser0 libmuparser-dev

@@ -47,6 +47,7 @@
       <y> 0</y>
       <z> -1.57 </z>
     </offsetr>
+    <enablePhysics> 1 </enablePhysics>
   </simParams>
   <camera>
     <freeMotion> 1 </freeMotion>

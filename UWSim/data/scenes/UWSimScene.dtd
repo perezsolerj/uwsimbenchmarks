@@ -2,7 +2,7 @@
 
 <!-- elementos oceanScene -->
 <!ELEMENT oceanState (windx?,windy?,windSpeed?,depth?,reflectionDamping?,waveScale?,isNotChoppy?,choppyFactor?,crestFoamHeight?,oceanSurfaceHeight?,fog?,color?,attenuation?)>
-<!ELEMENT simParams (disableShaders?,resw?,resh?,offsetp?,offsetr?)>
+<!ELEMENT simParams (disableShaders?,resw?,resh?,offsetp?,offsetr?,enablePhysics?,gravity?)>
 <!ELEMENT vehicle (name,file,jointValues?,position?,orientation?,virtualCamera*, rangeSensor*, imu*, pressureSensor*, gpsSensor*, dvlSensor*)>
 <!ELEMENT virtualCamera (name,relativeTo,resw?,resh?,position?,orientation?,baseline?,frameId?, parameters?, showpath?)>
 <!ELEMENT rangeSensor (name,relativeTo,range,visible?,position?,orientation?)>
@@ -53,6 +53,8 @@
 <!ELEMENT eye_in_hand (#PCDATA)>
 <!ELEMENT resw (#PCDATA)>
 <!ELEMENT resh (#PCDATA)>
+<!ELEMENT enablePhysics (#PCDATA)>
+<!ELEMENT gravity (x,y,z)>
 
 <!--elementos camera -->
 <!ELEMENT freeMotion (#PCDATA)>

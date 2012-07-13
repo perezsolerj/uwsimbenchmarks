@@ -1,6 +1,10 @@
 #include "PhysicsBuilder.h"
 
 PhysicsBuilder::PhysicsBuilder(SceneBuilder * scene_builder,ConfigFile config){
+  loadPhysics(scene_builder,config);
+}
+
+void PhysicsBuilder::loadPhysics(SceneBuilder * scene_builder,ConfigFile config){
 
   physics = new BulletPhysics(config.gravity,scene_builder->scene->getOceanSurface());
   OSG_INFO << "Loading Physics" << std::endl;

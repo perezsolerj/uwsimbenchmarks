@@ -82,7 +82,9 @@ int main(int argc, char *argv[])
 
 	SceneBuilder builder(arguments);
 	builder.loadScene(config);
-	PhysicsBuilder physicsBuilder(&builder,config);
+        PhysicsBuilder physicsBuilder;
+        if(config.enablePhysics)
+	  physicsBuilder.loadPhysics(&builder,config);
 
 	ViewBuilder view(config, &builder, arguments);
 	
@@ -100,13 +102,15 @@ int main(int argc, char *argv[])
 		ROSInterface::setROSTime(ros::Time::now());
 		ros::spinOnce();
 
-                const double currSimTime = view.getViewer()->getFrameStamp()->getSimulationTime();
-                double elapsed( currSimTime - prevSimTime );
-                if( view.getViewer()->getFrameStamp()->getFrameNumber() < 3 ) 
-                  elapsed = 1./60.;
-                physicsBuilder.physics->stepSimulation(elapsed, 4, elapsed/4. );
-                prevSimTime = currSimTime;
-                
+		if(config.enablePhysics){
+                  const double currSimTime = view.getViewer()->getFrameStamp()->getSimulationTime();
+                  double elapsed( currSimTime - prevSimTime );
+                  if( view.getViewer()->getFrameStamp()->getFrameNumber() < 3 ) 
+                    elapsed = 1./60.;
+                  physicsBuilder.physics->stepSimulation(elapsed, 4, elapsed/4. );
+                  prevSimTime = currSimTime;
+		}                
+
 		view.getViewer()->frame();
 	}
 	if (ros::ok()) ros::shutdown();
