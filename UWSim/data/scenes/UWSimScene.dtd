@@ -11,7 +11,7 @@
 <!ELEMENT gpsSensor (name,relativeTo,position?,orientation?, std?)>
 <!ELEMENT dvlSensor (name,relativeTo,position?,orientation?, std?)>
 <!ELEMENT camera (freeMotion?,objectToTrack?,fov?,aspectRatio?,near?,far?,position?,lookAt?) >
-<!ELEMENT object (name,file,position,orientation,offsetp?,offsetr?)>
+<!ELEMENT object (name,file,position,orientation,offsetp?,offsetr?,physics?)>
 <!ELEMENT rosInterfaces ((ROSOdomToPAT*)?, (PATToROSOdom*)?, (ArmToROSJointState*)?, (ROSJointStateToArm*)?, (VirtualCameraToROSImage*)?, (ROSImageToHUD*)?,(ROSTwistToPAT*)?, (RangeSensorToROSRange*)?, (ROSPoseToPAT*)?, (ImuToROSImu*)?, (PressureSensorToROS*)?, (GPSSensorToROS*)?, (DVLSensorToROS*)?)>
 
 <!-- elementos comunes -->
@@ -122,3 +122,9 @@
 <!-- elementos vcamtoROSImage -->
 <!ELEMENT cam (#PCDATA)>
 <!ELEMENT info (#PCDATA)>
+
+<!-- elementos physics -->
+<!ELEMENT physics (mass,inertia,collisionShapeType)>
+<!ELEMENT mass (#PCDATA)>
+<!ELEMENT inertia (x,y,z)>
+<!ELEMENT collisionShapeType (#PCDATA)>

@@ -243,6 +243,15 @@
       <p>3.1415</p>
       <y>0</y>
     </orientation>
+    <physics>
+      <mass> 8 </mass>
+      <inertia> 
+        <x> 0</x>
+        <y> 0 </y>
+        <z> 0 </z>
+      </inertia>
+      <collisionShapeType> box </collisionShapeType>
+    </physics>
   </object>
 
   <rosInterfaces>

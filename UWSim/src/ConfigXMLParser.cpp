@@ -739,7 +739,20 @@ void ConfigFile::processVehicle(const xmlpp::Node* node,Vehicle &vehicle){
 	}
 }
 
-
+void ConfigFile::processPhysicProperties(const xmlpp::Node* node, PhysicProperties &pp){
+	xmlpp::Node::NodeList list = node->get_children();
+	for(xmlpp::Node::NodeList::iterator iter = list.begin(); iter != list.end(); ++iter){
+		xmlpp::Node* child=dynamic_cast<const xmlpp::Node*>(*iter);
+		
+		if(child->get_name()=="mass")
+			extractFloatChar(child,pp.mass);
+		else if(child->get_name()=="inertia")
+			extractPositionOrColor(child,pp.inertia);
+		else if(child->get_name()=="collisionShapeType")
+			extractStringChar(child,pp.csType);		
+		
+	}
+}
 
 void ConfigFile::processObject(const xmlpp::Node* node,Object &object){
 	xmlpp::Node::NodeList list = node->get_children();
@@ -758,6 +771,12 @@ void ConfigFile::processObject(const xmlpp::Node* node,Object &object){
 			extractPositionOrColor(child,object.offsetp);
 		else if(child->get_name()=="offsetr")
 			extractPositionOrColor(child,object.offsetr);
+		else if(child->get_name()=="physics"){
+                        object.physicProperties.reset(new PhysicProperties);
+			object.physicProperties->init();
+			processPhysicProperties(child,*object.physicProperties);
+
+		}
 
 	}
 }
@@ -863,6 +882,7 @@ void ConfigFile::processXML(const xmlpp::Node* node){
 				Object  object;
 				memset(object.offsetp,0,3*sizeof(double));
 				memset(object.offsetr,0,3*sizeof(double));
+				object.physicProperties.reset();
 				processObject(child,object);
 				objects.push_back(object);
 			}
@@ -907,9 +927,3 @@ ConfigFile::ConfigFile(const std::string &fName){
 	}
 
 }
-
-
-
-
-
-

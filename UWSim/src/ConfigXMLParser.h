@@ -146,12 +146,20 @@ struct Vehicle{
   std::list<XMLDVLSensor> dvl_sensors;
 };
 
+struct PhysicProperties{
+  double mass;
+  double inertia[3];
+  std::string csType;
+  void init(){mass=1;inertia[0]=0;inertia[1]=0;inertia[2]=0;csType="box";};
+};
+
 struct Object{
   string name,file;
   double position[3];
   double orientation[3];
   double offsetp[3];
   double offsetr[3];
+  boost::shared_ptr<PhysicProperties> physicProperties;
 };
 
 class ConfigFile{
@@ -179,6 +187,7 @@ private:
   void processCamera(const xmlpp::Node* node);
   void processJointValues(const xmlpp::Node* node, std::vector<double> &jointValues, int &ninitJoints);
   void processVehicle(const xmlpp::Node* node, Vehicle &vehicle);
+  void processPhysicProperties(const xmlpp::Node* node, PhysicProperties &pp);
   void processObject(const xmlpp::Node* node, Object &object);
   void processROSInterface(const xmlpp::Node* node, ROSInterfaceInfo &rosInterface);
   void processROSInterfaces(const xmlpp::Node* node);
