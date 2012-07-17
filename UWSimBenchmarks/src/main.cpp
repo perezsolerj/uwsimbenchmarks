@@ -95,17 +95,10 @@ int main(int argc, char *argv[])
 
 	ViewBuilder view(config, &builder, arguments);
 
+        //Applies world offset defined on config file to benchmark coordinates.
         benchmarkInfo->postProcessWorldOffset(&config.offsetp[3],&config.offsetr[3]);
-        std::vector<osg::Fog *>  camerasFog;
-	//Get cameras fog
-	for(unsigned int i=0; i<builder.iauvFile.size();i++){
- 	  for (unsigned int j=0; j<builder.iauvFile[i]->getNumCams(); j++) {
-            camerasFog.push_back((osg::Fog *) builder.iauvFile[i]->camview[j].textureCamera->getOrCreateStateSet()->getAttribute(osg::StateAttribute::FOG));
-	  }
-	}
 
-
-        Benchmark benchmark(benchmarkInfo, builder.root,physicsBuilder.physics,camerasFog,builder.scene);
+        Benchmark benchmark(benchmarkInfo, &builder,physicsBuilder.physics);
 	
 	view.init();
 	view.getViewer()->realize();

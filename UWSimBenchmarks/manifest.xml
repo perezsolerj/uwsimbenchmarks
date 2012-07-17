@@ -8,7 +8,7 @@
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/UWSimBenchmarks</url>
-  <depend package="UWSimPhysics"/>
+  <depend package="UWSim"/>
   <depend package="std_srvs"/>
   <rosdep name="libmuparser" />
 </package>

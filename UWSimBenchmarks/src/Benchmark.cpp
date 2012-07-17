@@ -6,7 +6,7 @@ Benchmark::Benchmark(){
 numMeasures=0;
 }
 
-Benchmark::Benchmark(BenchmarkXMLParser *bench,osg::Group*  root,BulletPhysics * physics,std::vector<osg::Fog *>  camerasFog, osg::ref_ptr<osgOceanScene> scene){
+Benchmark::Benchmark(BenchmarkXMLParser *bench,SceneBuilder * builder,BulletPhysics * physics){
 
   function=bench->function;
   MeasureInfo measureInfo;
@@ -22,22 +22,22 @@ Benchmark::Benchmark(BenchmarkXMLParser *bench,osg::Group*  root,BulletPhysics *
     else if(measureInfo.type == MeasureInfo::Collisions)
       measures[i]=createCollisionMeasure(measureInfo,physics);
     else if(measureInfo.type == MeasureInfo::PositionError)
-      measures[i]=createPositionErrorMeasure(measureInfo,root);
+      measures[i]=createPositionErrorMeasure(measureInfo,builder->root);
     else if(measureInfo.type == MeasureInfo::Distance)
-      measures[i]=createDistanceMeasure(measureInfo,root);
+      measures[i]=createDistanceMeasure(measureInfo,builder->root);
     else if(measureInfo.type == MeasureInfo::EuclideanNorm)
       measures[i]=createEuclideanNormMeasure(measureInfo);
 
-    measures[i]->setTriggers(createTrigger(measureInfo.startOn,root),createTrigger(measureInfo.stopOn,root));
+    measures[i]->setTriggers(createTrigger(measureInfo.startOn,builder->root),createTrigger(measureInfo.stopOn,builder->root));
     measures[i]->setName(measureInfo.name);
     active[i]=0;
     bench->measures.pop_front();
     i++;
   }
 
-  startOn= createTrigger(bench->startOn,root);
-  stopOn= createTrigger(bench->stopOn,root);
-  sceneUpdater= createSceneUpdater(bench->sceneUpdater,camerasFog,scene);
+  startOn= createTrigger(bench->startOn,builder->root);
+  stopOn= createTrigger(bench->stopOn,builder->root);
+  sceneUpdater= createSceneUpdater(bench->sceneUpdater,builder);
   activeBenchmark=0;
 }
 
@@ -83,11 +83,19 @@ Trigger * Benchmark::createTrigger(TriggerInfo triggerInfo,osg::Group * root){
   }
 }
 
-SceneUpdater * Benchmark::createSceneUpdater(SceneUpdaterInfo su,std::vector<osg::Fog *>  camerasFog, osg::ref_ptr<osgOceanScene> scene){
+SceneUpdater * Benchmark::createSceneUpdater(SceneUpdaterInfo su, SceneBuilder * builder){
   if(su.type==SceneUpdaterInfo::None)
     return new NullSceneUpdater();
-  else if(su.type==SceneUpdaterInfo::SceneFogUpdater)
-    return new SceneFogUpdater(su.initialFog, su.finalFog, su.step, su.interval,camerasFog,scene);
+  else if(su.type==SceneUpdaterInfo::SceneFogUpdater){
+    //Get cameras fog
+    std::vector<osg::Fog *>  camerasFog;
+    for(unsigned int i=0; i<builder->iauvFile.size();i++){
+      for (unsigned int j=0; j<builder->iauvFile[i]->getNumCams(); j++) {
+        camerasFog.push_back((osg::Fog *) builder->iauvFile[i]->camview[j].textureCamera->getOrCreateStateSet()->getAttribute(osg::StateAttribute::FOG));
+      }
+     }
+    return new SceneFogUpdater(su.initialFog, su.finalFog, su.step, su.interval,camerasFog,builder->scene);
+  }
   else{
     std::cerr<<"Unknown scene updater"<<std::endl;
     exit(1);  

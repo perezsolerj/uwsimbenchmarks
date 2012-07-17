@@ -8,6 +8,7 @@ using namespace std;
 #include "Measures.h"
 #include "BenchmarkXMLParser.h"
 #include "SceneUpdater.h"
+#include "SceneBuilder.h"
 
 class Benchmark{
 private:
@@ -27,7 +28,7 @@ private:
   Trigger * startOn,* stopOn;
 
   SceneUpdater * sceneUpdater;
-  SceneUpdater * createSceneUpdater(SceneUpdaterInfo su,std::vector<osg::Fog *>  camerasFog, osg::ref_ptr<osgOceanScene> scene);
+  SceneUpdater * createSceneUpdater(SceneUpdaterInfo su, SceneBuilder * builder);
 
   int activeBenchmark;
 
@@ -38,7 +39,7 @@ private:
 
   std::list<std::vector<double> > results;
 public:
-  Benchmark(BenchmarkXMLParser * bench,osg::Group * root,BulletPhysics * physics,std::vector<osg::Fog *>  camerasFog, osg::ref_ptr<osgOceanScene> scene);
+  Benchmark(BenchmarkXMLParser * bench,SceneBuilder * builder,BulletPhysics * physics);
   Benchmark();
   void step();
 
