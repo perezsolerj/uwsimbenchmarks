@@ -10,12 +10,26 @@
 
 #include <iostream>
 #include <string.h>
+#include <resource_retriever/retriever.h>
+#include <osgDB/Registry>
+#include <osgDB/FileNameUtils>
+
+struct membuf : std::streambuf
+{
+    membuf(char* begin, char* end) {
+        this->setg(begin, begin, end);
+    }
+};
+
 
 class URDFRobot: public KinematicChain {
 
 public:
 
 	std::vector<osg::Vec3d> joint_axis;
+
+	osg::Node * retrieveResource(std::string name);
+        osg::Node * loadGeometry(boost::shared_ptr<Geometry> geom);
 
 	URDFRobot(osgOcean::OceanScene *oscene,Vehicle vehicle);
 
