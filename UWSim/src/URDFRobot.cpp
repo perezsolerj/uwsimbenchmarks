@@ -5,7 +5,7 @@
 #include <osg/Material>
 #include <math.h>
 
-osg::Node * URDFRobot::retrieveResource(std::string name){
+osg::Node * retrieveResource(std::string name){
   //Load file in memory
   resource_retriever::Retriever r;
   resource_retriever::MemoryResource resource;
@@ -49,12 +49,11 @@ osg::Node * URDFRobot::retrieveResource(std::string name){
 
 }
 
-osg::Node * URDFRobot::loadGeometry(boost::shared_ptr<Geometry> geom){
+osg::Node * loadGeometry(boost::shared_ptr<Geometry> geom){
   if(geom->type==0){
     osg::Node * node = retrieveResource(geom->file);
     if(node == NULL){
       std::cerr<<"Error reading file " << geom->file <<" Check URDF file." <<std::endl;
-      exit(0);
     }
     return node;
   }
@@ -82,8 +81,10 @@ URDFRobot::URDFRobot(osgOcean::OceanScene *oscene,Vehicle vehicle): KinematicCha
 
    for(int i=0; i<vehicle.nlinks;i++) {
 	ScopedTimer buildSceneTimer("  · "+vehicle.links[i].geom->file+": ", osg::notify(osg::ALWAYS));
-	
+
 	link[i]=loadGeometry(vehicle.links[i].geom);
+	if(!link[i] )
+	  exit(0);
 	link[i]->setName(vehicle.links[i].name);
 
 	if(vehicle.links[i].material!=-1){ //Add material if exists

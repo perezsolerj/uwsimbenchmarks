@@ -22,6 +22,8 @@ struct membuf : std::streambuf
     }
 };
 
+osg::Node * retrieveResource(std::string name);
+osg::Node * loadGeometry(boost::shared_ptr<Geometry> geom);
 
 class URDFRobot: public KinematicChain {
 
@@ -29,8 +31,6 @@ public:
 
 	std::vector<osg::Vec3d> joint_axis;
 
-	osg::Node * retrieveResource(std::string name);
-        osg::Node * loadGeometry(boost::shared_ptr<Geometry> geom);
 
 	URDFRobot(osgOcean::OceanScene *oscene,Vehicle vehicle);
 
