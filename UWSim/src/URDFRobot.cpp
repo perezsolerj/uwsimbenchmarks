@@ -24,17 +24,23 @@ osg::Node * URDFRobot::retrieveResource(std::string name){
 
   //Get file extension and create options
   std::string file_ext = osgDB::getFileExtension(name);
-  osg::ref_ptr<osgDB::Options::Options> local_opt = new osgDB::Options::Options;
-
+  #if OSG_VERSION_MAJOR>=3
+  osg::ref_ptr<osgDB::Options> local_opt = new osgDB::Options;
+  #endif
+  
   //Check if file format is supported, get readerwriter
-  osgDB::ReaderWriter::ReaderWriter* rw = osgDB::Registry::instance()->getReaderWriterForExtension(file_ext);
+  osgDB::ReaderWriter* rw = osgDB::Registry::instance()->getReaderWriterForExtension(file_ext);
   if(!rw){
     std::cout<<"Data file format "<<file_ext<<" not supported"<<std::endl;
     return NULL;
   }
 
   //Try loading the resource,
+  #if OSG_VERSION_MAJOR>=3
   osgDB::ReaderWriter::ReadResult readResult = rw->readNode( in,local_opt.get());
+  #else
+  osgDB::ReaderWriter::ReadResult readResult = rw->readNode( in);
+  #endif
   if (readResult.validNode())
     return readResult.takeNode();
   else

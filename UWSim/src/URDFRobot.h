@@ -13,6 +13,7 @@
 #include <resource_retriever/retriever.h>
 #include <osgDB/Registry>
 #include <osgDB/FileNameUtils>
+#include <osg/Version>
 
 struct membuf : std::streambuf
 {
