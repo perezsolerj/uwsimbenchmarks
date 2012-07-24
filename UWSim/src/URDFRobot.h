@@ -10,20 +10,6 @@
 
 #include <iostream>
 #include <string.h>
-#include <resource_retriever/retriever.h>
-#include <osgDB/Registry>
-#include <osgDB/FileNameUtils>
-#include <osg/Version>
-
-struct membuf : std::streambuf
-{
-    membuf(char* begin, char* end) {
-        this->setg(begin, begin, end);
-    }
-};
-
-osg::Node * retrieveResource(std::string name);
-osg::Node * loadGeometry(boost::shared_ptr<Geometry> geom);
 
 class URDFRobot: public KinematicChain {
 

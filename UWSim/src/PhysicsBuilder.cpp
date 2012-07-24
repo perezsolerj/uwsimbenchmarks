@@ -14,14 +14,13 @@ void PhysicsBuilder::loadPhysics(SceneBuilder * scene_builder,ConfigFile config)
     for(unsigned int j=0; j<scene_builder->iauvFile[i]->urdf->link.size();j++){
       osg::Node * link =scene_builder->iauvFile[i]->urdf->link[j];
       osg::Node * cs= NULL;
-      //TODO: Add collision shape parsing....
       //Look for vehicle, and collision shapes on config.
       for(std::list<Vehicle>::iterator cfgVehicle=config.vehicles.begin();cfgVehicle!=config.vehicles.end();cfgVehicle++)
         if(cfgVehicle->name==scene_builder->iauvFile[i]->name)
 	  for(unsigned int part=0;part<cfgVehicle->links.size();part++)
 	    if(cfgVehicle->links[part].name==link->getName() && cfgVehicle->links[part].cs){
               //std::cout<<link->getName()<<" has cs"<<std::endl;
-	      cs=loadGeometry(cfgVehicle->links[part].cs);
+	      cs=UWSimGeometry::loadGeometry(cfgVehicle->links[part].cs);
 	      if(!cs)
 	        std::cerr<<"Collision shape couldn't load, using visual to create physics"<<std::endl;
 	    }
