@@ -85,6 +85,14 @@ src/DVLSensor.cpp
 src/GPSSensor.cpp
 src/BulletPhysics.cpp
 src/PhysicsBuilder.cpp
+src/BulletHfFluid/btHfFluid.cpp
+src/BulletHfFluid/btHfFluidBuoyantConvexShape.cpp
+src/BulletHfFluid/btHfFluidBuoyantShapeCollisionAlgorithm.cpp
+src/BulletHfFluid/btHfFluidCollisionShape.cpp
+src/BulletHfFluid/btHfFluidRigidCollisionAlgorithm.cpp
+src/BulletHfFluid/btHfFluidRigidCollisionConfiguration.cpp
+src/BulletHfFluid/btHfFluidRigidDynamicsWorld.cpp
+src/BulletHfFluid/BuoyantShapeConvexCollisionAlgorithm.cpp
 )
 
 rosbuild_add_executable(UWSim  src/main.cpp)
@@ -99,6 +107,7 @@ rosbuild_add_executable(setVehicleDisturbances interface_examples/setVehicleDist
 rosbuild_add_executable(gotoAbsolutePose interface_examples/gotoAbsolutePose.cpp)
 rosbuild_add_executable(gotoRelativePose interface_examples/gotoRelativePose.cpp)
 rosbuild_add_executable(setVehicleActuators interface_examples/setVehicleActuators.cpp)
+rosbuild_add_executable(prueba interface_examples/test.cpp)
 
 TARGET_LINK_LIBRARIES(UWSim uwsim ${OPENSCENEGRAPH_LIBRARIES} ${LIBXML++_LIBRARIES} GLU)
 TARGET_LINK_LIBRARIES(makeVehicleSurvey ${OPENSCENEGRAPH_LIBRARIES} ${LIBXML++_LIBRARIES})
@@ -112,4 +121,5 @@ TARGET_LINK_LIBRARIES(setVehicleDisturbances ${OPENSCENEGRAPH_LIBRARIES} ${LIBXM
 TARGET_LINK_LIBRARIES(gotoAbsolutePose ${OPENSCENEGRAPH_LIBRARIES} ${LIBXML++_LIBRARIES})
 TARGET_LINK_LIBRARIES(gotoRelativePose ${OPENSCENEGRAPH_LIBRARIES} ${LIBXML++_LIBRARIES})
 TARGET_LINK_LIBRARIES(setVehicleActuators ${OPENSCENEGRAPH_LIBRARIES} ${LIBXML++_LIBRARIES})
+TARGET_LINK_LIBRARIES(prueba ${OPENSCENEGRAPH_LIBRARIES} ${LIBXML++_LIBRARIES})
 

@@ -6,7 +6,7 @@ PhysicsBuilder::PhysicsBuilder(SceneBuilder * scene_builder,ConfigFile config){
 
 void PhysicsBuilder::loadPhysics(SceneBuilder * scene_builder,ConfigFile config){
 
-  physics = new BulletPhysics(config.gravity,scene_builder->scene->getOceanSurface());
+  physics = new BulletPhysics(config.gravity,scene_builder->scene->getOceanSurface(),config.physicsWater);
   OSG_INFO << "Loading Physics" << std::endl;
 
   //Add physics to vehicles
@@ -53,16 +53,20 @@ void PhysicsBuilder::loadPhysics(SceneBuilder * scene_builder,ConfigFile config)
     double mass=1, inertia[3];
     memset(inertia,0,3*sizeof(double));
     BulletPhysics::collisionShapeType_t shape=BulletPhysics::SHAPE_BOX;  
+    int customProp=0; //true if physic properties were added on xml.
 
     //Search for object in config, and look for physic properties
     for(std::list<Object>::iterator j=config.objects.begin();j!=config.objects.end();j++){
       if(j->name==scene_builder->objects[i]->getName() && j->physicProperties){
+	customProp=1;
 	mass=j->physicProperties->mass;
 	inertia[0]=j->physicProperties->inertia[0];
 	inertia[1]=j->physicProperties->inertia[1];
 	inertia[2]=j->physicProperties->inertia[2];
 	if(j->physicProperties->csType=="box")
 	  shape=BulletPhysics::SHAPE_BOX;
+	else if(j->physicProperties->csType=="sphere")
+	  shape=BulletPhysics::SHAPE_SPHERE;
 	else if(j->physicProperties->csType=="compound box")
 	  shape=BulletPhysics::SHAPE_COMPOUND_BOX;
 	else if(j->physicProperties->csType=="trimesh")
@@ -74,13 +78,18 @@ void PhysicsBuilder::loadPhysics(SceneBuilder * scene_builder,ConfigFile config)
       }
 
     }
-    if(scene_builder->objects[i]->getName()!="terrain"){
-       physics->addDynamicObject(mt,scene_builder->objects[i],btScalar(mass),btVector3(inertia[0],inertia[1],inertia[2]), shape,colData);
-      //data = new NodeDataType(flotante,1);
-    }
-    else{
+
+    //Objects called terrain will be added as concave trimesh shape and kinematic mode, objects with physic properties and simple shapes will be added with water physics and rest with physics.
+    if(scene_builder->objects[i]->getName()=="terrain"){
       floorbody=physics->addKinematicObject(mt,scene_builder->objects[i],btScalar(0),btVector3(0,0,0), BulletPhysics::SHAPE_TRIMESH,colData);
       //data = new NodeDataType(floorbody,0);
+    }
+    else if(customProp && (shape==BulletPhysics::SHAPE_BOX || shape==BulletPhysics::SHAPE_SPHERE)){
+       physics->addFloatingObject(mt,scene_builder->objects[i],btScalar(mass),btVector3(inertia[0],inertia[1],inertia[2]), shape,colData);
+    }
+    else{
+       physics->addDynamicObject(mt,scene_builder->objects[i],btScalar(mass),btVector3(inertia[0],inertia[1],inertia[2]), shape,colData);
+      //data = new NodeDataType(flotante,1);
     }
     //wMb->setUserData(data); 
   }

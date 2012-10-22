@@ -15,11 +15,17 @@
 
 #include <osgOcean/OceanScene>
 
+#include "BulletHfFluid/btHfFluidRigidDynamicsWorld.h"
+#include "BulletHfFluid/btHfFluidRigidCollisionConfiguration.h"
+#include "BulletHfFluid/btHfFluid.h"
+#include "BulletHfFluid/btHfFluidBuoyantConvexShape.h"
+
+
 //#include <osgbCollision/GLDebugDrawer.h>
 
 
 
-#define UWSIM_DEFAULT_GRAVITY	btVector3(0,0,-1.0)
+#define UWSIM_DEFAULT_GRAVITY	btVector3(0,0,-1)
 
 // Define filter groups
 enum CollisionTypes {
@@ -51,12 +57,12 @@ class CollisionDataType : public osg::Referenced{
 class BulletPhysics: public osg::Referenced {
 
 public:
-	typedef enum {SHAPE_BOX, SHAPE_TRIMESH,SHAPE_COMPOUND_TRIMESH,SHAPE_COMPOUND_BOX} collisionShapeType_t;
+	typedef enum {SHAPE_BOX, SHAPE_SPHERE, SHAPE_TRIMESH,SHAPE_COMPOUND_TRIMESH,SHAPE_COMPOUND_BOX} collisionShapeType_t;
 
-	btDynamicsWorld * dynamicsWorld;
+	btHfFluidRigidDynamicsWorld * dynamicsWorld;
 	//osgbCollision::GLDebugDrawer debugDrawer;
 
-	BulletPhysics(double configGravity[3],osgOcean::OceanTechnique* oceanSurf);
+	BulletPhysics(double configGravity[3],osgOcean::OceanTechnique* oceanSurf,PhysicsWater physicsWater);
 
 	void setGravity(btVector3 g) {dynamicsWorld->setGravity( g );}
 
@@ -75,20 +81,22 @@ public:
 	~BulletPhysics() {};
 
 private:
-	btDefaultCollisionConfiguration * collisionConfiguration;
+	btHfFluidRigidCollisionConfiguration * collisionConfiguration;
 	btCollisionDispatcher * dispatcher;
 	btConstraintSolver * solver;
 	btBroadphaseInterface * inter;
+ 	btHfFluid* fluid;
 
 	std::vector<btRigidBody *> floatingBodies;
 	std::vector<double> floatForces;
 	osgOcean::OceanTechnique* oceanSurface;
 
-	void processFloatingObjects();
 	void cleanManifolds();
 	btCollisionShape* GetCSFromOSG(osg::Node * node, collisionShapeType_t ctype);
+	btConvexShape* GetConvexCSFromOSG(osg::Node * node, collisionShapeType_t ctype);
 	btRigidBody* addObject(osg::MatrixTransform *root, osg::Node *node, btScalar mass, btVector3 inertia, collisionShapeType_t ctype, CollisionDataType * data,osg::Node * colShape= NULL );
 
+	void updateOceanSurface();
 	
 };
 

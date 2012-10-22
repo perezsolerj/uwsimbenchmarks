@@ -48,6 +48,22 @@
       <z> -1.57 </z>
     </offsetr>
     <enablePhysics> 1 </enablePhysics>
+    <physicsWater>
+      <size>
+	<minX> -10 </minX>
+	<maxX> 10 </maxX>
+	<minY> -10 </minY>
+	<maxY> 10 </maxY>
+	<minZ> -10 </minZ>
+	<maxZ> 10 </maxZ>
+      </size>
+      <position>
+        <x>0</x>
+        <y>0</y>
+        <z>0</z>
+      </position>
+      <resolution> 0.25 </resolution>
+    </physicsWater>
   </simParams>
   <camera>
     <freeMotion> 1 </freeMotion>
