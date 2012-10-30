@@ -260,7 +260,31 @@
       <y>0</y>
     </orientation>
     <physics>
-      <mass> 8 </mass>
+      <mass> 15 </mass>
+      <inertia> 
+        <x> 0</x>
+        <y> 0 </y>
+        <z> 0 </z>
+      </inertia>
+      <collisionShapeType> box </collisionShapeType>
+    </physics>
+  </object>
+
+  <object>
+    <name> blackbox2 </name>
+    <file> objects/blackbox_uib_trimesh.osg  </file>
+    <position>
+      <x> 1</x>
+      <y> 1 </y>
+      <z> 0 </z>
+    </position>
+    <orientation>
+      <r>0</r>
+      <p>3.1415</p>
+      <y>0</y>
+    </orientation>
+    <physics>
+      <mass> 4 </mass>
       <inertia> 
         <x> 0</x>
         <y> 0 </y>
