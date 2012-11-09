@@ -8,6 +8,10 @@
 #include <osg/MatrixTransform>
 #include <osgDB/ReadFile>
 
+#if OSG_VERSION_MAJOR>=3
+#include <osgDB/Options>
+#endif
+
 //#include <osgOcean/OceanScene>
 #include <osgOcean/ShaderManager>
 
@@ -233,6 +237,7 @@ void UWSimGeometry::applyStateSets(osg::Node *node) {
           node->getStateSet()->addUniform( new osg::Uniform( "uNormalMap",  2 ) );
 }
 
+
 osg::Node * UWSimGeometry::retrieveResource(std::string name){
   //Load file in memory
   resource_retriever::Retriever r;
@@ -247,8 +252,9 @@ osg::Node * UWSimGeometry::retrieveResource(std::string name){
   }
 
   //Create stream with memory resource
-  membuf sbuf((char *)resource.data.get(),(char *)resource.data.get()+resource.size);
-  std::istream in(&sbuf);
+  std::stringstream buffer;
+  buffer.write((char *)resource.data.get(),resource.size);
+
 
   //Get file extension and create options
   std::string file_ext = osgDB::getFileExtension(name);
@@ -265,9 +271,9 @@ osg::Node * UWSimGeometry::retrieveResource(std::string name){
 
   //Try loading the resource,
   #if OSG_VERSION_MAJOR>=3
-  osgDB::ReaderWriter::ReadResult readResult = rw->readNode( in,local_opt.get());
+  osgDB::ReaderWriter::ReadResult readResult = rw->readNode( buffer,local_opt.get());
   #else
-  osgDB::ReaderWriter::ReadResult readResult = rw->readNode( in);
+  osgDB::ReaderWriter::ReadResult readResult = rw->readNode( buffer);
   #endif
   if (readResult.validNode())
     return readResult.takeNode();
@@ -298,8 +304,6 @@ osg::Node * UWSimGeometry::loadGeometry(boost::shared_ptr<Geometry> geom){
   exit(0);
   return NULL;
 }
-
-/*****************/
 
 
 getWorldCoordOfNodeVisitor::getWorldCoordOfNodeVisitor(): osg::NodeVisitor(NodeVisitor::TRAVERSE_PARENTS), done(false){
