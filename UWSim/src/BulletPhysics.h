@@ -87,8 +87,6 @@ private:
 	btBroadphaseInterface * inter;
  	btHfFluid* fluid;
 
-	std::vector<btRigidBody *> floatingBodies;
-	std::vector<double> floatForces;
 	osgOcean::OceanTechnique* oceanSurface;
 
 	void cleanManifolds();

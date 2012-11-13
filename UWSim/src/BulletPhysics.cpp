@@ -97,8 +97,6 @@ BulletPhysics::BulletPhysics(double configGravity[3],osgOcean::OceanTechnique* o
     }
 
     dynamicsWorld->setGravity( gravity);
-    floatingBodies.clear();
-    floatForces.clear();
     oceanSurface=oceanSurf;
 
     fluid = new btHfFluid (physicsWater.resolution, physicsWater.size[0], physicsWater.size[1],physicsWater.size[2], physicsWater.size[3],physicsWater.size[4] , physicsWater.size[5]);
