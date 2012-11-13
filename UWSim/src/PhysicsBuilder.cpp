@@ -84,7 +84,7 @@ void PhysicsBuilder::loadPhysics(SceneBuilder * scene_builder,ConfigFile config)
       floorbody=physics->addKinematicObject(mt,scene_builder->objects[i],btScalar(0),btVector3(0,0,0), BulletPhysics::SHAPE_TRIMESH,colData);
       //data = new NodeDataType(floorbody,0);
     }
-    else if(customProp && (shape==BulletPhysics::SHAPE_BOX || shape==BulletPhysics::SHAPE_SPHERE)){
+    else if(config.physicsWater.enable && customProp && (shape==BulletPhysics::SHAPE_BOX || shape==BulletPhysics::SHAPE_SPHERE)){
        physics->addFloatingObject(mt,scene_builder->objects[i],btScalar(mass),btVector3(inertia[0],inertia[1],inertia[2]), shape,colData);
     }
     else{

@@ -52,7 +52,8 @@ void BulletPhysics::stepSimulation(btScalar timeStep, int maxSubSteps=1, btScala
   //dynamicsWorld->debugDrawWorld();
   //printManifolds();
   //cleanManifolds();
-  updateOceanSurface();
+  if(fluid)
+    updateOceanSurface();
   ((btDynamicsWorld*)dynamicsWorld)->stepSimulation( timeStep, maxSubSteps, fixedTimeStep);
 }
 
@@ -99,23 +100,27 @@ BulletPhysics::BulletPhysics(double configGravity[3],osgOcean::OceanTechnique* o
     dynamicsWorld->setGravity( gravity);
     oceanSurface=oceanSurf;
 
-    fluid = new btHfFluid (physicsWater.resolution, physicsWater.size[0], physicsWater.size[1],physicsWater.size[2], physicsWater.size[3],physicsWater.size[4] , physicsWater.size[5]);
-    //fluid = new btHfFluid (btScalar(0.25), 100,100);
-    btTransform xform;
-    xform.setIdentity ();
-    xform.getOrigin() = btVector3(physicsWater.position[0], physicsWater.position[1], physicsWater.position[2]);
-    //xform.setRotation(btQuaternion(0,1.57,0));
-    fluid->setWorldTransform (xform);
-    fluid->setHorizontalVelocityScale (btScalar(0.0f));
-    fluid->setVolumeDisplacementScale (btScalar(0.0f));
-    dynamicsWorld->addHfFluid (fluid);
+    if(physicsWater.enable){
 
-     for (int i = 0; i < fluid->getNumNodesLength()*fluid->getNumNodesWidth(); i++){
+    	fluid = new btHfFluid (physicsWater.resolution, physicsWater.size[0], physicsWater.size[1],physicsWater.size[2], physicsWater.size[3],physicsWater.size[4] , physicsWater.size[5]);
+    	//fluid = new btHfFluid (btScalar(0.25), 100,100);
+    	btTransform xform;
+    	xform.setIdentity ();
+    	xform.getOrigin() = btVector3(physicsWater.position[0], physicsWater.position[1], physicsWater.position[2]);
+    	//xform.setRotation(btQuaternion(0,1.57,0));
+    	fluid->setWorldTransform (xform);
+    	fluid->setHorizontalVelocityScale (btScalar(0.0f));
+    	fluid->setVolumeDisplacementScale (btScalar(0.0f));
+    	dynamicsWorld->addHfFluid (fluid);
+
+	for (int i = 0; i < fluid->getNumNodesLength()*fluid->getNumNodesWidth(); i++){
 		fluid->setFluidHeight(i, btScalar(0.0f));
-     }
+     	}
 
-     fluid->prep ();
-
+     	fluid->prep ();
+    }
+    else
+	fluid=NULL;
     /*debugDrawer.setDebugMode(btIDebugDraw::DBG_DrawContactPoints|| btIDebugDraw::DBG_DrawWireframe || btIDebugDraw::DBG_DrawText);
     dynamicsWorld->setDebugDrawer(&debugDrawer);
     debugDrawer.BeginDraw();

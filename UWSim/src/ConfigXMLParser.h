@@ -163,10 +163,11 @@ struct Object{
 };
 
 struct PhysicsWater{
+  int enable;
   double position[3];
   double resolution;
   double size[6];
-  void init(){resolution=0.25;position[0]=position[1]=position[2]=0;size[0]=size[2]=size[4]=-10;size[1]=size[3]=size[5]=10;};
+  void init(){enable=0;resolution=0.25;position[0]=position[1]=position[2]=0;size[0]=size[2]=size[4]=-10;size[1]=size[3]=size[5]=10;};
 };
 
 class ConfigFile{

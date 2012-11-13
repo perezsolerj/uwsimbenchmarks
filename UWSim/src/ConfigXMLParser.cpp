@@ -184,8 +184,10 @@ void ConfigFile::processSimParams(const xmlpp::Node* node){
 			}
 			physicsWater.init();
 		}
-		else if(child->get_name()=="physicsWater")			
+		else if(child->get_name()=="physicsWater"){		
+			physicsWater.enable=1;
 			processPhysicsWater(child);
+		}
 
 	}
 }
