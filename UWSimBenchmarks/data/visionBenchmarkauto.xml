@@ -7,15 +7,9 @@
 
     <euclideanNorm>
       <name>corners</name>
-      <groundTruth type="constant">
-	<value>215</value>
-	<value>149</value>
-	<value>300</value>
-	<value>149</value>
-	<value>300</value>
-	<value>176</value>
-	<value>215</value>
-	<value>176</value>
+      <groundTruth type="cornersFromCamera">
+	<camera>bowtech1</camera>
+	<target>blackbox</target>
       </groundTruth>	
       <target> cornersTopic </target>
       <startOn>
@@ -28,9 +22,9 @@
 
     <euclideanNorm>
       <name>centroid</name>
-      <groundTruth type="constant">
-	<value>257.5 </value>
-	<value>162.5</value>
+      <groundTruth type="centroidFromCamera">
+	<camera>bowtech1</camera>
+	<target>blackbox</target>
       </groundTruth>	
       <target> centroidTopic </target>
       <startOn>

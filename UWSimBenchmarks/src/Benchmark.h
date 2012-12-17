@@ -20,7 +20,7 @@ private:
   Measures * createPositionErrorMeasure(MeasureInfo measureInfo,osg::Group * root);
   Measures * createDistanceMeasure(MeasureInfo measureInfo,osg::Group * root);
   Measures * createCollisionMeasure(MeasureInfo measureInfo, BulletPhysics * physics);
-  Measures * createEuclideanNormMeasure(MeasureInfo measureInfo);
+  Measures * createEuclideanNormMeasure(MeasureInfo measureInfo, SceneBuilder * builder);
 
   std::string function;
 

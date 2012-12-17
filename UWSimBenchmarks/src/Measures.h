@@ -7,6 +7,7 @@
 #include <iostream>
 #include "Trigger.h"
 #include "BulletPhysics.h"
+#include <osg/ComputeBoundsVisitor>
 
 
 //Abstract class for holding Benchmarking measures
@@ -86,6 +87,7 @@ public:
 class Distance: public Measures{
 private:
   osg::Node * target;
+
   osg::Vec3f last;
   double distance;
 
@@ -102,21 +104,55 @@ public:
 };
 
 class EuclideanNorm: public Measures{
+public:
+
+  class GT{
+    public:
+      virtual std::vector<double> getGT()=0;
+  };
+
+  class ConstantGT: public GT{
+    public:
+      std::vector<double> groundTruth;
+      std::vector<double> getGT(){return groundTruth;};
+      ConstantGT(std::vector<double> groundT){groundTruth=groundT;};
+  };
+
+  class ObjectCornersInCam: public GT{
+    private:
+      osg::Camera * cam;
+      osg::Node * target;
+    public: 
+      std::vector<double> getGT();
+      ObjectCornersInCam(osg::Camera * cam,osg::Node * target);
+  };
+
+  class ObjectCentroidInCam: public GT{
+    private:
+      osg::Camera * cam;
+      osg::Node * target;
+    public: 
+      std::vector<double> getGT();
+      ObjectCentroidInCam(osg::Camera * cam,osg::Node * target);
+  };
+
 private:
   std::vector<double> groundTruth;
-  int nVals;
   ROSArrayToEuclideanNorm * topic;
   double norm;
+  GT * gt;
 
 public:
   void start(void);
   void stop(void);
   void update(void);
-  EuclideanNorm(std::vector<double> groundT, int nVal, std::string topic);
+  EuclideanNorm(GT * groundT, std::string topic);
   double getMeasure(void);
   int isOn();
   void reset();
   int error();
+
+
 
 };
 

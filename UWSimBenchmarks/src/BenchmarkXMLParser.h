@@ -25,11 +25,13 @@ struct TriggerInfo{
 
 struct MeasureInfo{ 
   typedef enum { Unknown, Time, Collisions, PositionError, Distance, EuclideanNorm } type_t;
+  typedef enum { Constant, CornersFromCam, CentroidFromCam } type_s;
   type_t type;
+  type_s subtype; //Subtype for euclideanNorm
   string name,target;
+  string camera,object; //Needed for EuclideanNorm
   double position[3]; //needed for PositionError
   std::vector<double>  groundTruth; //Used in euclideanNorm
-  int nVals; //Used in euclideanNorm
   TriggerInfo startOn, stopOn;
 };
 
@@ -50,12 +52,13 @@ class BenchmarkXMLParser{
     void extractPositionOrColor(const xmlpp::Node* node,double * param);
 
     void processXML(const xmlpp::Node* node);
-    void processVector(const xmlpp::Node* node, std::vector<double> &groundTruth, int &nVals);
+    void processVector(const xmlpp::Node* node, std::vector<double> &groundTruth);
     void processMeasure(const xmlpp::Node* node,MeasureInfo * measure);
     void processMeasures(const xmlpp::Node* node);
     void processTrigger(const xmlpp::Node* node,TriggerInfo * trigger);
     void processSceneUpdater(const xmlpp::Node* node,SceneUpdaterInfo * su);
     void processSceneUpdaters(const xmlpp::Node* node,SceneUpdaterInfo * su);
+    void processGTFromCam(const xmlpp::Node* node,MeasureInfo * measure);
 
     void applyOffset(double position[3],double offsetp[3],double offsetr[3]);
   public:

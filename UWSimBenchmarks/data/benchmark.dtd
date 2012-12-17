@@ -27,7 +27,10 @@
 
 <!ELEMENT name (#PCDATA)>
 
-<!ELEMENT groundTruth (value+)>
+<!ELEMENT groundTruth ((value+)|(camera,target))>
+<!ELEMENT camera (#PCDATA)>
+<!ATTLIST groundTruth type (constant|cornersFromCamera|centroidFromCamera) #REQUIRED>
+
 
 <!ELEMENT value (#PCDATA)>
 

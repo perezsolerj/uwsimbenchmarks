@@ -111,9 +111,8 @@ void BenchmarkXMLParser::processTrigger(const xmlpp::Node* node,TriggerInfo * tr
 
 }
 
-void BenchmarkXMLParser::processVector(const xmlpp::Node* node, std::vector<double> &groundTruth, int &nVals){
+void BenchmarkXMLParser::processVector(const xmlpp::Node* node, std::vector<double> &groundTruth){
     xmlpp::Node::NodeList list = node->get_children();
-    nVals=(list.size()-1)/2;
     groundTruth.resize((list.size()-1)/2);
     int pos=0;
     for(xmlpp::Node::NodeList::iterator iter = list.begin(); iter != list.end(); ++iter){
@@ -142,12 +141,35 @@ void BenchmarkXMLParser::processMeasure(const xmlpp::Node* node,MeasureInfo * me
       else if(child->get_name()=="position")
         extractPositionOrColor(child,measure->position);
       else if(child->get_name()=="groundTruth"){
-	measure->nVals=0;
-	processVector(child,measure->groundTruth,measure->nVals);
+   	xmlpp::Attribute * atrib =  dynamic_cast<const xmlpp::Element*>(child)->get_attribute("type");
+	if(atrib->get_value()=="constant"){
+	  measure->subtype=MeasureInfo::Constant;
+	  processVector(child,measure->groundTruth);
+	}
+	else if (atrib->get_value()=="cornersFromCamera"){
+	  measure->subtype=MeasureInfo::CornersFromCam;
+	  processGTFromCam(child,measure);
+	}
+	else if (atrib->get_value()=="centroidFromCamera"){
+	  measure->subtype=MeasureInfo::CentroidFromCam;
+	  processGTFromCam(child,measure);
+	}
       }
     }
 }
 
+void BenchmarkXMLParser::processGTFromCam(const xmlpp::Node* node,MeasureInfo * measure){
+
+    xmlpp::Node::NodeList list = node->get_children();
+    for(xmlpp::Node::NodeList::iterator iter = list.begin(); iter != list.end(); ++iter){
+      xmlpp::Node* child=dynamic_cast<const xmlpp::Node*>(*iter);
+      if(child->get_name()=="target")
+	extractStringChar(child,&measure->object);
+      else if(child->get_name()=="camera")
+        extractStringChar(child,&measure->camera);
+    }
+
+}
 void BenchmarkXMLParser::processMeasures(const xmlpp::Node* node){
 
   xmlpp::Node::NodeList list = node->get_children();

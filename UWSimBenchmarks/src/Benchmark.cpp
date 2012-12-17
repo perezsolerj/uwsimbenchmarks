@@ -26,7 +26,7 @@ Benchmark::Benchmark(BenchmarkXMLParser *bench,SceneBuilder * builder,BulletPhys
     else if(measureInfo.type == MeasureInfo::Distance)
       measures[i]=createDistanceMeasure(measureInfo,builder->root);
     else if(measureInfo.type == MeasureInfo::EuclideanNorm)
-      measures[i]=createEuclideanNormMeasure(measureInfo);
+      measures[i]=createEuclideanNormMeasure(measureInfo,builder);
 
     measures[i]->setTriggers(createTrigger(measureInfo.startOn,builder->root),createTrigger(measureInfo.stopOn,builder->root));
     measures[i]->setName(measureInfo.name);
@@ -39,6 +39,7 @@ Benchmark::Benchmark(BenchmarkXMLParser *bench,SceneBuilder * builder,BulletPhys
   stopOn= createTrigger(bench->stopOn,builder->root);
   sceneUpdater= createSceneUpdater(bench->sceneUpdater,builder);
   activeBenchmark=0;
+
 }
 
 Trigger * Benchmark::createTrigger(TriggerInfo triggerInfo,osg::Group * root){
@@ -132,8 +133,39 @@ Measures * Benchmark::createCollisionMeasure(MeasureInfo measureInfo,BulletPhysi
   return coll;
 }
 
-Measures * Benchmark::createEuclideanNormMeasure(MeasureInfo measureInfo){
-  EuclideanNorm * EN = new EuclideanNorm(measureInfo.groundTruth, measureInfo.nVals,measureInfo.target);
+Measures * Benchmark::createEuclideanNormMeasure(MeasureInfo measureInfo, SceneBuilder * builder){
+  EuclideanNorm * EN;
+  if(measureInfo.subtype==MeasureInfo::Constant){
+    EN = new EuclideanNorm(new EuclideanNorm::ConstantGT(measureInfo.groundTruth),measureInfo.target);
+  }
+  else{ //Type requires look for camera and target (cornersfromcam or centroidfromcam)
+    osg::Camera *  camera=NULL;
+    for(unsigned int i=0; i<builder->iauvFile.size();i++){
+      for (unsigned int j=0; j<builder->iauvFile[i]->getNumCams(); j++) {
+        if(builder->iauvFile[i]->camview[j].name==measureInfo.camera)
+          camera=builder->iauvFile[i]->camview[j].textureCamera;
+      }
+    }
+    if(camera==NULL){
+      std::cerr<<"Camera for measure "<<measureInfo.name<<" couldn't be found."<<std::endl;
+      exit(1);
+    }
+
+    osg::Node* target=NULL;
+    for(unsigned int i=0; i<builder->objects.size();i++)
+      if(builder->objects[i]->getName()==measureInfo.object)
+        target=builder->objects[i];
+
+    if(target==NULL){
+      std::cerr<<"Object target for measure "<<measureInfo.name<<" couldn't be found."<<std::endl;
+      exit(1);
+    }
+
+    if(measureInfo.subtype==MeasureInfo::CornersFromCam)
+      EN = new EuclideanNorm(new EuclideanNorm::ObjectCornersInCam(camera,target),measureInfo.target);
+    else //CentroidFromCam{
+      EN = new EuclideanNorm(new EuclideanNorm::ObjectCentroidInCam(camera,target),measureInfo.target);
+  }
   return EN;
 }
 
