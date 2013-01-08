@@ -142,6 +142,7 @@ void BenchmarkXMLParser::processMeasure(const xmlpp::Node* node,MeasureInfo * me
         extractPositionOrColor(child,measure->position);
       else if(child->get_name()=="groundTruth"){
    	xmlpp::Attribute * atrib =  dynamic_cast<const xmlpp::Element*>(child)->get_attribute("type");
+	measure->publishOn="";
 	if(atrib->get_value()=="constant"){
 	  measure->subtype=MeasureInfo::Constant;
 	  processVector(child,measure->groundTruth);
@@ -167,6 +168,8 @@ void BenchmarkXMLParser::processGTFromCam(const xmlpp::Node* node,MeasureInfo * 
 	extractStringChar(child,&measure->object);
       else if(child->get_name()=="camera")
         extractStringChar(child,&measure->camera);
+      else if(child->get_name()=="publishOn")
+        extractStringChar(child,&measure->publishOn);
     }
 
 }
@@ -213,6 +216,10 @@ void BenchmarkXMLParser::processSceneUpdater(const xmlpp::Node* node,SceneUpdate
       su->type=SceneUpdaterInfo::SceneFogUpdater;
       processSceneUpdaters(child,su);
     }
+    else if(child->get_name()=="currentForceUpdater"){
+      su->type=SceneUpdaterInfo::CurrentForceUpdater;
+      processSceneUpdaters(child,su);
+    }
   }
 
 }
@@ -231,6 +238,12 @@ void BenchmarkXMLParser::processSceneUpdaters(const xmlpp::Node* node,SceneUpdat
       extractFloatChar(child,&su->step);
     else if(child->get_name()=="interval")
       extractFloatChar(child,&su->interval);
+    else if(child->get_name()=="initialCurrent")
+      extractFloatChar(child,&su->initialCurrent);
+    else if(child->get_name()=="finalCurrent")
+      extractFloatChar(child,&su->finalCurrent);
+    else if(child->get_name()=="target")
+      extractStringChar(child,&su->target);
   }
 }
 

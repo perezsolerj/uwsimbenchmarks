@@ -97,6 +97,17 @@ SceneUpdater * Benchmark::createSceneUpdater(SceneUpdaterInfo su, SceneBuilder *
      }
     return new SceneFogUpdater(su.initialFog, su.finalFog, su.step, su.interval,camerasFog,builder->scene);
   }
+  else if(su.type==SceneUpdaterInfo::CurrentForceUpdater){
+    SimulatedIAUV * vehicle=NULL;
+    for(unsigned int i=0;i<builder->iauvFile.size();i++)
+      if(builder->iauvFile[i]->name==su.target)
+	vehicle=builder->iauvFile[i].get();
+    if(!vehicle){
+      std::cerr<<"Target "<<su.target<<" for current force scene updater NOT found"<<std::endl;
+      exit(1);
+    }
+    return new CurrentForceUpdater(su.initialCurrent, su.finalCurrent, su.step, su.interval,vehicle);
+  }
   else{
     std::cerr<<"Unknown scene updater"<<std::endl;
     exit(1);  
@@ -136,7 +147,7 @@ Measures * Benchmark::createCollisionMeasure(MeasureInfo measureInfo,BulletPhysi
 Measures * Benchmark::createEuclideanNormMeasure(MeasureInfo measureInfo, SceneBuilder * builder){
   EuclideanNorm * EN;
   if(measureInfo.subtype==MeasureInfo::Constant){
-    EN = new EuclideanNorm(new EuclideanNorm::ConstantGT(measureInfo.groundTruth),measureInfo.target);
+    EN = new EuclideanNorm(new EuclideanNorm::ConstantGT(measureInfo.groundTruth),measureInfo.target,"");
   }
   else{ //Type requires look for camera and target (cornersfromcam or centroidfromcam)
     osg::Camera *  camera=NULL;
@@ -162,9 +173,9 @@ Measures * Benchmark::createEuclideanNormMeasure(MeasureInfo measureInfo, SceneB
     }
 
     if(measureInfo.subtype==MeasureInfo::CornersFromCam)
-      EN = new EuclideanNorm(new EuclideanNorm::ObjectCornersInCam(camera,target),measureInfo.target);
+      EN = new EuclideanNorm(new EuclideanNorm::ObjectCornersInCam(camera,target),measureInfo.target,measureInfo.publishOn);
     else //CentroidFromCam{
-      EN = new EuclideanNorm(new EuclideanNorm::ObjectCentroidInCam(camera,target),measureInfo.target);
+      EN = new EuclideanNorm(new EuclideanNorm::ObjectCentroidInCam(camera,target),measureInfo.target,measureInfo.publishOn);
   }
   return EN;
 }
@@ -265,8 +276,10 @@ void Benchmark::step(){
     stopMeasures();
     activeBenchmark=0;
     sceneUpdater->updateScene();
-    if(sceneUpdater->finished())
+    if(sceneUpdater->finished()){
       printResults();
+      ROS_INFO("Benchmark finished.");
+    }
     else
       reset();
   }
@@ -275,8 +288,10 @@ void Benchmark::step(){
     stopMeasures();
     activeBenchmark=0;
     sceneUpdater->updateScene();
-    if(sceneUpdater->finished())
+    if(sceneUpdater->finished()){
       printResults();
+      ROS_INFO("Benchmark finished.");
+    }
     else
       reset();
   }

@@ -27,8 +27,9 @@
 
 <!ELEMENT name (#PCDATA)>
 
-<!ELEMENT groundTruth ((value+)|(camera,target))>
+<!ELEMENT groundTruth ((value+)|(camera,target,publishOn?))>
 <!ELEMENT camera (#PCDATA)>
+<!ELEMENT publishOn (#PCDATA)>
 <!ATTLIST groundTruth type (constant|cornersFromCamera|centroidFromCamera) #REQUIRED>
 
 
@@ -36,13 +37,16 @@
 
 <!-- SceneUpdater -->
 
-<!ELEMENT sceneUpdater (none | sceneFogUpdater)>
+<!ELEMENT sceneUpdater (none | sceneFogUpdater | currentForceUpdater)>
 
 <!ELEMENT none EMPTY>
 
 <!ELEMENT sceneFogUpdater (initialFog, finalFog, step, interval)>
+<!ELEMENT currentForceUpdater (initialCurrent, finalCurrent, step, interval, target)>
 <!ELEMENT initialFog (#PCDATA)>
 <!ELEMENT finalFog (#PCDATA)>
+<!ELEMENT initialCurrent (#PCDATA)>
+<!ELEMENT finalCurrent (#PCDATA)>
 <!ELEMENT step (#PCDATA)>
 <!ELEMENT interval (#PCDATA)>
 

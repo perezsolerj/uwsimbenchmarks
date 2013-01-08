@@ -80,9 +80,13 @@ SimulatedIAUV::SimulatedIAUV(osgOcean::OceanScene *oscene, arm_t armtype) {
 SimulatedIAUV::SimulatedIAUV(SceneBuilder *oscene, Vehicle vehicleChars) : urdf(new URDFRobot(oscene->scene->getOceanScene(),vehicleChars)) {
 	name=vehicleChars.name;
 	baseTransform=new osg::MatrixTransform;
+	offset=new osg::MatrixTransform;
 
+	//benchmark offset TODO: FIX IT
 	if(urdf->baseTransform!=NULL /* && arm->baseTransform!=NULL*/ ){
-		baseTransform->addChild(urdf->baseTransform);
+
+		offset->addChild(urdf->baseTransform);
+		baseTransform->addChild(offset);
 		baseTransform->setName(vehicleChars.name);
 	}
 
@@ -219,11 +223,12 @@ void SimulatedIAUV::setVirtualCamera(std::string name, osg::Transform* transform
 
 /** Sets the vehicle position. (x,y,z) given wrt to the world frame. (roll,pitch,yaw) are RPY angles in the local frame */
 void SimulatedIAUV::setVehiclePosition(double x, double y, double z, double roll, double pitch, double yaw) {
-	osg::Matrixd T, Rx, Ry, Rz, transform;
+	osg::Matrixd S,T, Rx, Ry, Rz, transform;
 	T.makeTranslate(x,y,z);
 	Rx.makeRotate(roll,1,0,0);
 	Ry.makeRotate(pitch,0,1,0);
 	Rz.makeRotate(yaw,0,0,1);
+	S.makeScale(10,10,10);
 	transform=Rz*Ry*Rx*T;
 	setVehiclePosition(transform);
 }

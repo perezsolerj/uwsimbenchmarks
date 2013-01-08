@@ -1,4 +1,5 @@
 #include "SceneUpdater.h"
+#include <std_srvs/Empty.h>
 
 
 SceneUpdater::SceneUpdater(double interval){
@@ -13,6 +14,7 @@ void SceneUpdater::start(){
 
 int SceneUpdater::needsUpdate(){
   if(started){
+    update();
     ros::WallDuration t_diff = ros::WallTime::now() - init;
     return t_diff.toSec() > interval;
   }
@@ -80,4 +82,46 @@ double SceneFogUpdater::getReference(){
 
 std::string SceneFogUpdater::getName(){
   return "Fog";
+}
+
+/*Current Force Updater*/
+
+void  CurrentForceUpdater::update(){
+  ros::WallDuration t_diff = ros::WallTime::now() - last;
+  offset+=initialCurrent*t_diff.toSec();
+  vehicle->setOffset(offset,0,0);
+  last = ros::WallTime::now();
+}
+
+void CurrentForceUpdater::updateScene(){
+  //std::cout<<"Updated "<<std::endl;
+  restartTimer();
+  initialCurrent+=step;
+  offset=0;
+  vehicle->setOffset(offset,0,0);
+
+  /*std_srvs::Empty::Request request, response;
+  ros::service::call("Dynamics/reset_navigation",request, response);*/
+}
+
+int CurrentForceUpdater::finished(){
+  return initialCurrent>finalCurrent;
+}
+
+CurrentForceUpdater::CurrentForceUpdater(double initialCurrent, double finalCurrent, double step, double interval, SimulatedIAUV *  vehicle): SceneUpdater(interval){
+  this->initialCurrent=initialCurrent;
+  this->finalCurrent=finalCurrent;
+  this->step=step;
+  this->vehicle=vehicle;
+  last = ros::WallTime::now();
+
+  vehicle->setOffset(0,0,0);
+}
+
+double CurrentForceUpdater::getReference(){
+  return initialCurrent;
+}
+
+std::string CurrentForceUpdater::getName(){
+  return "Current";
 }

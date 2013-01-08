@@ -29,16 +29,18 @@ struct MeasureInfo{
   type_t type;
   type_s subtype; //Subtype for euclideanNorm
   string name,target;
-  string camera,object; //Needed for EuclideanNorm
+  string camera,object,publishOn; //Needed for EuclideanNorm
   double position[3]; //needed for PositionError
   std::vector<double>  groundTruth; //Used in euclideanNorm
   TriggerInfo startOn, stopOn;
 };
 
 struct SceneUpdaterInfo{
-  typedef enum { None, SceneFogUpdater} SceneUpdaterType;
+  typedef enum { None, SceneFogUpdater, CurrentForceUpdater} SceneUpdaterType;
   SceneUpdaterType type;
   double initialFog, finalFog, step, interval; //needed for SceneFogUpdater
+  double initialCurrent, finalCurrent;
+  std::string target;
 };
 
 class BenchmarkXMLParser{

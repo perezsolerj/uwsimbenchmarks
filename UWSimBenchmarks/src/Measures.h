@@ -9,6 +9,8 @@
 #include "BulletPhysics.h"
 #include <osg/ComputeBoundsVisitor>
 
+#include <UWSimBenchmarks/GTpublish.h>
+
 
 //Abstract class for holding Benchmarking measures
 class Measures{
@@ -141,12 +143,13 @@ private:
   ROSArrayToEuclideanNorm * topic;
   double norm;
   GT * gt;
+  std::string  publishOn;
 
 public:
   void start(void);
   void stop(void);
   void update(void);
-  EuclideanNorm(GT * groundT, std::string topic);
+  EuclideanNorm(GT * groundT, std::string topic, std::string publishOn);
   double getMeasure(void);
   int isOn();
   void reset();

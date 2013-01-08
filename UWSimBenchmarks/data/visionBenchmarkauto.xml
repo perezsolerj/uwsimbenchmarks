@@ -10,6 +10,7 @@
       <groundTruth type="cornersFromCamera">
 	<camera>bowtech1</camera>
 	<target>blackbox</target>
+	<publishOn> autoInit</publishOn>
       </groundTruth>	
       <target> cornersTopic </target>
       <startOn>

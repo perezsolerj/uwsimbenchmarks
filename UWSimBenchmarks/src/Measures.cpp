@@ -1,5 +1,6 @@
 #include "Measures.h"
 
+#include <pcl/surface/convex_hull.h>
 int Measures::isOn(){
   return startOn->isOn() && ! stopOn->isOn();
 }
@@ -252,7 +253,6 @@ EuclideanNorm::ObjectCornersInCam::ObjectCornersInCam(osg::Camera * cam,osg::Nod
 
 std::vector<double> EuclideanNorm::ObjectCornersInCam::getGT(){
   std::vector<double> groundTruth;
-  double minX=cam->getViewport()->width(),minY=cam->getViewport()->height(),maxX=0,maxY=0;
   groundTruth.resize(8);
 
   //std::cout<<"minX: "<<minX<<" minY: "<<minY<<std::endl;
@@ -267,6 +267,11 @@ std::vector<double> EuclideanNorm::ObjectCornersInCam::getGT(){
   //std::cout<<"BOX: "<<box.xMin()<<" "<<box.xMax()<<" "<<box.yMin()<<" "<<box.yMax()<<" "<<box.zMin()<<" "<<box.zMax()<<" "<<std::endl;
   //std::cout<<"BOX position: "<<pos->getTrans().x()<<" "<<pos->getTrans().y()<<" "<<pos->getTrans().z()<<" "<<std::endl;
 
+  //Create a convexHull with all the points in 2D.
+  pcl::ConvexHull<pcl::PointXYZ> chull;
+  chull.setDimension(2);
+  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>), newcloud (new pcl::PointCloud<pcl::PointXYZ>);
+
   osg::Vec3 posIn2D;
 
   for(int i=1;i<9;i++){
@@ -279,28 +284,79 @@ std::vector<double> EuclideanNorm::ObjectCornersInCam::getGT(){
       corner.z()=box.zMax();
     posIn2D = (pos->getTrans()+pos->getRotate()*corner) * MVPW;
     //std::cout<<"2D POINT("<<i<<"): "<<posIn2D.x()<<" "<<posIn2D.y()<<" "<<posIn2D.z()<<" "<<std::endl;
-    if(posIn2D.x()>maxX)
-      maxX=posIn2D.x();
-    if(posIn2D.x()<minX)
-      minX=posIn2D.x();
-    if(posIn2D.y()>maxY)
-      maxY=posIn2D.y();
-    if(posIn2D.y()<minY)
-      minY=posIn2D.y();
+    cloud->push_back(pcl::PointXYZ(posIn2D.x(),posIn2D.y(),posIn2D.z()));
   }
+
+  chull.setInputCloud(cloud);
+  chull.reconstruct(*newcloud);
+
+  //Get the minimun bounding box from convex hull (Can be improved with rotating calipers from o(n^2) to o(n), but there are only 8 points, so it shouldn't be worthy)
+  //TODO: Initial min max can be improved with camera parameters...
+
+  double minXMax=-9999,minXMin=9999,minYMax=-9999,minYMin=9999,minM=0,minArea=999999999;
+  for( pcl::PointCloud<pcl::PointXYZ>::iterator i= newcloud->begin(); i!=newcloud->end();i++){
+    //Considering edge i->i+1 to find minimun bounding box
+    pcl::PointCloud<pcl::PointXYZ>::iterator next=(i+1);
+    if(next==newcloud->end())
+      next=newcloud->begin();
+    //std::cout<<"CHULL "<<i->x<<" "<<i->y<<" "<<i->z<<std::endl;
+    //std::cout<<"CHULL NEXT "<<next->x<<" "<<next->y<<" "<<next->z<<std::endl;
+    double m=(next->y-i->y)/(next->x-i->x);
+    //std::cout<<"Pendiente "<<m<<" "<<atan(m)<<std::endl;
+    //Rotate points and find maxX,minX,maxY,minY
+    double xMax=-9999,xMin=9999,yMax=-9999,yMin=9999;
+    for( pcl::PointCloud<pcl::PointXYZ>::iterator j= newcloud->begin(); j!=newcloud->end();j++){
+      double newX=(j->x*cos(atan(-m)))-(j->y*sin(atan(-m)));
+      double newY=(j->x*sin(atan(-m)))+(j->y*cos(atan(-m)));
+      //std::cout<<"Transformacion: "<<j->x<<" "<<j->y<<" "<<newX<<" "<<newY<<std::endl;
+      if(newX>xMax)
+	xMax=newX;
+      if(newX<xMin)
+	xMin=newX;
+      if(newY>yMax)
+	yMax=newY;
+      if(newY<yMin)
+	yMin=newY;
+    }
+    if(((xMax-xMin)*(yMax-yMin))<minArea){
+      minXMax=xMax;
+      minXMin=xMin;
+      minYMax=yMax;
+      minYMin=yMin;
+      minM=m;
+      minArea=(xMax-xMin)*(yMax-yMin);
+    }
+  }
+
+  //Get corners of minimun bounding box and rotate them.
+  double BBSW_x=(minXMin*cos(atan(minM)))-(minYMin*sin(atan(minM)));
+  double BBSW_y=(minXMin*sin(atan(minM)))+(minYMin*cos(atan(minM)));
+
+  double BBSE_x=(minXMax*cos(atan(minM)))-(minYMin*sin(atan(minM)));
+  double BBSE_y=(minXMax*sin(atan(minM)))+(minYMin*cos(atan(minM)));
+
+  double BBNE_x=(minXMax*cos(atan(minM)))-(minYMax*sin(atan(minM)));
+  double BBNE_y=(minXMax*sin(atan(minM)))+(minYMax*cos(atan(minM)));
+
+  double BBNW_x=(minXMin*cos(atan(minM)))-(minYMax*sin(atan(minM)));
+  double BBNW_y=(minXMin*sin(atan(minM)))+(minYMax*cos(atan(minM)));
+
+  //std::cout<<"Final: "<<BBSW_x<<" "<<BBSW_y<<" "<<BBSE_x<<" "<<BBSE_y<<" "<<BBNE_x<<" "<<BBNE_y<<" "<<BBNW_x<<" "<<BBNW_y<<std::endl;
+  
 
   //std::cout<<"minX:"<<minX<<" maxX:"<<maxX<<"minY:"<<minY<<" maxY:"<<maxY<<std::endl;
 
   //Image origin is on the bottom-left looking towards up-right, whereas ROS image origin on
   //top-left looking towards bottom-right. So points are being manually changed.
-  groundTruth[0]=minX;
-  groundTruth[1]=cam->getViewport()->height()-maxY;
-  groundTruth[2]=maxX;
-  groundTruth[3]=cam->getViewport()->height()-maxY;
-  groundTruth[4]=maxX;
-  groundTruth[5]=cam->getViewport()->height()-minY;
-  groundTruth[6]=minX;
-  groundTruth[7]=cam->getViewport()->height()-minY;
+ 
+  groundTruth[0]=BBNW_x;
+  groundTruth[1]=cam->getViewport()->height()-BBNW_y;
+  groundTruth[2]=BBNE_x;
+  groundTruth[3]=cam->getViewport()->height()-BBNE_y;
+  groundTruth[4]=BBSE_x;
+  groundTruth[5]=cam->getViewport()->height()-BBSE_y;
+  groundTruth[6]=BBSW_x;
+  groundTruth[7]=cam->getViewport()->height()-BBSW_y;
 
   //std::cout<<"GT: "<< groundTruth[0]<<" "<< groundTruth[1]<<" "<< groundTruth[2]<<" "<< groundTruth[3]<<" "<< groundTruth[4]<<" "<< groundTruth[5]<<" "<< groundTruth[6]<<" "<< groundTruth[7]<<" "<<std::endl;
 
@@ -341,16 +397,26 @@ std::vector<double> EuclideanNorm::ObjectCentroidInCam::getGT(){
 
 //-------EuclideanNorm------
 
-EuclideanNorm::EuclideanNorm(GT * groundT, std::string topic){
+EuclideanNorm::EuclideanNorm(GT * groundT, std::string topic, std::string publishOn){
   gt=groundT;
   this->topic=new ROSArrayToEuclideanNorm(topic);
   norm=-1; //error value
+  this->publishOn=publishOn;
 }
 
 void EuclideanNorm::start(void){
   std::vector<double> estimated;
   norm=-1; //error value
   topic->getVector(estimated); //Clears previous measures on topic
+  if(publishOn!=""){
+    estimated=gt->getGT();
+    UWSimBenchmarks::GTpublish::Request req;
+    req.groundTruth.clear();
+    for(int i=0; i< estimated.size();i++)
+      req.groundTruth.push_back(estimated[i]);
+    UWSimBenchmarks::GTpublish::Response res;
+    ros::service::call(publishOn,req, res);
+  }
 }
 
 void EuclideanNorm::update(void){

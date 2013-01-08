@@ -10,6 +10,7 @@
   <url>http://ros.org/wiki/UWSimBenchmarks</url>
   <depend package="UWSim"/>
   <depend package="std_srvs"/>
+  <depend package="pcl"/>
   <rosdep name="libmuparser" />
 </package>
 

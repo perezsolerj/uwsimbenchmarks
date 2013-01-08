@@ -3,6 +3,7 @@ include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
 include($ENV{ROS_ROOT}/core/rosbuild/FindPkgConfig.cmake)
 
 rosbuild_init()
+rosbuild_gensrv()
 
 #set the default path for built executables to the "bin" directory
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)

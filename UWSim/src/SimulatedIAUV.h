@@ -33,6 +33,10 @@ public:
 	std::vector<GPSSensor> gps_sensors;
 	std::vector<DVLSensor> dvl_sensors;
 
+	//offset for tracking benchmark TODO: do it better!
+	osg::ref_ptr<osg::MatrixTransform> offset;
+	void setOffset(double x,double y, double z){osg::Matrixd s; s.makeTranslate(x,y,z);offset->setMatrix(s);};
+
 	typedef enum {ARM5,PA10} arm_t;
 
 	std::string name;		///< Vehicle name

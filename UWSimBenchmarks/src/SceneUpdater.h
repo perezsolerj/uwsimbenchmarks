@@ -4,6 +4,7 @@
 #include <ros/ros.h>
 #include <osg/Fog>
 #include "osgOceanScene.h"
+#include "SimulatedIAUV.h"
 
 class SceneUpdater{
 private:
@@ -18,6 +19,7 @@ virtual int needsUpdate();
 SceneUpdater(double interval);
 SceneUpdater(){};
 
+virtual void update() =0;
 virtual void updateScene() =0;
 virtual int finished() =0;
 virtual double getReference()=0;
@@ -34,6 +36,7 @@ int finished();
 NullSceneUpdater(){finish=0;};
 double getReference();
 std::string getName();
+void update(){};
 
 };
 
@@ -46,6 +49,22 @@ public:
 void updateScene();
 int finished();
 SceneFogUpdater(double initialFog, double finalFog, double step, double interval,std::vector<osg::Fog *>  camerasFog, osg::ref_ptr<osgOceanScene> scene);
+double getReference();
+std::string getName();
+void update(){};
+};
+
+class CurrentForceUpdater: public SceneUpdater{
+private:
+ros::WallTime last;
+double initialCurrent,finalCurrent,step;
+SimulatedIAUV *  vehicle;
+double offset;
+public:
+void updateScene();
+int finished();
+void update();
+CurrentForceUpdater(double initialCurrent, double finalCurrent, double step, double interval,SimulatedIAUV *  vehicle);
 double getReference();
 std::string getName();
 };
