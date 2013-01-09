@@ -87,9 +87,11 @@ std::string SceneFogUpdater::getName(){
 /*Current Force Updater*/
 
 void  CurrentForceUpdater::update(){
-  ros::WallDuration t_diff = ros::WallTime::now() - last;
-  offset+=initialCurrent*t_diff.toSec();
-  vehicle->setOffset(offset,0,0);
+  if ( (last-lastUpdated).toSec()>1){ // Wait 1 sec to start moving in order to init tracker or whatever
+    ros::WallDuration t_diff = ros::WallTime::now() - last;
+    offset+=initialCurrent*t_diff.toSec();
+    vehicle->setOffset(offset,0,0);
+  }
   last = ros::WallTime::now();
 }
 
@@ -99,6 +101,8 @@ void CurrentForceUpdater::updateScene(){
   initialCurrent+=step;
   offset=0;
   vehicle->setOffset(offset,0,0);
+  last = ros::WallTime::now();
+  lastUpdated = ros::WallTime::now();
 
   /*std_srvs::Empty::Request request, response;
   ros::service::call("Dynamics/reset_navigation",request, response);*/

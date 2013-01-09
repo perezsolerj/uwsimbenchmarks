@@ -56,7 +56,7 @@ void update(){};
 
 class CurrentForceUpdater: public SceneUpdater{
 private:
-ros::WallTime last;
+ros::WallTime last, lastUpdated;
 double initialCurrent,finalCurrent,step;
 SimulatedIAUV *  vehicle;
 double offset;
