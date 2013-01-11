@@ -154,9 +154,21 @@ public:
   int isOn();
   void reset();
   int error();
+};
 
-
-
+class ObjectCenteredOnCam: public Measures{
+private:
+  osg::Camera * cam;
+  osg::Node * target;
+public:
+  void start(void);
+  void stop(void);
+  void update(void);
+  ObjectCenteredOnCam(osg::Camera * cam,osg::Node * target);
+  double getMeasure(void);
+  int isOn();
+  void reset();
+  int error();
 };
 
 #endif

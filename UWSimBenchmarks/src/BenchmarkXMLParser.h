@@ -24,7 +24,7 @@ struct TriggerInfo{
 };
 
 struct MeasureInfo{ 
-  typedef enum { Unknown, Time, Collisions, PositionError, Distance, EuclideanNorm } type_t;
+  typedef enum { Unknown, Time, Collisions, PositionError, Distance, EuclideanNorm , ObjectCenteredOnCam} type_t;
   typedef enum { Constant, CornersFromCam, CentroidFromCam } type_s;
   type_t type;
   type_s subtype; //Subtype for euclideanNorm

@@ -60,6 +60,7 @@ ros::WallTime last, lastUpdated;
 double initialCurrent,finalCurrent,step;
 SimulatedIAUV *  vehicle;
 double offset;
+osg::Matrixd m;
 public:
 void updateScene();
 int finished();

@@ -1,6 +1,6 @@
 <!ELEMENT benchmark (measures,startOn,stopOn,function,sceneUpdater)>
 
-<!ELEMENT measures (time*,collision*,positionError*, distance*, euclideanNorm*)>
+<!ELEMENT measures (time*,collision*,positionError*, distance*, euclideanNorm*, objectCenteredOnCam*)>
 
 <!-- benchmark -->
 <!ELEMENT startOn (type,target?,position?)>
@@ -13,6 +13,7 @@
 <!ELEMENT positionError (name,target,position,startOn,stopOn)>
 <!ELEMENT distance (name,target,startOn,stopOn)>
 <!ELEMENT euclideanNorm (name,groundTruth,target,startOn,stopOn)>
+<!ELEMENT objectCenteredOnCam (name,target,camera,startOn,stopOn)>
 
 <!-- Trigger -->
 <!ELEMENT type (#PCDATA)>

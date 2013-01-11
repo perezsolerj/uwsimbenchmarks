@@ -459,3 +459,49 @@ int EuclideanNorm::error(){
     return 1;
   return 0;
 }
+
+//******************OBJECT CENTERED ON CAM ***************
+
+ObjectCenteredOnCam::ObjectCenteredOnCam(osg::Camera * cam,osg::Node * target){
+  this->cam=cam;
+  this->target=target;
+}
+
+void ObjectCenteredOnCam::start(void){
+
+}
+
+void ObjectCenteredOnCam::update(void){
+}
+
+void ObjectCenteredOnCam::stop(void){
+}
+
+double ObjectCenteredOnCam::getMeasure(void){
+  osg::Matrix MVPW( cam->getViewMatrix() * cam->getProjectionMatrix() * cam->getViewport()->computeWindowMatrix());
+
+  osg::ComputeBoundsVisitor cbv;
+  target->accept(cbv);
+  osg::BoundingBox box = cbv.getBoundingBox(); 
+
+  osg::Matrixd * pos=getWorldCoords(target); 
+
+  osg::Vec3 posIn2D = pos->getTrans() * MVPW;
+
+  double measure=sqrt((cam->getViewport()->width()/2-posIn2D.x())*(cam->getViewport()->width()/2-posIn2D.x())+(cam->getViewport()->height()/2-posIn2D.y())*(cam->getViewport()->height()/2-posIn2D.y()));
+
+  return measure;
+}
+
+int ObjectCenteredOnCam::isOn(){
+  return Measures::isOn();
+}
+
+void ObjectCenteredOnCam::reset(){
+  Measures::reset();
+}
+
+int ObjectCenteredOnCam::error(){
+  return 0;
+}
+

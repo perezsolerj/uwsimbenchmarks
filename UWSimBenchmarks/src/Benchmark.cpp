@@ -27,6 +27,8 @@ Benchmark::Benchmark(BenchmarkXMLParser *bench,SceneBuilder * builder,BulletPhys
       measures[i]=createDistanceMeasure(measureInfo,builder->root);
     else if(measureInfo.type == MeasureInfo::EuclideanNorm)
       measures[i]=createEuclideanNormMeasure(measureInfo,builder);
+    else if(measureInfo.type == MeasureInfo::ObjectCenteredOnCam)
+      measures[i]=createObjectCenteredOnCam(measureInfo,builder);
 
     measures[i]->setTriggers(createTrigger(measureInfo.startOn,builder->root),createTrigger(measureInfo.stopOn,builder->root));
     measures[i]->setName(measureInfo.name);
@@ -178,6 +180,29 @@ Measures * Benchmark::createEuclideanNormMeasure(MeasureInfo measureInfo, SceneB
       EN = new EuclideanNorm(new EuclideanNorm::ObjectCentroidInCam(camera,target),measureInfo.target,measureInfo.publishOn);
   }
   return EN;
+}
+
+Measures * Benchmark::createObjectCenteredOnCam(MeasureInfo measureInfo, SceneBuilder * builder){
+
+  osg::Camera *  camera=NULL;
+  for(unsigned int i=0; i<builder->iauvFile.size();i++){
+    for (unsigned int j=0; j<builder->iauvFile[i]->getNumCams(); j++) {
+      if(builder->iauvFile[i]->camview[j].name==measureInfo.camera)
+        camera=builder->iauvFile[i]->camview[j].textureCamera;
+    }
+  }
+  if(camera==NULL){
+    std::cerr<<"Camera for measure "<<measureInfo.name<<" couldn't be found."<<std::endl;
+    exit(1);
+  }
+
+  osg::Node * first= findRN(measureInfo.target,builder->root);
+  if(first==NULL){
+    std::cerr<<"Can't find target "<<measureInfo.target<<" in measure "<<measureInfo.name<<" check benchmark's XML."<<std::endl;
+    exit(1);
+  }
+
+  return new ObjectCenteredOnCam(camera,first);
 }
 
 void Benchmark::stopMeasures(){

@@ -101,6 +101,7 @@ void CurrentForceUpdater::updateScene(){
   initialCurrent+=step;
   offset=0;
   vehicle->setOffset(offset,0,0);
+  vehicle->setVehiclePosition(m);
   last = ros::WallTime::now();
   lastUpdated = ros::WallTime::now();
 
@@ -117,6 +118,7 @@ CurrentForceUpdater::CurrentForceUpdater(double initialCurrent, double finalCurr
   this->finalCurrent=finalCurrent;
   this->step=step;
   this->vehicle=vehicle;
+  m=vehicle->baseTransform->getMatrix();
   last = ros::WallTime::now();
 
   vehicle->setOffset(0,0,0);
