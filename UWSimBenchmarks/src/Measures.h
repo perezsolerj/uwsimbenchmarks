@@ -16,15 +16,19 @@
 class Measures{
 public:
   std::string name;
+  double log;
   virtual double getMeasure(void)=0;
   virtual int isOn()=0;
   virtual void start()=0;
   virtual void stop()=0;
   virtual void update()=0;
   virtual int error()=0;
+  virtual std::vector<double> getMeasureDetails(void);
+  virtual std::vector<std::string> getNameDetails(void);
   void reset();
   void setTriggers(Trigger * start, Trigger * stop);
   void setName(std::string name);
+  void setLog(double log);
 private:
 
 protected:
@@ -166,6 +170,8 @@ public:
   void update(void);
   ObjectCenteredOnCam(osg::Camera * cam,osg::Node * target);
   double getMeasure(void);
+  std::vector<double> getMeasureDetails(void);
+  std::vector<std::string> getNameDetails(void);
   int isOn();
   void reset();
   int error();

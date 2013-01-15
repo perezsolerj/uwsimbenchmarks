@@ -14,11 +14,28 @@ void Measures::setName(std::string name){
   this->name=name;
 }
 
+void Measures::setLog(double log){
+  this->log=log;
+}
+
 void Measures::reset(){
   startOn->reset();
   stopOn->reset();
 }
 
+std::vector<double> Measures::getMeasureDetails(void){
+  std::vector<double> vector;
+  vector.resize(1);
+  vector[0]=getMeasure();
+  return vector;
+}
+
+std::vector<std::string> Measures::getNameDetails(void){
+  std::vector<std::string> vector;
+  vector.resize(1);
+  vector[0]=name;
+  return vector;
+}
 
 
 //******************TIME ***************
@@ -493,6 +510,38 @@ double ObjectCenteredOnCam::getMeasure(void){
   return measure;
 }
 
+std::vector<double> ObjectCenteredOnCam::getMeasureDetails(void){
+  osg::Matrix MVPW( cam->getViewMatrix() * cam->getProjectionMatrix() * cam->getViewport()->computeWindowMatrix());
+
+  osg::ComputeBoundsVisitor cbv;
+  target->accept(cbv);
+  osg::BoundingBox box = cbv.getBoundingBox(); 
+
+  osg::Matrixd * pos=getWorldCoords(target); 
+
+  osg::Vec3 posIn2D = pos->getTrans() * MVPW;
+
+  std::vector<double> results;
+
+  results.resize(3);
+  results[0]=sqrt((cam->getViewport()->width()/2-posIn2D.x())*(cam->getViewport()->width()/2-posIn2D.x())+(cam->getViewport()->height()/2-posIn2D.y())*(cam->getViewport()->height()/2-posIn2D.y()));
+  results[1]=cam->getViewport()->width()/2-posIn2D.x();
+  results[2]=cam->getViewport()->height()/2-posIn2D.y();
+
+  return results;
+}
+
+std::vector<std::string> ObjectCenteredOnCam::getNameDetails(void){
+  std::vector<std::string> names;
+
+  names.resize(3);
+  names[0]=name+"_total";
+  names[1]=name+"_x";
+  names[2]=name+"_y";
+
+  return names;
+}
+
 int ObjectCenteredOnCam::isOn(){
   return Measures::isOn();
 }
@@ -501,7 +550,7 @@ void ObjectCenteredOnCam::reset(){
   Measures::reset();
 }
 
-int ObjectCenteredOnCam::error(){
+int ObjectCenteredOnCam::error(){ //TODO: check if target is outside the camera¿?.
   return 0;
 }
 

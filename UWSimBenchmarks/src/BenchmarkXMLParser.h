@@ -29,6 +29,7 @@ struct MeasureInfo{
   type_t type;
   type_s subtype; //Subtype for euclideanNorm
   string name,target;
+  double log;
   string camera,object,publishOn; //Needed for EuclideanNorm
   double position[3]; //needed for PositionError
   std::vector<double>  groundTruth; //Used in euclideanNorm

@@ -14,6 +14,7 @@ class Benchmark{
 private:
   Measures ** measures;
   int numMeasures;
+  ros::WallTime time;
   int * active; // 0 if measure was off last iteration,1 if it was on (Measures)
 
   Measures * createTimeMeasure(MeasureInfo measureInfo);
@@ -39,6 +40,9 @@ private:
   void printResults();
 
   std::list<std::vector<double> > results;
+  std::vector<std::list<double> > logging;
+  std::vector<std::list<double> > timeLogging;
+  std::list<double> iterationStart;
 public:
   Benchmark(BenchmarkXMLParser * bench,SceneBuilder * builder,BulletPhysics * physics);
   Benchmark();

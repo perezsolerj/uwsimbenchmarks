@@ -136,6 +136,8 @@ void BenchmarkXMLParser::processMeasure(const xmlpp::Node* node,MeasureInfo * me
         processTrigger(child,&measure->startOn);
       else if(child->get_name()=="stopOn")
         processTrigger(child,&measure->stopOn);
+      else if(child->get_name()=="log")
+        extractFloatChar(child,&measure->log);
       else if(child->get_name()=="target")
         extractStringChar(child,&measure->target);
       else if(child->get_name()=="camera")
@@ -183,6 +185,7 @@ void BenchmarkXMLParser::processMeasures(const xmlpp::Node* node){
 
     MeasureInfo measure;
     measure.type=MeasureInfo::Unknown;
+    measure.log=-1;
     if(child->get_name()=="time"){
       measure.type=MeasureInfo::Time;
     }

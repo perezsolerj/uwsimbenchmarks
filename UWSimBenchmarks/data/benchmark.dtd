@@ -8,12 +8,12 @@
 <!ELEMENT function (#PCDATA)>
 
 <!-- Measures -->
-<!ELEMENT time (name,startOn,stopOn)>
-<!ELEMENT collision (name,target,startOn,stopOn)>
-<!ELEMENT positionError (name,target,position,startOn,stopOn)>
-<!ELEMENT distance (name,target,startOn,stopOn)>
-<!ELEMENT euclideanNorm (name,groundTruth,target,startOn,stopOn)>
-<!ELEMENT objectCenteredOnCam (name,target,camera,startOn,stopOn)>
+<!ELEMENT time (name,log?,startOn,stopOn)>
+<!ELEMENT collision (name,target,log?,startOn,stopOn)>
+<!ELEMENT positionError (name,target,position,log?,startOn,stopOn)>
+<!ELEMENT distance (name,target,log?,startOn,stopOn)>
+<!ELEMENT euclideanNorm (name,groundTruth,target,log?,startOn,stopOn)>
+<!ELEMENT objectCenteredOnCam (name,target,camera,log?,startOn,stopOn)>
 
 <!-- Trigger -->
 <!ELEMENT type (#PCDATA)>
@@ -27,6 +27,7 @@
 <!ELEMENT z (#PCDATA)>
 
 <!ELEMENT name (#PCDATA)>
+<!ELEMENT log (#PCDATA)>
 
 <!ELEMENT groundTruth ((value+)|(camera,target,publishOn?))>
 <!ELEMENT camera (#PCDATA)>

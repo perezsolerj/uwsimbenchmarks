@@ -13,6 +13,9 @@ Benchmark::Benchmark(BenchmarkXMLParser *bench,SceneBuilder * builder,BulletPhys
   numMeasures= bench->measures.size();
   measures = new Measures *[numMeasures];
   active = new int[numMeasures];
+  logging.resize(numMeasures);
+  timeLogging.resize(numMeasures);
+  iterationStart.push_back(0);
   int i=0;
   while( bench->measures.size() >0){
     measureInfo=  bench->measures.front();
@@ -32,6 +35,7 @@ Benchmark::Benchmark(BenchmarkXMLParser *bench,SceneBuilder * builder,BulletPhys
 
     measures[i]->setTriggers(createTrigger(measureInfo.startOn,builder->root),createTrigger(measureInfo.stopOn,builder->root));
     measures[i]->setName(measureInfo.name);
+    measures[i]->setLog(measureInfo.log);
     active[i]=0;
     bench->measures.pop_front();
     i++;
@@ -248,6 +252,13 @@ void Benchmark::updateMeasures(){
           measures[i]->start();
         else 
  	  measures[i]->update();
+      if(measures[i]->log!=-1 && (ros::WallTime::now()-time).toSec()+iterationStart.back()-timeLogging[i].back()>measures[i]->log){ //saving log
+        std::vector<double> results=measures[i]->getMeasureDetails();
+	for(unsigned int j=0;j<results.size();j++){
+          logging[i].push_back(results[j]);
+	}
+        timeLogging[i].push_back((ros::WallTime::now()-time).toSec()+iterationStart.back());
+      }
       //Cout for debugging!
       //std::cout<<"MEASURE "<<measures[i]->getMeasure()<<" "<<measures[i]->isOn()<<" "<<active[i]<<std::endl;
       }
@@ -287,19 +298,50 @@ void Benchmark::printResults(){
     outdata<<std::endl;
     results.pop_front();
   }
+  outdata.close();
+  
+  //Logging
+  for (int i=0;i<numMeasures;i++){
+    if(measures[i]->log!=-1){
+      outdata.open(("benchmark-"+measures[i]->name+".data").c_str());
+      if(!outdata){
+        std::cerr<<"Couldn't open benchmark output file."<<std::endl;
+        exit(1);
+      }
+      outdata<<sceneUpdater->getName()<<"\t";
+      std::vector<std::string> namedetails=measures[i]->getNameDetails();
+      for(unsigned int j=0;j<namedetails.size();j++)
+	outdata<<namedetails[j]<<"\t";
+      outdata<<std::endl;
+      while(logging[i].size()>0){
+	outdata<<timeLogging[i].front()<<"\t";
+	timeLogging[i].pop_front();
+        for(unsigned int j=0;j<namedetails.size();j++){ //We assume namedetails has the same length as measuredetails.
+	  outdata<<logging[i].front()<<"\t";
+	  logging[i].pop_front();
+	}
+        outdata<<std::endl;
+      }
+      outdata<<std::endl;
+      outdata.close();
+    }
+  }
 }
 
 void Benchmark::step(){
 
   if(startOn->isOn() && !stopOn->isOn() && !sceneUpdater->finished()){
-    if(activeBenchmark==0) //Benchmark started this iteration
+    if(activeBenchmark==0){ //Benchmark started this iteration
       sceneUpdater->start();
+      time=ros::WallTime::now();
+    }
     activeBenchmark=1;
     updateMeasures();
   }
-  else if( activeBenchmark==1){
+  else if( activeBenchmark==1){ //Benchmark stopped this iteration
     stopMeasures();
     activeBenchmark=0;
+    iterationStart.push_back((ros::WallTime::now()-time).toSec()+iterationStart.back());
     sceneUpdater->updateScene();
     if(sceneUpdater->finished()){
       printResults();
@@ -309,9 +351,10 @@ void Benchmark::step(){
       reset();
   }
 
-  if(sceneUpdater->needsUpdate()){
-    stopMeasures();
+  if(sceneUpdater->needsUpdate()){ //Scene Updater needs update
+    stopMeasures(); 
     activeBenchmark=0;
+    iterationStart.push_back((ros::WallTime::now()-time).toSec()+iterationStart.back());
     sceneUpdater->updateScene();
     if(sceneUpdater->finished()){
       printResults();
