@@ -32,6 +32,24 @@
       <g>0.0075 </g>
       <b> 0.005 </b>
     </attenuation>
+    <current>
+      <forceModule> 0.3 </forceModule>
+      <sphericalDirection>
+	<theta> 1.57 </theta>
+	<phi> 0 </phi>
+      </sphericalDirection>
+      <forceVariation> 0.1 </forceVariation>
+      <forcePeriod> 4 </forcePeriod>
+      <directionVariation>
+	<theta> 0 </theta>
+	<phi> 0.7 </phi>	
+      </directionVariation>
+      <directionPeriod>
+	<theta> 4 </theta>
+	<phi> 30 </phi>	
+      </directionPeriod>
+      <random> 0.01 </random>
+    </current>
   </oceanState>
   <simParams>
     <disableShaders> 0 </disableShaders>

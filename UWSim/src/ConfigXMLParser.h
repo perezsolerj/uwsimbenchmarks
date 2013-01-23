@@ -170,6 +170,12 @@ struct PhysicsWater{
   void init(){enable=0;resolution=0.25;position[0]=position[1]=position[2]=0;size[0]=size[2]=size[4]=-10;size[1]=size[3]=size[5]=10;};
 };
 
+struct CurrentConfig{
+  double force,forceVariation,forcePeriod,random;
+  double direction[2],directionVariation[2],directionPeriod[2];
+  int on;
+};
+
 class ConfigFile{
 private:
 
@@ -180,10 +186,12 @@ private:
   void extractUIntChar(const xmlpp::Node* node, unsigned int &param);
   void extractStringChar(const xmlpp::Node* node,string &param);
   void extractPositionOrColor(const xmlpp::Node* node,double param[3]);
+  void extractSphericalDirection(const xmlpp::Node* node,double param[2]);
   void extractOrientation(const xmlpp::Node* node,double param[3]);
 
   void processFog(const xmlpp::Node* node);
   void processOceanState(const xmlpp::Node* node);
+  void processCurrent(const xmlpp::Node* node);
   void processSimParams(const xmlpp::Node* node);
   void processPhysicsWater(const xmlpp::Node* node);
   void processSize(const xmlpp::Node* node);
@@ -222,6 +230,7 @@ public:
   list <Object> objects;
   list <ROSInterfaceInfo> ROSInterfaces;
   PhysicsWater physicsWater;
+  CurrentConfig current;
 
   ConfigFile(const std::string &fName);
 };

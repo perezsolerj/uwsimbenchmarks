@@ -88,6 +88,12 @@ SimulatedIAUV::SimulatedIAUV(SceneBuilder *oscene, Vehicle vehicleChars) : urdf(
 		offset->addChild(urdf->baseTransform);
 		baseTransform->addChild(offset);
 		baseTransform->setName(vehicleChars.name);
+		arrow=(osg::MatrixTransform *)UWSimGeometry::createArrow(0.1,1);
+		osg::Matrix transf;
+		transf.preMultRotate(osg::Quat(M_PI_2,osg::Vec3d(0,1,0.5)));
+		transf.preMultScale(osg::Vec3d(1,1,1));
+		arrow->setMatrix(transf);
+		baseTransform->addChild(UWSimGeometry::createSwitchable(arrow));
 	}
 
 	//Add virtual cameras in config file

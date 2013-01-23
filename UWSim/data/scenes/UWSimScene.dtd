@@ -1,7 +1,7 @@
 <!ELEMENT UWSimScene (oceanState?,simParams?,camera?,vehicle*,object*,rosInterfaces?)>
 
 <!-- elementos oceanScene -->
-<!ELEMENT oceanState (windx?,windy?,windSpeed?,depth?,reflectionDamping?,waveScale?,isNotChoppy?,choppyFactor?,crestFoamHeight?,oceanSurfaceHeight?,fog?,color?,attenuation?)>
+<!ELEMENT oceanState (windx?,windy?,windSpeed?,depth?,reflectionDamping?,waveScale?,isNotChoppy?,choppyFactor?,crestFoamHeight?,oceanSurfaceHeight?,fog?,color?,attenuation?, current?)>
 <!ELEMENT simParams (disableShaders?,resw?,resh?,offsetp?,offsetr?,enablePhysics?,gravity?,physicsWater?)>
 <!ELEMENT vehicle (name,file,jointValues?,position?,orientation?,virtualCamera*, rangeSensor*, objectPicker*, imu*, pressureSensor*, gpsSensor*, dvlSensor*)>
 <!ELEMENT virtualCamera (name,relativeTo,resw?,resh?,position?,orientation?,baseline?,frameId?, parameters?, showpath?)>
@@ -46,8 +46,18 @@
 <!ELEMENT oceanSurfaceHeight (#PCDATA)>
 <!ELEMENT fog (density,color)>
 <!ELEMENT attenuation (r,g,b)>
+<!ELEMENT current (forceModule, sphericalDirection, forceVariation, forcePeriod, directionVariation, directionPeriod, random)>
 
 <!ELEMENT density (#PCDATA)>
+<!ELEMENT forceModule (#PCDATA)>
+<!ELEMENT sphericalDirection (theta, phi)>
+<!ELEMENT theta (#PCDATA)>
+<!ELEMENT phi (#PCDATA)>
+<!ELEMENT forceVariation (#PCDATA)>
+<!ELEMENT forcePeriod (#PCDATA)>
+<!ELEMENT directionVariation (theta, phi)>
+<!ELEMENT directionPeriod (theta, phi)>
+<!ELEMENT random (#PCDATA)>
 
 <!-- elementos simParams -->
 <!ELEMENT disableShaders (#PCDATA)>

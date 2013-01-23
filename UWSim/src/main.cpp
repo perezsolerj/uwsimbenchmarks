@@ -112,6 +112,8 @@ int main(int argc, char *argv[])
 		}                
 
 		view.getViewer()->frame();
+		if(builder.current)
+		  builder.current->applyCurrent(builder.iauvFile);
 	}
 	if (ros::ok()) ros::shutdown();
 

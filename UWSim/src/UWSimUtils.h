@@ -114,11 +114,14 @@ private:
 
 class UWSimGeometry {
 public:
+	static osg::Node* createArrow(double radius=0.015, double length=0.2);
 	static osg::Node* createFrame(double radius=0.015, double length=0.2);
 	static osg::Node* createSwitchableFrame(double radius=0.015, double length=0.2);
+	static osg::Node* createSwitchable(osg::Node * drawable);
 	static osg::Node* createOSGBox( osg::Vec3 size );
 	static osg::Node* createOSGCylinder( double radius, double height );
 	static osg::Node* createOSGSphere( double radius );
+	static osg::Node* createOSGCone  (double radius, double height);
 
 	static osg::Node * retrieveResource(std::string name);
 	static osg::Node * loadGeometry(boost::shared_ptr<Geometry> geom);

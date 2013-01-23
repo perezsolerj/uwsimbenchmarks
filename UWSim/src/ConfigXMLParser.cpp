@@ -80,6 +80,18 @@ void ConfigFile::extractPositionOrColor(const xmlpp::Node* node,double param[3])
 	}
 }
 
+void ConfigFile::extractSphericalDirection(const xmlpp::Node* node,double param[2]){
+	xmlpp::Node::NodeList list = node->get_children();
+	for(xmlpp::Node::NodeList::iterator iter = list.begin(); iter != list.end(); ++iter){
+		xmlpp::Node* child=dynamic_cast<const xmlpp::Node*>(*iter);
+
+		if(child->get_name()=="theta")
+			extractFloatChar(child,param[0]);
+		else if(child->get_name()=="phi")
+			extractFloatChar(child,param[1]);
+	}
+}
+
 void ConfigFile::extractOrientation(const xmlpp::Node* node,double param[3]){
 	xmlpp::Node::NodeList list = node->get_children();
 	for(xmlpp::Node::NodeList::iterator iter = list.begin(); iter != list.end(); ++iter){
@@ -143,8 +155,33 @@ void ConfigFile::processOceanState(const xmlpp::Node* node){
 			extractPositionOrColor(child,color);
 		else if(child->get_name()=="attenuation")
 			extractPositionOrColor(child,attenuation);
+		else if(child->get_name()=="current"){
+			current.on=1;
+			processCurrent(child);
+		}
 	}
 
+}
+
+void ConfigFile::processCurrent(const xmlpp::Node* node){
+  	xmlpp::Node::NodeList list = node->get_children();
+	for(xmlpp::Node::NodeList::iterator iter = list.begin(); iter != list.end(); ++iter){
+		xmlpp::Node* child=dynamic_cast<const xmlpp::Node*>(*iter);
+		if(child->get_name()=="forceModule")
+			extractFloatChar(child,current.force);
+		else if(child->get_name()=="sphericalDirection")
+			extractSphericalDirection(child,current.direction);
+		else if(child->get_name()=="forceVariation")
+			extractFloatChar(child,current.forceVariation);
+		else if(child->get_name()=="forcePeriod")
+			extractFloatChar(child,current.forcePeriod);
+		else if(child->get_name()=="directionVariation")
+			extractSphericalDirection(child,current.directionVariation);
+		else if(child->get_name()=="directionPeriod")
+			extractSphericalDirection(child,current.directionPeriod);
+		else if(child->get_name()=="random")
+			extractFloatChar(child,current.random);
+	}
 }
 
 void ConfigFile::processSimParams(const xmlpp::Node* node){
@@ -939,11 +976,13 @@ void ConfigFile::processXML(const xmlpp::Node* node){
 
 
 ConfigFile::ConfigFile(const std::string &fName){
+	//Maybe we should create a default value function instead of doing it here?
 	memset(offsetr,0,3*sizeof(double));
 	memset(offsetp,0,3*sizeof(double));
    	memset(gravity,0,3*sizeof(double));
 	camNear=camFar=-1;
         enablePhysics=0;
+	current.on=0;
 	try
 	{
 		xmlpp::DomParser parser;

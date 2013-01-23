@@ -119,6 +119,14 @@ osg::Node* UWSimGeometry::createSwitchableFrame(double radius, double length) {
    return axis;
 }
 
+osg::Node* UWSimGeometry::createSwitchable(osg::Node * drawable) {
+   osg::Switch *axis=new osg::Switch();
+   axis->setNewChildDefaultValue(false);
+   axis->setName("switch_node");
+   axis->addChild(drawable);
+   return axis;
+}
+
 osg::Node* UWSimGeometry::createFrame(double radius, double length) {
   osg::MatrixTransform *linkBaseTransform= new osg::MatrixTransform(osg::Matrix());
 
@@ -175,6 +183,30 @@ osg::Node* UWSimGeometry::createFrame(double radius, double length) {
   return linkBaseTransform;
 }
 
+osg::Node* UWSimGeometry::createArrow(double radius, double length) {
+  osg::MatrixTransform *linkBaseTransform= new osg::MatrixTransform(osg::Matrix());
+
+  //create X cylinder, set color, and add to XBase
+  osg::Node *Xcylinder = UWSimGeometry::createOSGCylinder( radius, length );
+  osg::StateSet * Xstateset = new osg::StateSet();
+  osg::Material * Xmaterial = new osg::Material();
+  Xmaterial->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4(1,0,0,0));
+  Xstateset->setAttribute(Xmaterial);
+  Xcylinder->setStateSet(Xstateset);
+  linkBaseTransform->addChild(Xcylinder);
+
+  //create coneBase to translate
+  osg::Matrix coneBase;
+  coneBase.makeIdentity();
+  coneBase.preMultTranslate(osg::Vec3d(0,0,length/2));
+  osg::MatrixTransform *coneBaseTransform= new osg::MatrixTransform(coneBase);
+  Xcylinder->asGroup()->addChild(coneBaseTransform);
+  osg::Node *cone = UWSimGeometry::createOSGCone(radius*2,length/2);
+  coneBaseTransform->addChild(cone);
+
+  return linkBaseTransform;
+}
+
 osg::Node * UWSimGeometry::createOSGBox( osg::Vec3 size )
 {
     osg::Box *box = new osg::Box();
@@ -215,6 +247,23 @@ osg::Node * UWSimGeometry::createOSGSphere( double radius )
     sphere->setRadius( radius );
 
     osg::ShapeDrawable *shape = new osg::ShapeDrawable( sphere );
+    osg::Geode *geode = new osg::Geode();
+    geode->addDrawable( shape );
+
+    osg::Node *node = new osg::Group();
+    node->asGroup()->addChild( geode );
+
+    return node;
+}
+
+osg::Node* UWSimGeometry::createOSGCone( double radius, double height )
+{
+    osg::Cone *cone = new osg::Cone();
+
+    cone->setRadius( radius );
+    cone->setHeight( height );
+
+    osg::ShapeDrawable *shape = new osg::ShapeDrawable( cone );
     osg::Geode *geode = new osg::Geode();
     geode->addDrawable( shape );
 

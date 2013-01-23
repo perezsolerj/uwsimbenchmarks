@@ -76,6 +76,14 @@ public:
 			(draw_frames_) ? draw_frames_=false : draw_frames_=true;
 			for (unsigned int i=0; i<node_list.size(); i++) 
 			  (draw_frames_) ? node_list[i]->asSwitch()->setAllChildrenOn() : node_list[i]->asSwitch()->setAllChildrenOff();
+		} else if (ea.getKey() == 'v' ) {
+			//Search for 'switch_frames' nodes and toggle their values
+			findNodeVisitor finder("switch_node");
+			_scene->localizedWorld->accept(finder);
+			std::vector<osg::Node*> node_list=finder.getNodeList();
+			(draw_frames_) ? draw_frames_=false : draw_frames_=true;
+			for (unsigned int i=0; i<node_list.size(); i++) 
+			  (draw_frames_) ? node_list[i]->asSwitch()->setAllChildrenOn() : node_list[i]->asSwitch()->setAllChildrenOff();
 		} else if (ea.getKey() == 'r' ) {
   		  //search catchable objects and get them back to their original positions
 		  GetCatchableObjects finder;

@@ -9,6 +9,7 @@
 #include "ROSInterface.h"
 #include "SimulatedIAUV.h"
 #include "ConfigXMLParser.h"
+#include "Current.h"
 
 class SceneBuilder 
 {
@@ -19,11 +20,11 @@ public:
         std::vector<osg::ref_ptr<osg::Node> > objects;
 
 	osg::ref_ptr<osg::Group> root;
+        boost::shared_ptr<Current> current;
 
 	std::vector<boost::shared_ptr<HUDCamera> > realcams;
 	std::vector<boost::shared_ptr<ROSInterface> > ROSInterfaces;
 	std::vector<osg::ref_ptr<osgWidget::Window> > camWidgets;
-
 
 public:
 	SceneBuilder();

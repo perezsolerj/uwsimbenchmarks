@@ -272,6 +272,14 @@ bool SceneBuilder::loadScene(ConfigFile config)
 	}
 	//root->addChild(physics.debugDrawer.getSceneGraph());
 
+
+	//Current 
+
+	if(config.current.on)
+	  current =  (boost::shared_ptr<Current>)new Current(config.current.force, config.current.direction, config.current.forceVariation, config.current.forcePeriod, config.current.directionVariation, config.current.directionPeriod, config.current.random);
+	else
+	  current=boost::shared_ptr<Current>();
+
 	return true;
 }
 
