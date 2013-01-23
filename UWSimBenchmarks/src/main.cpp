@@ -116,15 +116,18 @@ int main(int argc, char *argv[])
 		ros::spinOnce();
                 benchmark.step();
 
-                const double currSimTime = view.getViewer()->getFrameStamp()->getSimulationTime();
-                double elapsed( currSimTime - prevSimTime );
-                if( view.getViewer()->getFrameStamp()->getFrameNumber() < 3 )
-                  elapsed = 1./60.;
-  	        //physics.stepSimulation(elapsed, 8, btScalar(1.)/btScalar(200.) );
-	        physicsBuilder.physics->stepSimulation(elapsed, 4, elapsed/4. );
-                prevSimTime = currSimTime;
+		if(config.enablePhysics){
+                  const double currSimTime = view.getViewer()->getFrameStamp()->getSimulationTime();
+                  double elapsed( currSimTime - prevSimTime );
+                  if( view.getViewer()->getFrameStamp()->getFrameNumber() < 3 ) 
+                    elapsed = 1./60.;
+                  physicsBuilder.physics->stepSimulation(elapsed, 4, elapsed/4. );
+                  prevSimTime = currSimTime;
+		}  
 
 		view.getViewer()->frame();
+		if(builder.current)
+		  builder.current->applyCurrent(builder.iauvFile);
 	}
 	if (ros::ok()) ros::shutdown();
 

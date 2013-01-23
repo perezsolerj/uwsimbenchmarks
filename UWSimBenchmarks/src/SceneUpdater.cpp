@@ -86,24 +86,13 @@ std::string SceneFogUpdater::getName(){
 
 /*Current Force Updater*/
 
-void  CurrentForceUpdater::update(){
-  if ( (last-lastUpdated).toSec()>1){ // Wait 1 sec to start moving in order to init tracker or whatever
-    ros::WallDuration t_diff = ros::WallTime::now() - last;
-    offset+=initialCurrent*t_diff.toSec();
-    vehicle->setOffset(offset,0,0);
-  }
-  last = ros::WallTime::now();
-}
-
 void CurrentForceUpdater::updateScene(){
   //std::cout<<"Updated "<<std::endl;
   restartTimer();
   initialCurrent+=step;
-  offset=0;
-  vehicle->setOffset(offset,0,0);
+  vehicle->setOffset(0,0,0);
   vehicle->setVehiclePosition(m);
-  last = ros::WallTime::now();
-  lastUpdated = ros::WallTime::now();
+  current->changeCurrentForce(initialCurrent,1);
 
   /*std_srvs::Empty::Request request, response;
   ros::service::call("Dynamics/reset_navigation",request, response);*/
@@ -113,13 +102,13 @@ int CurrentForceUpdater::finished(){
   return initialCurrent>finalCurrent;
 }
 
-CurrentForceUpdater::CurrentForceUpdater(double initialCurrent, double finalCurrent, double step, double interval, SimulatedIAUV *  vehicle): SceneUpdater(interval){
+CurrentForceUpdater::CurrentForceUpdater(double initialCurrent, double finalCurrent, double step, double interval, SimulatedIAUV *  vehicle,boost::shared_ptr<Current>  current): SceneUpdater(interval){
   this->initialCurrent=initialCurrent;
   this->finalCurrent=finalCurrent;
   this->step=step;
   this->vehicle=vehicle;
+  this->current=current;
   m=vehicle->baseTransform->getMatrix();
-  last = ros::WallTime::now();
 
   vehicle->setOffset(0,0,0);
 }

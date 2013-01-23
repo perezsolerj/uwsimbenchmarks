@@ -112,7 +112,11 @@ SceneUpdater * Benchmark::createSceneUpdater(SceneUpdaterInfo su, SceneBuilder *
       std::cerr<<"Target "<<su.target<<" for current force scene updater NOT found"<<std::endl;
       exit(1);
     }
-    return new CurrentForceUpdater(su.initialCurrent, su.finalCurrent, su.step, su.interval,vehicle);
+    if(!builder->current){
+      std::cerr<<"You must define a current in order to use CurrentForceUpdater"<<std::endl;
+      exit(1);
+    }    
+    return new CurrentForceUpdater(su.initialCurrent, su.finalCurrent, su.step, su.interval,vehicle,builder->current);
   }
   else{
     std::cerr<<"Unknown scene updater"<<std::endl;

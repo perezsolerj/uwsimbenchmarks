@@ -16,6 +16,7 @@ Current::Current(double module, double direction[], double moduleVariation, doub
   this->randomNoise=randomNoise;
   srand (ros::WallTime::now().toSec());
   last=ros::WallTime::now();
+  waitFor=0;
 }
 
 void Current::applyCurrent(std::vector<boost::shared_ptr<SimulatedIAUV> > iauvFile){
@@ -23,6 +24,8 @@ void Current::applyCurrent(std::vector<boost::shared_ptr<SimulatedIAUV> > iauvFi
   double elapsedFromBeg=ros::WallTime::now().toSec();
   double elapsed=(ros::WallTime::now()-last).toSec();
   if(elapsed>MAX_ELAPSED) //We assume it's too much time (It happens in first iteration if scene is complex)
+    elapsed=0;
+  if((last-init).toSec()<waitFor) //Used to wait for X seconds until current starts (useful for benchmarks)
     elapsed=0;
   double random;
 
@@ -44,11 +47,11 @@ void Current::applyCurrent(std::vector<boost::shared_ptr<SimulatedIAUV> > iauvFi
     double z=cos(dir1);
     //std::cout<<x<<" "<<y<<" "<<z<<" sacado de: "<<dir1<<" "<<dir2<<std::endl;
     //Get displacement
-    osg::Vec3f prueba=(osg::Vec3f(y,-x,z))*elapsed*force;
+    osg::Vec3f displacement=(osg::Vec3f(y,-x,z))*elapsed*force;
 
     //Apply displacement to vehicle
     osg::Matrix transf;
-    transf.preMultTranslate(prueba+iauvFile[i]->baseTransform->getMatrix().getTrans());
+    transf.preMultTranslate(displacement+iauvFile[i]->baseTransform->getMatrix().getTrans());
     transf.preMultRotate(iauvFile[i]->baseTransform->getMatrix().getRotate());
     iauvFile[i]->setVehiclePosition(transf);
 
@@ -57,7 +60,8 @@ void Current::applyCurrent(std::vector<boost::shared_ptr<SimulatedIAUV> > iauvFi
     osg::Matrix mat=iauvFile[i]->arrow->getMatrix();
 
     transf.makeIdentity();
-    transf.preMultTranslate(osg::Vec3d(force*2.5*y,force*2.5*(-x),force*2.5*z)); //Keep arrow origin stable
+    displacement = iauvFile[i]->baseTransform->getMatrix().getRotate().inverse()*osg::Vec3d(force*2.5*y,force*2.5*(-x),force*2.5*z);
+    transf.preMultTranslate(displacement); //Keep arrow origin stable
     transf.preMultRotate(iauvFile[i]->baseTransform->getMatrix().getRotate().inverse()); //Make arrow independient from vehicle rotation
     transf.preMultRotate(osg::Quat(dir1,osg::Vec3d(1,0,0)));
     transf.preMultRotate(osg::Quat(dir2,osg::Vec3d(0,1,0)));
@@ -68,3 +72,11 @@ void Current::applyCurrent(std::vector<boost::shared_ptr<SimulatedIAUV> > iauvFi
     }
   last=ros::WallTime::now();
 }
+
+void Current::changeCurrentForce(double modul,double wait){
+  module=modul;
+  init=ros::WallTime::now();
+  waitFor=wait;
+}
+
+

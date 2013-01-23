@@ -5,6 +5,7 @@
 #include <osg/Fog>
 #include "osgOceanScene.h"
 #include "SimulatedIAUV.h"
+#include "Current.h"
 
 class SceneUpdater{
 private:
@@ -56,18 +57,17 @@ void update(){};
 
 class CurrentForceUpdater: public SceneUpdater{
 private:
-ros::WallTime last, lastUpdated;
-double initialCurrent,finalCurrent,step;
-SimulatedIAUV *  vehicle;
-double offset;
-osg::Matrixd m;
+  double initialCurrent,finalCurrent,step;
+  SimulatedIAUV *  vehicle;
+  osg::Matrixd m;
+  boost::shared_ptr<Current> current;
 public:
-void updateScene();
-int finished();
-void update();
-CurrentForceUpdater(double initialCurrent, double finalCurrent, double step, double interval,SimulatedIAUV *  vehicle);
-double getReference();
-std::string getName();
+  void updateScene();
+  int finished();
+  void update(){};
+  CurrentForceUpdater(double initialCurrent, double finalCurrent, double step, double interval,SimulatedIAUV *  vehicle, boost::shared_ptr<Current>  current);
+  double getReference();
+  std::string getName();
 };
 
 #endif
