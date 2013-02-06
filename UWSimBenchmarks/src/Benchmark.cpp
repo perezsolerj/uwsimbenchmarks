@@ -216,8 +216,9 @@ Measures * Benchmark::createObjectCenteredOnCam(MeasureInfo measureInfo, SceneBu
 void Benchmark::stopMeasures(){
   mu::Parser parser;
   std::vector<double> benchResult;
-  benchResult.resize(numMeasures+2);
+  benchResult.resize(numMeasures+3); //measures+reference+globalresult+time
   benchResult[0]=sceneUpdater->getReference();
+  benchResult[numMeasures+2]=(ros::WallTime::now()-time).toSec()+iterationStart.back();
   int error=0;
 
   //std::cout<<"Num measures: "<<numMeasures<<std::endl;
@@ -293,7 +294,7 @@ void Benchmark::printResults(){
   outdata<<sceneUpdater->getName()<<"\t";
   for(int i=0;i<numMeasures;i++)
     outdata<<measures[i]->name<<"\t";
-  outdata<<"TOTAL"<<std::endl;
+  outdata<<"TOTAL\tSimTime"<<std::endl;
 
   while(results.size()>0){
     benchResult=results.front();
