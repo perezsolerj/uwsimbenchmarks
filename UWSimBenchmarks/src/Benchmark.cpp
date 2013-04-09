@@ -45,6 +45,7 @@ Benchmark::Benchmark(BenchmarkXMLParser *bench,SceneBuilder * builder,BulletPhys
   stopOn= createTrigger(bench->stopOn,builder->root);
   sceneUpdater= createSceneUpdater(bench->sceneUpdater,builder);
   activeBenchmark=0;
+  //asd = new  ROSTopicToShapeShifter("/dataNavigator");
 
 }
 

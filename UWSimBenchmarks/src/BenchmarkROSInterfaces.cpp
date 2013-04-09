@@ -46,6 +46,51 @@ int ROSArrayToEuclideanNorm::getVector(std::vector<double> &estim){
 
 ROSArrayToEuclideanNorm::~ROSArrayToEuclideanNorm(){}
 
+
+ROSTopicToShapeShifter::ROSTopicToShapeShifter(std::string topic): ROSSubscriberInterface(topic) {
+  std::cout<<"CREADITO "<<topic<<std::endl;
+}
+
+void ROSTopicToShapeShifter::createSubscriber(ros::NodeHandle &nh) {
+  sub_ = nh.subscribe<topic_tools::ShapeShifter>(topic, 10, &ROSTopicToShapeShifter::processData, this);
+}
+
+void ROSTopicToShapeShifter::processData(const  topic_tools::ShapeShifter::ConstPtr& msg) {
+  std::cout<<"************NEW DATA**********"<<std::endl<<"datatype: "<<msg->getDataType()<<" definition: "<< msg->getMessageDefinition()<<std::endl;
+}
+
+/*const char* ShapeShifterGetDataType(const topic_tools::ShapeShifter::ConstPtr message)
+  {
+      string info = message->getDataType();
+
+      char* result = new char[info.size() + 1];
+      strcpy(result, info.c_str());
+      return result;  
+  }
+  const char* ShapeShifterGetDefinition(const topic_tools::ShapeShifter::ConstPtr message)
+  {
+      string info = message->getMessageDefinition();
+
+      char* result = new char[info.size() + 1];
+      strcpy(result, info.c_str());
+      return result;
+  }
+  unsigned char* ShapeShifterGetData(const topic_tools::ShapeShifter::ConstPtr message)
+  {
+      unsigned char* data = new unsigned char[message->size()];
+
+      ros::serialization::OStream stream(data, message->size());
+      message->write(stream);
+
+      return data;
+  }
+  unsigned int ShapeShifterGetDataLength(const topic_tools::ShapeShifter::ConstPtr message)
+  {
+      return message->size();
+  }*/
+
+ROSTopicToShapeShifter::~ROSTopicToShapeShifter(){}
+
 ROSServiceTrigger::ROSServiceTrigger(std::string service,ServiceTrigger * trigger) {
   this->trigger=trigger;
 

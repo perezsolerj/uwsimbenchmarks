@@ -8,13 +8,24 @@
     <time>
       <name>taskTime</name>
       <startOn>
-        <type>onInit</type>
+        <type>onMove</type>
+        <target> girona500 </target>
       </startOn>
       <stopOn>
          <type>never</type>
       </stopOn>
     </time>
 
+    <distance>
+      <name>distance</name>
+      <target> girona500 </target>
+      <startOn>
+	<type>onInit</type>
+      </startOn>
+      <stopOn>
+	<type>never</type>
+      </stopOn>
+    </distance>
   </measures>
 
   <startOn>

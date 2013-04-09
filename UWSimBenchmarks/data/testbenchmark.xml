@@ -57,7 +57,7 @@
 
     <euclideanNorm>
       <name>euclideanNorm</name>
-      <groundTruth>
+      <groundTruth type="constant">
 	<value>0.2 </value>
 	<value> 1.5</value>
 	<value> 2.1 </value>
@@ -73,7 +73,7 @@
   </measures>
 
   <startOn>
-     <type>service</type>
+     <type>onInit</type>
      <target> startBench </target>
   </startOn>
 
@@ -85,12 +85,7 @@
   <function>taskTime</function>
 
   <sceneUpdater> 
-    <sceneFogUpdater>
-      <initialFog>0</initialFog>
-      <finalFog>1</finalFog>
-      <step>0.1</step>
-      <interval>2</interval>
-    </sceneFogUpdater>
+    <none />
   </sceneUpdater>
 
 </benchmark>

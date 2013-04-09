@@ -15,7 +15,7 @@
     <crestFoamHeight> 6 </crestFoamHeight>
     <oceanSurfaceHeight> 0 </oceanSurfaceHeight>
     <fog>
-      <density> 0 </density>
+      <density> 1.1 </density>
       <color>
 	<r>0</r>
 	<g>0.05</g>

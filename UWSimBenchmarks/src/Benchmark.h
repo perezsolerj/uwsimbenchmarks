@@ -43,6 +43,7 @@ private:
   std::vector<std::list<double> > logging;
   std::vector<std::list<double> > timeLogging;
   std::list<double> iterationStart;
+  ROSTopicToShapeShifter* asd;
 public:
   Benchmark(BenchmarkXMLParser * bench,SceneBuilder * builder,BulletPhysics * physics);
   Benchmark();

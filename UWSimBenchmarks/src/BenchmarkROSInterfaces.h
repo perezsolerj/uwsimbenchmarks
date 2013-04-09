@@ -8,6 +8,7 @@ class ServiceTrigger;
 #include <std_msgs/Float32MultiArray.h>
 #include <std_msgs/Bool.h>
 #include <std_srvs/Empty.h>
+#include <topic_tools/shape_shifter.h>
 
 class TopicTrigger;
 
@@ -29,6 +30,15 @@ public:
 	virtual void processData(const std_msgs::Float32MultiArray::ConstPtr& msg);
         int getVector(std::vector<double> &estim);
 	~ROSArrayToEuclideanNorm();
+};
+
+class ROSTopicToShapeShifter: public ROSSubscriberInterface {
+
+public:
+	ROSTopicToShapeShifter(std::string topic);
+	virtual void createSubscriber(ros::NodeHandle &nh);
+	virtual void processData(const  topic_tools::ShapeShifter::ConstPtr& msg);
+	~ROSTopicToShapeShifter();
 };
 
 class ROSServiceTrigger {
