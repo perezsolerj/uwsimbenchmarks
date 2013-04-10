@@ -14,13 +14,12 @@ using namespace std;
 #include <list>
 
 struct ROSInterfaceInfo{
-  typedef enum {Unknown, ROSOdomToPAT, PATToROSOdom, ROSJointStateToArm, ArmToROSJointState, VirtualCameraToROSImage, RangeSensorToROSRange,
-	  	  	    ROSImageToHUD, ROSTwistToPAT, ROSPoseToPAT, ImuToROSImu, PressureSensorToROS, GPSSensorToROS, DVLSensorToROS} type_t;
+  typedef enum {Unknown, ROSOdomToPAT, PATToROSOdom, ROSJointStateToArm, ArmToROSJointState, VirtualCameraToROSImage, RangeSensorToROSRange,ROSImageToHUD, ROSTwistToPAT, ROSPoseToPAT, ImuToROSImu, PressureSensorToROS, GPSSensorToROS, DVLSensorToROS, RangeImageSensorToROSImage,multibeamSensorToLaserScan} type_t;
   string topic, infoTopic, targetName;
   type_t type; //Type of ROSInterface
   int rate; //if it's necessary
   unsigned int w, h; //width and height if necessary
-  unsigned int posx, posy, blackWhite; ///< default (x,y) position of the widget if necessary, blackWhite camera
+  unsigned int posx, posy, depth, blackWhite; ///< default (x,y) position of the widget if necessary, blackWhite camera
   double scale; ///< default scale of the widget if necessary
   int visualize; ///< If 1, enable visualization of the data. 0 by default
   double color[3]; // visualization color in rosodomtopat waypoints
@@ -34,12 +33,12 @@ struct Vcam{
   string name;
   string linkName, roscam, roscaminfo;
   std::string frameId; ///Frame Id for stereo camera images
-  int resw,resh,link;
+  int resw,resh,link,range;
   double showpath;
   double position[3],orientation[3];
   double baseLine; ///baseline for stereo cameras
   boost::shared_ptr<Parameters> parameters;
-  void init(){name="";linkName="";roscam="";roscaminfo="";resw=160;resh=120;position[0]=0;position[1]=0;position[2]=0;orientation[0]=0;orientation[1]=0;orientation[2]=0; baseLine=0.0; frameId=""; showpath=0; parameters.reset();}
+  void init(){name="";linkName="";roscam="";roscaminfo="";resw=160;resh=120;position[0]=0;position[1]=0;position[2]=0;orientation[0]=0;orientation[1]=0;orientation[2]=0; baseLine=0.0; frameId=""; showpath=0; parameters.reset();range=0;}
 };
 
 struct rangeSensor {
@@ -86,6 +85,15 @@ struct XMLDVLSensor {
   double position[3],orientation[3];
   int link;
   void init(){name="";linkName=""; std=0.0; position[0]=0;position[1]=0;position[2]=0;orientation[0]=0;orientation[1]=0;orientation[2]=0;}
+};
+
+struct XMLMultibeamSensor {
+  string name;
+  string linkName;
+  double position[3],orientation[3];
+  int link;
+  double initAngle,finalAngle,angleIncr,range;
+  void init(){name="";linkName=""; position[0]=0;position[1]=0;position[2]=0;orientation[0]=0;orientation[1]=0;orientation[2]=0;}
 };
 
 struct Mimic{
@@ -139,11 +147,13 @@ struct Vehicle{
   std::vector<double> jointValues;
   std::vector<Material> materials;
   std::list<Vcam> Vcams;
+  std::list<Vcam> VRangecams;
   std::list<rangeSensor> range_sensors, object_pickers;
   std::list<Imu> imus;
   std::list<XMLPressureSensor> pressure_sensors;
   std::list<XMLGPSSensor> gps_sensors;
   std::list<XMLDVLSensor> dvl_sensors;
+  std::list<XMLMultibeamSensor> multibeam_sensors;
 };
 
 struct PhysicProperties{
@@ -202,6 +212,7 @@ private:
   void processPressureSensor(const xmlpp::Node* node, XMLPressureSensor &ps);
   void processDVLSensor(const xmlpp::Node* node, XMLDVLSensor &s);
   void processGPSSensor(const xmlpp::Node* node, XMLGPSSensor &s);
+  void processMultibeamSensor(const xmlpp::Node* node, XMLMultibeamSensor &s);
   void processCamera(const xmlpp::Node* node);
   void processJointValues(const xmlpp::Node* node, std::vector<double> &jointValues, int &ninitJoints);
   void processVehicle(const xmlpp::Node* node, Vehicle &vehicle);

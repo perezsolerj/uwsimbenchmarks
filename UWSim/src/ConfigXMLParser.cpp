@@ -436,6 +436,30 @@ void ConfigFile::processCamera(const xmlpp::Node* node){
 	}
 }
 
+void ConfigFile::processMultibeamSensor(const xmlpp::Node* node, XMLMultibeamSensor &MB){
+	xmlpp::Node::NodeList list = node->get_children();
+	for(xmlpp::Node::NodeList::iterator iter = list.begin(); iter != list.end(); ++iter){
+		xmlpp::Node* child=dynamic_cast<const xmlpp::Node*>(*iter);
+
+		if(child->get_name()=="position")
+			extractPositionOrColor(child,MB.position);
+		else if(child->get_name()=="relativeTo")
+			extractStringChar(child,MB.linkName);
+		else if(child->get_name()=="orientation")
+			extractOrientation(child,MB.orientation);
+		else if(child->get_name()=="name")
+			extractStringChar(child,MB.name);
+		else if(child->get_name()=="initAngle")
+			extractFloatChar(child,MB.initAngle);
+		else if(child->get_name()=="finalAngle")
+			extractFloatChar(child,MB.finalAngle);
+		else if(child->get_name()=="angleIncr")
+			extractFloatChar(child,MB.angleIncr);
+		else if(child->get_name()=="range")
+			extractFloatChar(child,MB.range);
+	}
+}
+
 void ConfigFile::processPose(urdf::Pose pose, double position[3], double rpy[3], double quat[4]){
 	position[0]=pose.position.x;
 	position[1]=pose.position.y;
@@ -645,6 +669,24 @@ void ConfigFile::postprocessVehicle(Vehicle &vehicle){
 			vehicle.Vcams.push_back(aux);
 	}
 
+	//get range camera joint
+	Vcam aux2;
+	for(unsigned int i=0;i<vehicle.VRangecams.size();i++){
+		found=0;
+		aux2=vehicle.VRangecams.front();
+		vehicle.VRangecams.pop_front();
+		for(int j=0;j<vehicle.nlinks && !found;j++){
+			if(vehicle.links[j].name==aux2.linkName){
+				aux2.link=j;
+				found=1;
+			}
+		}
+		if(found==0) {
+			OSG_WARN << "ConfigFile::postProcessVehicle: Range Camera attached to unknown link: " << aux.linkName << " camera will be ignored" << std::endl;
+		} else
+			vehicle.VRangecams.push_back(aux2);
+	}
+
 	//get Range sensor joint
 	rangeSensor rs;
 	for(unsigned int i=0;i<vehicle.range_sensors.size();i++){
@@ -739,6 +781,26 @@ void ConfigFile::postprocessVehicle(Vehicle &vehicle){
 		}
 	}
 
+	//get multibeamSensor joint
+	{
+		XMLMultibeamSensor MB;
+		for(unsigned int i=0;i<vehicle.multibeam_sensors.size();i++){
+			found=0;
+			MB=vehicle.multibeam_sensors.front();
+			vehicle.multibeam_sensors.pop_front();
+			for(int j=0;j<vehicle.nlinks && !found;j++){
+				if(vehicle.links[j].name==MB.linkName){
+					MB.link=j;
+					found=1;
+				}
+			}
+			if(found==0) {
+				OSG_WARN << "ConfigFile::postProcessVehicle: multibeamSensor attached to unknown link: " << MB.linkName << ". Will be ignored"<< std::endl;
+			} else
+				vehicle.multibeam_sensors.push_back(MB);
+		}
+	}
+
 	//get Hand link
 	for(unsigned int i=0;i<vehicle.object_pickers.size();i++){
 		found=0;
@@ -780,6 +842,13 @@ void ConfigFile::processVehicle(const xmlpp::Node* node,Vehicle &vehicle){
 			aux.init();
 			processVcam(child,aux);
 			vehicle.Vcams.push_back(aux);
+		}
+		else if (child->get_name()=="virtualRangeImage"){
+			Vcam aux;
+			aux.init();
+			aux.range=1;
+			processVcam(child,aux);
+			vehicle.VRangecams.push_back(aux);
 		} else if (child->get_name()=="rangeSensor"){
 			rangeSensor aux;
 			aux.init();
@@ -810,6 +879,11 @@ void ConfigFile::processVehicle(const xmlpp::Node* node,Vehicle &vehicle){
 			aux.init();
 			processDVLSensor(child,aux);
 			vehicle.dvl_sensors.push_back(aux);
+		} else if (child->get_name()=="multibeamSensor"){
+			XMLMultibeamSensor aux;
+			aux.init();
+			processMultibeamSensor(child,aux);
+			vehicle.multibeam_sensors.push_back(aux);
 		}
 	}
 }
@@ -877,18 +951,27 @@ void ConfigFile::processROSInterface(const xmlpp::Node* node,ROSInterfaceInfo &r
 			extractUIntChar(child,rosInterface.posx);
 		else if(child->get_name()=="posy")
 			extractUIntChar(child,rosInterface.posy);
-		else if(child->get_name()=="blackWhite")
+		else if(child->get_name()=="blackWhite"){
 			extractUIntChar(child,rosInterface.blackWhite);
 			if (rosInterface.blackWhite!=0 && rosInterface.blackWhite!=1) {
-				OSG_WARN <<"ConfigFile::processCamera: blackWhite is not a binary value ( 0 1), using default value (0)" << std::endl;
+				OSG_WARN <<"ConfigFile::processROSInterface: blackWhite is not a binary value ( 0 1), using default value (0)" << std::endl;
 				rosInterface.blackWhite=0;
 			}
-		else if(child->get_name()=="scale")
+		}else if(child->get_name()=="depth"){
+			extractUIntChar(child,rosInterface.depth);
+			if (rosInterface.depth!=0 && rosInterface.depth!=1) {				
+				osg::notify(osg::ALWAYS)  <<"ConfigFile::processROSInterface: depth is not a binary value ( 0 1), using default value (0)" << std::endl;
+				rosInterface.depth=0;
+			}
+		}else if(child->get_name()=="scale")
 			extractFloatChar(child,rosInterface.scale);
 		else if(child->get_name()=="visualize")
 			extractIntChar(child,rosInterface.visualize);
 		else if(child->get_name()=="color")
 			extractPositionOrColor(child,rosInterface.color);
+		else if(child->get_name()=="text"){}//we ignore this as whitespace is treated as a whole child element}    
+		else
+			osg::notify(osg::ALWAYS)  <<"processROSInterface:: unexpected child: " << child->get_name() <<std::endl;			
 	}
 }
 
@@ -903,6 +986,8 @@ void ConfigFile::processROSInterfaces(const xmlpp::Node* node){
 		rosInterface.scale=1;
 		rosInterface.visualize=0;
 		rosInterface.type=ROSInterfaceInfo::Unknown;
+		rosInterface.depth=0;
+
 		if(child->get_name()=="ROSOdomToPAT"){
 			rosInterface.type=ROSInterfaceInfo::ROSOdomToPAT;
 			rosInterface.color[0]=rosInterface.color[1]=rosInterface.color[2]=1;
@@ -914,6 +999,8 @@ void ConfigFile::processROSInterfaces(const xmlpp::Node* node){
 			rosInterface.type=ROSInterfaceInfo::ROSJointStateToArm;
 		} else if(child->get_name()=="VirtualCameraToROSImage") {
 			rosInterface.type=ROSInterfaceInfo::VirtualCameraToROSImage;
+		} else if(child->get_name()=="RangeImageSensorToROSImage") {
+			rosInterface.type=ROSInterfaceInfo::RangeImageSensorToROSImage;
 		} else if(child->get_name()=="RangeSensorToROSRange") {
 			rosInterface.type=ROSInterfaceInfo::RangeSensorToROSRange;
 		} else if(child->get_name()=="ROSImageToHUD") {
@@ -930,7 +1017,10 @@ void ConfigFile::processROSInterfaces(const xmlpp::Node* node){
 			rosInterface.type=ROSInterfaceInfo::GPSSensorToROS;
 		} else if(child->get_name()=="DVLSensorToROS"){
 			rosInterface.type=ROSInterfaceInfo::DVLSensorToROS;
+		} else if(child->get_name()=="multibeamSensorToLaserScan"){
+			rosInterface.type=ROSInterfaceInfo::multibeamSensorToLaserScan;
 		}
+
 
 		if (rosInterface.type!=ROSInterfaceInfo::Unknown) {
 			processROSInterface(child,rosInterface);

@@ -6,6 +6,7 @@
 
 #include <sensor_msgs/Imu.h>
 #include <sensor_msgs/NavSatFix.h>
+#include <sensor_msgs/LaserScan.h>
 #include <underwater_sensor_msgs/Pressure.h>
 #include <underwater_sensor_msgs/DVL.h>
 
@@ -548,8 +549,9 @@ void ArmToROSJointState::publish() {
 ArmToROSJointState::~ArmToROSJointState() {}
 	
 
-VirtualCameraToROSImage::VirtualCameraToROSImage(VirtualCamera *camera, std::string topic, std::string info_topic, int rate): ROSPublisherInterface(info_topic,rate), cam(camera), image_topic(topic) {
+VirtualCameraToROSImage::VirtualCameraToROSImage(VirtualCamera *camera, std::string topic, std::string info_topic, int rate, int depth): ROSPublisherInterface(info_topic,rate), cam(camera), image_topic(topic) {
   it.reset(new image_transport::ImageTransport(nh_));
+  this->depth=depth;
 }
 
 void VirtualCameraToROSImage::createPublisher(ros::NodeHandle &nh) {
@@ -563,20 +565,29 @@ void VirtualCameraToROSImage::createPublisher(ros::NodeHandle &nh) {
 
 void VirtualCameraToROSImage::publish() {
   //OSG_DEBUG << "OSGImageToROSImage::publish entering" << std::endl;
-  if (cam->renderTexture!=NULL && cam->renderTexture->getTotalSizeInBytes()!=0) {
+  osg::ref_ptr<osg::Image> osgimage;
+  if(depth){
+    osgimage=cam->depthTexture;
+  }else{
+    osgimage=cam->renderTexture;
+  }
+  if (osgimage!=NULL && osgimage->getTotalSizeInBytes()!=0) {
     //OSG_DEBUG << "\t image size: " << cam->renderTexture->s() << " " << cam->renderTexture->t() << " " << cam->renderTexture->getTotalSizeInBytes() << std::endl;
     int w, h, d;
-    w=cam->renderTexture->s();
-    h=cam->renderTexture->t();
-    d=cam->renderTexture->getTotalSizeInBytes();
+    w=osgimage->s();
+    h=osgimage->t();
+    d=osgimage->getTotalSizeInBytes();
 
     if (d!=0) {
       sensor_msgs::Image img;
       sensor_msgs::CameraInfo img_info;
       img_info.header.stamp=img.header.stamp=getROSTime();
       img_info.header.frame_id=img.header.frame_id=cam->frameId;
-      img.encoding=std::string("rgb8");
-      
+      if(depth)
+        img.encoding=std::string("mono8");
+      else
+        img.encoding=std::string("rgb8");   
+  
       img.is_bigendian=0;
       img.height=h;
       img.width=w;
@@ -615,16 +626,18 @@ void VirtualCameraToROSImage::publish() {
       img_info.binning_x = 0;
       img_info.binning_y = 0;
       
-      img_info.distortion_model = sensor_msgs::distortion_models::PLUMB_BOB;		
+      //img_info.distortion_model = sensor_msgs::distortion_models::PLUMB_BOB;
 	
-      char *virtualdata=(char*)cam->renderTexture->data();
+      unsigned char *virtualdata=(unsigned char*)osgimage->data();
       //memcpy(&(img.data.front()),virtualdata,d*sizeof(char));
       //Memory cannot be directly copied, since the image frame used in OpenSceneGraph (OpenGL glReadPixels) is on
       //the bottom-left looking towards up-right, whereas ROS sensor_msgs::Image::data expects origin on top-left
       //looking towards bottom-right. Therefore it must be manually arranged.
       if (virtualdata!=NULL) 
       	for (int i=0; i<h; i++) {
-          memcpy(&(img.data[i*img.step]), &(virtualdata[(h-i-1)*img.step]), img.step);
+	  for (unsigned int j=0; j<img.step; j++) {
+ 	         img.data[(h-i-1)*img.step+j]=virtualdata[i*img.step+j];
+    	  }
         }
       else
 	memset(&(img.data.front()), 0, d);
@@ -663,3 +676,56 @@ void RangeSensorToROSRange::publish() {
 }
 	
 RangeSensorToROSRange::~RangeSensorToROSRange() {}
+
+
+
+MultibeamSensorToROS::MultibeamSensorToROS(MultibeamSensor *multibeamSensor, std::string topic, int rate): ROSPublisherInterface(topic,rate), MB(multibeamSensor) {
+}
+
+void  MultibeamSensorToROS::createPublisher(ros::NodeHandle &nh) {
+  ROS_INFO(" MultibeamSensorToROS publisher on topic %s",topic.c_str());
+  pub_ = nh.advertise<sensor_msgs::LaserScan>(topic, 1);
+}
+
+void  MultibeamSensorToROS::publish() {
+  if (MB!=NULL) {
+    sensor_msgs::LaserScan ls;
+    ls.header.stamp = getROSTime();
+    ls.header.frame_id = MB->name;
+
+    double fov,aspect,near,far;
+
+    MB->textureCamera->getProjectionMatrixAsPerspective (fov,aspect,near,far);
+    ls.range_min=near;
+    ls.range_max=MB->range; //far plane should be higher (z-buffer resolution)
+    ls.angle_min=MB->initAngle * M_PI /180;
+    ls.angle_max=MB->finalAngle* M_PI /180;
+    ls.angle_increment=MB->angleIncr* M_PI /180;
+    ls.ranges.resize(MB->numpixels);
+    std::vector<double> tmp;
+    tmp.resize(MB->numpixels);
+
+    float * data= (float *)MB->depthTexture->data();
+    double a=far/(far-near);
+    double b=(far*near)/(near-far);
+
+    for(int i=0;i<MB->numpixels;i++){
+	double Z=(data[i]);///4294967296.0;
+        tmp[i]=b/(Z-a);
+	if(tmp[i]>MB->range)
+	  tmp[i]=MB->range;
+    }
+    for(int i=0;i<MB->numpixels;i++){
+	ls.ranges[i]=(tmp[MB->remapVector[i].pixel1]*MB->remapVector[i].weight1+tmp[MB->remapVector[i].pixel2]*MB->remapVector[i].weight2)*MB->remapVector[i].distort;
+    }
+
+    /*r.radiation_type=sensor_msgs::Range::ULTRASOUND;
+    r.field_of_view=0;	//X axis of the sensor
+    r.min_range=0;
+    r.max_range=rs->range;
+    r.range= (rs->node_tracker!=NULL) ? rs->node_tracker->distance_to_obstacle : r.max_range;*/	
+    pub_.publish(ls);
+  }
+}
+	
+ MultibeamSensorToROS::~MultibeamSensorToROS() {}

@@ -107,7 +107,23 @@ SimulatedIAUV::SimulatedIAUV(SceneBuilder *oscene, Vehicle vehicleChars) : urdf(
 		vMc->asPositionAttitudeTransform()->setPosition(osg::Vec3d(vcam.position[0],vcam.position[1],vcam.position[2]));
 		vMc->asPositionAttitudeTransform()->setAttitude(osg::Quat(vcam.orientation[0],osg::Vec3d(1,0,0),vcam.orientation[1],osg::Vec3d(0,1,0), vcam.orientation[2],osg::Vec3d(0,0,1) ));
 		urdf->link[vcam.link]->asGroup()->addChild(vMc);
-		camview.push_back(VirtualCamera(oscene->root, vcam.name, vMc, vcam.resw, vcam.resh, vcam.baseLine, vcam.frameId, vcam.parameters.get()));
+		camview.push_back(VirtualCamera(oscene->root, vcam.name, vMc, vcam.resw, vcam.resh, vcam.baseLine, vcam.frameId, vcam.parameters.get(),0));
+		if (vcam.showpath) camview[camview.size()-1].showPath(vcam.showpath);
+		OSG_INFO << "Done adding a virtual camera..." << std::endl;
+	}
+
+	//Add virtual range cameras in config file
+	while(vehicleChars.VRangecams.size() > 0){
+		Vcam vcam=vehicleChars.VRangecams.front();
+		OSG_INFO << "Adding a virtual camera " << vcam.name << "..." << std::endl;
+		vehicleChars.VRangecams.pop_front();
+		//Camera frame given wrt vehicle origin frame.
+		//Remember that in opengl/osg, the camera frame is a right-handed system with Z going backwards (opposite to the viewing direction) and Y up.
+		osg::ref_ptr<osg::Transform> vMc=(osg::Transform*) new osg::PositionAttitudeTransform;
+		vMc->asPositionAttitudeTransform()->setPosition(osg::Vec3d(vcam.position[0],vcam.position[1],vcam.position[2]));
+		vMc->asPositionAttitudeTransform()->setAttitude(osg::Quat(vcam.orientation[0],osg::Vec3d(1,0,0),vcam.orientation[1],osg::Vec3d(0,1,0), vcam.orientation[2],osg::Vec3d(0,0,1) ));
+		urdf->link[vcam.link]->asGroup()->addChild(vMc);
+		camview.push_back(VirtualCamera(oscene->root, vcam.name, vMc, vcam.resw, vcam.resh, vcam.baseLine, vcam.frameId, vcam.parameters.get(),1));
 		if (vcam.showpath) camview[camview.size()-1].showPath(vcam.showpath);
 		OSG_INFO << "Done adding a virtual camera..." << std::endl;
 	}
@@ -182,6 +198,22 @@ SimulatedIAUV::SimulatedIAUV(SceneBuilder *oscene, Vehicle vehicleChars) : urdf(
 		OSG_INFO << "Done adding an DVL Sensor..." << std::endl;
 	}
 
+	//Adding Multibeam sensors
+	while(vehicleChars.multibeam_sensors.size() > 0){
+		OSG_INFO << "Adding a Multibeam sensor..." << std::endl;
+		XMLMultibeamSensor MB;
+		MB=vehicleChars.multibeam_sensors.front();
+		vehicleChars.multibeam_sensors.pop_front();
+		osg::ref_ptr<osg::Transform> vMs=(osg::Transform*) new osg::PositionAttitudeTransform;
+		vMs->asPositionAttitudeTransform()->setPosition(osg::Vec3d(MB.position[0],MB.position[1],MB.position[2]));
+		vMs->asPositionAttitudeTransform()->setAttitude(osg::Quat(MB.orientation[0],osg::Vec3d(1,0,0),MB.orientation[1],osg::Vec3d(0,1,0), MB.orientation[2],osg::Vec3d(0,0,1) ));
+		urdf->link[MB.link]->getParent(0)->getParent(0)->asGroup()->addChild(vMs);
+		MultibeamSensor  mb=MultibeamSensor(oscene->root,MB.name,vMs,MB.initAngle,MB.finalAngle,MB.angleIncr,MB.range);
+		multibeam_sensors.push_back(mb);
+		camview.push_back(mb);
+		OSG_INFO << "Done adding a Multibeam Sensor..." << std::endl;
+	}
+
 	//Adding object pickers
 	while(vehicleChars.object_pickers.size() > 0){
 		OSG_INFO << "Adding an object picker..." << std::endl;
@@ -229,12 +261,12 @@ void SimulatedIAUV::setVirtualCamera(std::string name, osg::Transform* transform
 
 /** Sets the vehicle position. (x,y,z) given wrt to the world frame. (roll,pitch,yaw) are RPY angles in the local frame */
 void SimulatedIAUV::setVehiclePosition(double x, double y, double z, double roll, double pitch, double yaw) {
-	osg::Matrixd S,T, Rx, Ry, Rz, transform;
+	osg::Matrixd S, T, Rx, Ry, Rz, transform;
 	T.makeTranslate(x,y,z);
 	Rx.makeRotate(roll,1,0,0);
 	Ry.makeRotate(pitch,0,1,0);
 	Rz.makeRotate(yaw,0,0,1);
-	S.makeScale(10,10,10);
+	S.makeScale(2,5,8);
 	transform=Rz*Ry*Rx*T;
 	setVehiclePosition(transform);
 }

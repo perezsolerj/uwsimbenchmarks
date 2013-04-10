@@ -18,6 +18,7 @@
 #include "PressureSensor.h"
 #include "GPSSensor.h"
 #include "DVLSensor.h"
+#include "MultibeamSensor.h"
 
 class SceneBuilder; 
 
@@ -26,6 +27,7 @@ class SimulatedIAUV
 {
 public:
 	std::vector<VirtualCamera> camview;
+	std::vector<VirtualCamera> camrange;
 	std::vector<VirtualRangeSensor> range_sensors;
 	std::vector<ObjectPicker> object_pickers;
 	std::vector<InertialMeasurementUnit> imus;

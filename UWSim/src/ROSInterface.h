@@ -21,6 +21,7 @@
 #include "GPSSensor.h"
 #include "DVLSensor.h"
 #include "HUDCamera.h"
+#include "MultibeamSensor.h"
 #include "UWSimUtils.h"
 
 //OSG
@@ -324,8 +325,9 @@ class VirtualCameraToROSImage : public ROSPublisherInterface {
         boost::shared_ptr<image_transport::ImageTransport> it;
 	image_transport::Publisher img_pub_;
 	std::string image_topic;
+	int depth;
 public:
-	VirtualCameraToROSImage(VirtualCamera *camera, std::string topic, std::string info_topic, int rate);
+	VirtualCameraToROSImage(VirtualCamera *camera, std::string topic, std::string info_topic, int rate,int depth);
 
 	void createPublisher(ros::NodeHandle &nh);
 
@@ -344,6 +346,18 @@ public:
 	void publish();
 	
 	~RangeSensorToROSRange();
+};
+
+class MultibeamSensorToROS : public ROSPublisherInterface {
+	MultibeamSensor *MB;
+public:
+	MultibeamSensorToROS(MultibeamSensor *multibeamSensor, std::string topic, int rate);
+
+	void createPublisher(ros::NodeHandle &nh);
+
+	void publish();
+	
+	~MultibeamSensorToROS();
 };	
 #endif
 		

@@ -66,22 +66,6 @@
       <z> -1.57 </z>
     </offsetr>
     <enablePhysics> 1 </enablePhysics>
-    <physicsWater>
-      <size>
-	<minX> -10 </minX>
-	<maxX> 10 </maxX>
-	<minY> -10 </minY>
-	<maxY> 10 </maxY>
-	<minZ> -10 </minZ>
-	<maxZ> 10 </maxZ>
-      </size>
-      <position>
-        <x>0</x>
-        <y>0</y>
-        <z>0</z>
-      </position>
-      <resolution> 0.25 </resolution>
-    </physicsWater>
   </simParams>
   <camera>
     <freeMotion> 1 </freeMotion>
@@ -236,7 +220,51 @@
       </orientation>
       <std>0.0015</std>
     </dvlSensor>
+    <virtualRangeImage>
+      <name>rangeImage</name>
+      <relativeTo>part0</relativeTo>
+      <resw> 320</resw>
+      <resh> 240 </resh>
+      <position>
+        <x>-0.2</x>
+        <y> 0.1 </y>
+        <z> 0 </z>
+      </position>  
+      <orientation>
+        <r>0</r>
+        <p>0</p>
+        <y>1.57 </y>
+      </orientation>
+      <parameters>
+        <fx>257.986</fx>
+        <fy>257.341</fy>
+        <x0>120</x0>
+        <y0>160</y0>
+        <f>10</f>
+        <n>0.8</n>
+        <k>0</k>
+      </parameters>
 
+    </virtualRangeImage>
+
+    <multibeamSensor>
+      <name>multibeam</name>
+      <relativeTo>part0</relativeTo>
+      <position>
+        <x>-0.2</x>
+        <y> 0.1 </y>
+        <z> 0 </z>
+      </position>  
+      <orientation>
+        <r>0</r>
+        <p>0</p>
+        <y>1.57 </y>
+      </orientation>
+      <initAngle>-60</initAngle>
+      <finalAngle>60</finalAngle>
+      <angleIncr>0.1</angleIncr>
+      <range>10</range>
+    </multibeamSensor>
   </vehicle>
 
   <object>
@@ -271,7 +299,7 @@
     <position>
       <x> 0</x>
       <y> 0 </y>
-      <z> -1.8 </z>
+      <z> 4.7 </z>
     </position>
     <orientation>
       <r>0</r>
@@ -280,30 +308,6 @@
     </orientation>
     <physics>
       <mass> 15 </mass>
-      <inertia> 
-        <x> 0</x>
-        <y> 0 </y>
-        <z> 0 </z>
-      </inertia>
-      <collisionShapeType> box </collisionShapeType>
-    </physics>
-  </object>
-
-  <object>
-    <name> blackbox2 </name>
-    <file> objects/blackbox_uib_trimesh.osg  </file>
-    <position>
-      <x> 1</x>
-      <y> 1 </y>
-      <z> 0 </z>
-    </position>
-    <orientation>
-      <r>0</r>
-      <p>3.1415</p>
-      <y>0</y>
-    </orientation>
-    <physics>
-      <mass> 4 </mass>
       <inertia> 
         <x> 0</x>
         <y> 0 </y>
@@ -365,6 +369,15 @@
       <topic>g500/dvl</topic>
       <rate>5</rate>
     </DVLSensorToROS>
+    <RangeImageSensorToROSImage> 
+      <cameraName>rangeImage</cameraName>
+      <imageTopic> /uwsim/rangecamera </imageTopic>
+      <infoTopic> /uwsim/rangecamera_info </infoTopic>
+    </RangeImageSensorToROSImage>
+    <multibeamSensorToLaserScan>
+      <name>multibeam</name>
+      <topic>g500/multibeam</topic>
+    </multibeamSensorToLaserScan>
   </rosInterfaces>
 </UWSimScene>
 

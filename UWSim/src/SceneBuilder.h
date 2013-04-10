@@ -26,6 +26,7 @@ public:
 	std::vector<boost::shared_ptr<ROSInterface> > ROSInterfaces;
 	std::vector<osg::ref_ptr<osgWidget::Window> > camWidgets;
 
+
 public:
 	SceneBuilder();
 	SceneBuilder(int *argc, char **argv);

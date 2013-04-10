@@ -82,6 +82,7 @@ int main(int argc, char *argv[])
 
 	SceneBuilder builder(arguments);
 	builder.loadScene(config);
+
         PhysicsBuilder physicsBuilder;
         if(config.enablePhysics)
 	  physicsBuilder.loadPhysics(&builder,config);
