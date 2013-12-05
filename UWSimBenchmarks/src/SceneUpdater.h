@@ -70,4 +70,18 @@ public:
   std::string getName();
 };
 
+class ArmMoveUpdater: public SceneUpdater{
+private:
+  std::list<std::vector <double> > armPositions;
+  double steps; //Counter for position (1= first position, 1.5= average position between first and second)
+  SimulatedIAUV *  vehicle;
+public:
+  void updateScene();
+  int finished();
+  void update(){};
+  ArmMoveUpdater(std::list<std::vector <double> > armPositions, double steps, double interval,SimulatedIAUV *  vehicle);
+  double getReference();
+  std::string getName();
+};
+
 #endif

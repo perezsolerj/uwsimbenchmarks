@@ -25,22 +25,24 @@ struct TriggerInfo{
 
 struct MeasureInfo{ 
   typedef enum { Unknown, Time, Collisions, PositionError, Distance, EuclideanNorm , ObjectCenteredOnCam} type_t;
-  typedef enum { Constant, CornersFromCam, CentroidFromCam } type_s;
+  typedef enum { Constant, CornersFromCam, CentroidFromCam, RelativeLocation } type_s;
   type_t type;
   type_s subtype; //Subtype for euclideanNorm
   string name,target;
   double log;
   string camera,object,publishOn; //Needed for EuclideanNorm
+  string from, to; //Needed for EuclideanNorm (relativePosition)
   double position[3]; //needed for PositionError
   std::vector<double>  groundTruth; //Used in euclideanNorm
   TriggerInfo startOn, stopOn;
 };
 
 struct SceneUpdaterInfo{
-  typedef enum { None, SceneFogUpdater, CurrentForceUpdater} SceneUpdaterType;
+  typedef enum { None, SceneFogUpdater, CurrentForceUpdater, ArmMoveUpdater} SceneUpdaterType;
   SceneUpdaterType type;
   double initialFog, finalFog, step, interval; //needed for SceneFogUpdater
   double initialCurrent, finalCurrent;
+  std::list<std::vector <double> > armPositions;
   std::string target;
 };
 

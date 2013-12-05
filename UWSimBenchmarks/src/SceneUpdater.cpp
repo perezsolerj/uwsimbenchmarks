@@ -120,3 +120,49 @@ double CurrentForceUpdater::getReference(){
 std::string CurrentForceUpdater::getName(){
   return "Current";
 }
+
+/*Arm Move Updater*/
+
+void ArmMoveUpdater::updateScene(){
+  restartTimer();
+
+  vehicle->urdf->setJointPosition(armPositions.front());
+  armPositions.pop_front();
+}
+
+int ArmMoveUpdater::finished(){
+  return !armPositions.size();
+}
+
+ArmMoveUpdater::ArmMoveUpdater(std::list<std::vector <double> > armPositions, double steps, double interval,SimulatedIAUV *  vehicle): SceneUpdater(interval){
+
+  this->armPositions.push_back(armPositions.front());
+  armPositions.pop_front();
+  while(armPositions.size()>0){
+    std::vector<double> actual=this->armPositions.back();
+    for(unsigned int i=1;i<=steps;i++){ //0 steps = just move from one position to the next one
+      std::vector<double> nextStep;
+      for(unsigned int j=0;j<armPositions.front().size();j++){
+	nextStep.push_back(actual[j]+ (armPositions.front()[j]-actual[j])/(steps+1)*i);
+      }
+      this->armPositions.push_back(nextStep);
+    }
+    this->armPositions.push_back(armPositions.front());
+    armPositions.pop_front();
+  }
+  this->steps=1;
+  this->vehicle=vehicle;
+  this->armPositions.push_back(std::vector<double> ()); //Needed to check if update is over
+
+  vehicle->urdf->setJointPosition(this->armPositions.front());
+  this->armPositions.pop_front();
+
+}
+
+double ArmMoveUpdater::getReference(){
+  return steps;
+}
+
+std::string ArmMoveUpdater::getName(){
+  return "ArmPosition";
+}

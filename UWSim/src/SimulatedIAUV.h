@@ -34,6 +34,7 @@ public:
 	std::vector<PressureSensor> pressure_sensors;
 	std::vector<GPSSensor> gps_sensors;
 	std::vector<DVLSensor> dvl_sensors;
+	std::vector<MultibeamSensor> multibeam_sensors;
 
 	//offset for tracking benchmark TODO: do it better!
 	osg::ref_ptr<osg::MatrixTransform> offset;

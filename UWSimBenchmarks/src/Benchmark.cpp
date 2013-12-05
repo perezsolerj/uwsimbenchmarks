@@ -1,6 +1,6 @@
 #include "Benchmark.h"
 
-#include "muParser/muParser.h"  //Used to evaluate mathematical expresions on benchmark scores
+#include "muParser.h"  //Used to evaluate mathematical expresions on benchmark scores
 
 Benchmark::Benchmark(){
 numMeasures=0;
@@ -104,6 +104,7 @@ SceneUpdater * Benchmark::createSceneUpdater(SceneUpdaterInfo su, SceneBuilder *
      }
     return new SceneFogUpdater(su.initialFog, su.finalFog, su.step, su.interval,camerasFog,builder->scene);
   }
+
   else if(su.type==SceneUpdaterInfo::CurrentForceUpdater){
     SimulatedIAUV * vehicle=NULL;
     for(unsigned int i=0;i<builder->iauvFile.size();i++)
@@ -114,10 +115,22 @@ SceneUpdater * Benchmark::createSceneUpdater(SceneUpdaterInfo su, SceneBuilder *
       exit(1);
     }
     if(!builder->current){
-      std::cerr<<"You must define a current in order to use CurrentForceUpdater"<<std::endl;
+      std::cerr<<"Current must be defined in order to use CurrentForceUpdater"<<std::endl;
       exit(1);
     }    
     return new CurrentForceUpdater(su.initialCurrent, su.finalCurrent, su.step, su.interval,vehicle,builder->current);
+  }
+
+  else if(su.type==SceneUpdaterInfo::ArmMoveUpdater){
+    SimulatedIAUV * vehicle=NULL;
+    for(unsigned int i=0;i<builder->iauvFile.size();i++)
+      if(builder->iauvFile[i]->name==su.target)
+	vehicle=builder->iauvFile[i].get();
+    if(!vehicle){
+      std::cerr<<"Target "<<su.target<<" for arm move scene updater NOT found"<<std::endl;
+      exit(1);
+    }   
+    return new ArmMoveUpdater(su.armPositions, su.step, su.interval, vehicle);
   }
   else{
     std::cerr<<"Unknown scene updater"<<std::endl;
@@ -160,7 +173,7 @@ Measures * Benchmark::createEuclideanNormMeasure(MeasureInfo measureInfo, SceneB
   if(measureInfo.subtype==MeasureInfo::Constant){
     EN = new EuclideanNorm(new EuclideanNorm::ConstantGT(measureInfo.groundTruth),measureInfo.target,"");
   }
-  else{ //Type requires look for camera and target (cornersfromcam or centroidfromcam)
+  else if(measureInfo.subtype==MeasureInfo::CornersFromCam || measureInfo.subtype==MeasureInfo::CentroidFromCam){ //Type requires look for camera and target (cornersfromcam or centroidfromcam)
     osg::Camera *  camera=NULL;
     for(unsigned int i=0; i<builder->iauvFile.size();i++){
       for (unsigned int j=0; j<builder->iauvFile[i]->getNumCams(); j++) {
@@ -187,6 +200,19 @@ Measures * Benchmark::createEuclideanNormMeasure(MeasureInfo measureInfo, SceneB
       EN = new EuclideanNorm(new EuclideanNorm::ObjectCornersInCam(camera,target),measureInfo.target,measureInfo.publishOn);
     else //CentroidFromCam{
       EN = new EuclideanNorm(new EuclideanNorm::ObjectCentroidInCam(camera,target),measureInfo.target,measureInfo.publishOn);
+  }
+  else{  //RelativeLocation
+    osg::Node * from=findRN(measureInfo.from,builder->root);
+    osg::Node * to=findRN(measureInfo.to,builder->root);
+    if(from==NULL){
+      std::cerr<<"'from' target for measure "<<measureInfo.name<<" couldn't be found."<<std::endl;
+      exit(1);
+    }
+    if(to==NULL){
+      std::cerr<<"'to' target for measure "<<measureInfo.name<<" couldn't be found."<<std::endl;
+      exit(1);
+    }
+    EN = new EuclideanNorm(new EuclideanNorm::RelativeLocation(from,to),measureInfo.target,measureInfo.publishOn);
   }
   return EN;
 }

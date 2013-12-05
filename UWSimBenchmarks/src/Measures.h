@@ -142,6 +142,14 @@ public:
       ObjectCentroidInCam(osg::Camera * cam,osg::Node * target);
   };
 
+  class RelativeLocation: public GT{
+    private:
+      osg::Node * from, *to;
+    public: 
+      std::vector<double> getGT();
+      RelativeLocation(osg::Node * from,osg::Node * to);
+  };
+
 private:
   std::vector<double> groundTruth;
   ROSArrayToEuclideanNorm * topic;
@@ -155,6 +163,8 @@ public:
   void update(void);
   EuclideanNorm(GT * groundT, std::string topic, std::string publishOn);
   double getMeasure(void);
+  std::vector<double> getMeasureDetails(void);
+  std::vector<std::string> getNameDetails(void);
   int isOn();
   void reset();
   int error();

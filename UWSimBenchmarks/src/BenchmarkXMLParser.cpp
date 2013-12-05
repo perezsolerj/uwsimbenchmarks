@@ -117,7 +117,7 @@ void BenchmarkXMLParser::processVector(const xmlpp::Node* node, std::vector<doub
     int pos=0;
     for(xmlpp::Node::NodeList::iterator iter = list.begin(); iter != list.end(); ++iter){
       xmlpp::Node* child=dynamic_cast<const xmlpp::Node*>(*iter);
-      if(child->get_name()=="value"){
+      if(child->get_name()=="value" || child->get_name()=="joint"){
         extractFloatChar(child,&groundTruth[pos++]);
       }
     }
@@ -159,6 +159,10 @@ void BenchmarkXMLParser::processMeasure(const xmlpp::Node* node,MeasureInfo * me
 	  measure->subtype=MeasureInfo::CentroidFromCam;
 	  processGTFromCam(child,measure);
 	}
+	else if (atrib->get_value()=="relativeLocation"){
+	  measure->subtype=MeasureInfo::RelativeLocation;
+	  processGTFromCam(child,measure);
+	}
       }
     }
 }
@@ -174,6 +178,10 @@ void BenchmarkXMLParser::processGTFromCam(const xmlpp::Node* node,MeasureInfo * 
         extractStringChar(child,&measure->camera);
       else if(child->get_name()=="publishOn")
         extractStringChar(child,&measure->publishOn);
+      else if(child->get_name()=="from")
+        extractStringChar(child,&measure->from);
+      else if(child->get_name()=="to")
+        extractStringChar(child,&measure->to);
     }
 
 }
@@ -228,6 +236,10 @@ void BenchmarkXMLParser::processSceneUpdater(const xmlpp::Node* node,SceneUpdate
       su->type=SceneUpdaterInfo::CurrentForceUpdater;
       processSceneUpdaters(child,su);
     }
+    else if(child->get_name()=="armMoveUpdater"){
+      su->type=SceneUpdaterInfo::ArmMoveUpdater;
+      processSceneUpdaters(child,su);
+    }
   }
 
 }
@@ -252,6 +264,12 @@ void BenchmarkXMLParser::processSceneUpdaters(const xmlpp::Node* node,SceneUpdat
       extractFloatChar(child,&su->finalCurrent);
     else if(child->get_name()=="target")
       extractStringChar(child,&su->target);
+    else if(child->get_name()=="armPosition"){
+      std::vector<double> armPosition;
+      processVector(child,armPosition);
+      su->armPositions.push_back(armPosition);
+    }
+
   }
 }
 

@@ -18,6 +18,7 @@ libxml++-2.6:
 
 libmuparser:
   ubuntu: 
+    quantal: libmuparser2 libmuparser-dev
     12.04: libmuparser0debian1 libmuparser-dev
     oneiric: libmuparser0debian1 libmuparser-dev
     lucid: libmuparser0 libmuparser-dev

@@ -411,6 +411,32 @@ std::vector<double> EuclideanNorm::ObjectCentroidInCam::getGT(){
   return groundTruth;
 }
 
+//-------RelativeLocation------
+
+EuclideanNorm::RelativeLocation::RelativeLocation(osg::Node * from,osg::Node * to){
+  this->from=from;
+  this->to=to;
+}
+
+std::vector<double> EuclideanNorm::RelativeLocation::getGT(){
+  std::vector<double> groundTruth;
+  groundTruth.resize(3);
+
+  osg::Matrixd * fromMat=getWorldCoords(from); 
+  osg::Matrixd * toMat=getWorldCoords(to); 
+  fromMat->invert(*fromMat);
+
+  osg::Matrixd  res=*toMat * *fromMat;
+
+  groundTruth[0]=res.getTrans().x();
+  groundTruth[1]=res.getTrans().y();
+  groundTruth[2]=res.getTrans().z();
+
+  //std::cout<<"GT: "<< groundTruth[0]<<" "<< groundTruth[1]<<" "<< groundTruth[2]<<std::endl;
+
+  return groundTruth;
+}
+
 
 //-------EuclideanNorm------
 
@@ -437,6 +463,12 @@ void EuclideanNorm::start(void){
 }
 
 void EuclideanNorm::update(void){
+}
+
+void EuclideanNorm::stop(void){
+}
+
+double EuclideanNorm::getMeasure(void){
   std::vector<double> estimated, groundTruth=gt->getGT();
   double acum=0;
   if(topic->getVector(estimated)){
@@ -450,13 +482,40 @@ void EuclideanNorm::update(void){
       std::cout<<"Error: Estimated measure and groundTruth have different size on "<<name<<" measure. "<<estimated.size()<<" "<<groundTruth.size()<<std::endl;
     }
   }
-}
-
-void EuclideanNorm::stop(void){
-}
-
-double EuclideanNorm::getMeasure(void){
   return norm;
+}
+
+std::vector<double> EuclideanNorm::getMeasureDetails(void){
+  std::vector<double> estimated, groundTruth=gt->getGT();
+  double acum=0;
+  std::vector<double> results;
+  results.resize(groundTruth.size()+1);
+  if(topic->getVector(estimated)){
+    if(estimated.size() == groundTruth.size()){
+      for(unsigned int i=0;i<estimated.size();i++){
+        results[i+1]=groundTruth[i]-estimated[i];
+        acum+=pow(results[i+1],2);
+      }
+      norm=pow(acum,0.5);
+    }
+    else{
+      std::cout<<"Error: Estimated measure and groundTruth have different size on "<<name<<" measure. "<<estimated.size()<<" "<<groundTruth.size()<<std::endl;
+    }
+  }
+
+  results[0]=norm;
+  return results;
+}
+
+std::vector<std::string> EuclideanNorm::getNameDetails(void){
+  std::vector<std::string> results;
+  results.resize(gt->getGT().size()+1);
+  
+  results[0]=name+"_total";
+  for(unsigned int i=1;i<results.size();i++)
+    results[i]=name+"["+"]"; //Falta añadir el número!
+
+  return results;
 }
 
 int EuclideanNorm::isOn(){

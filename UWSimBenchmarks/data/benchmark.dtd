@@ -29,22 +29,27 @@
 <!ELEMENT name (#PCDATA)>
 <!ELEMENT log (#PCDATA)>
 
-<!ELEMENT groundTruth ((value+)|(camera,target,publishOn?))>
+<!-- Euclidean Norm -->
+<!ELEMENT groundTruth ((value+)|(camera,target,publishOn?)|(from,to))>
 <!ELEMENT camera (#PCDATA)>
 <!ELEMENT publishOn (#PCDATA)>
-<!ATTLIST groundTruth type (constant|cornersFromCamera|centroidFromCamera) #REQUIRED>
-
+<!ATTLIST groundTruth type (constant|cornersFromCamera|centroidFromCamera|relativeLocation) #REQUIRED>
 
 <!ELEMENT value (#PCDATA)>
+<!ELEMENT from (#PCDATA)>
+<!ELEMENT to (#PCDATA)>
 
 <!-- SceneUpdater -->
 
-<!ELEMENT sceneUpdater (none | sceneFogUpdater | currentForceUpdater)>
+<!ELEMENT sceneUpdater (none | sceneFogUpdater | currentForceUpdater | armMoveUpdater)>
 
 <!ELEMENT none EMPTY>
 
 <!ELEMENT sceneFogUpdater (initialFog, finalFog, step, interval)>
 <!ELEMENT currentForceUpdater (initialCurrent, finalCurrent, step, interval, target)>
+<!ELEMENT armMoveUpdater (armPosition+, step, interval, target)>
+<!ELEMENT armPosition (joint+)>
+<!ELEMENT joint (#PCDATA)>
 <!ELEMENT initialFog (#PCDATA)>
 <!ELEMENT finalFog (#PCDATA)>
 <!ELEMENT initialCurrent (#PCDATA)>
