@@ -3,9 +3,9 @@
 
 #include <ros/ros.h>
 #include <osg/Fog>
-#include "osgOceanScene.h"
-#include "SimulatedIAUV.h"
-#include "Current.h"
+#include "uwsim/uwsim/osgOceanScene.h"
+#include "uwsim/uwsim/SimulatedIAUV.h"
+//#include "uwsim/uwsim/Current.h"
 
 class SceneUpdater{
 private:
@@ -55,7 +55,7 @@ std::string getName();
 void update(){};
 };
 
-class CurrentForceUpdater: public SceneUpdater{
+/*class CurrentForceUpdater: public SceneUpdater{
 private:
   double initialCurrent,finalCurrent,step;
   SimulatedIAUV *  vehicle;
@@ -68,7 +68,7 @@ public:
   CurrentForceUpdater(double initialCurrent, double finalCurrent, double step, double interval,SimulatedIAUV *  vehicle, boost::shared_ptr<Current>  current);
   double getReference();
   std::string getName();
-};
+};*/
 
 class ArmMoveUpdater: public SceneUpdater{
 private:

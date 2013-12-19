@@ -1,31 +1,76 @@
-cmake_minimum_required(VERSION 2.4.6)
-include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
-include($ENV{ROS_ROOT}/core/rosbuild/FindPkgConfig.cmake)
+cmake_minimum_required(VERSION 2.8.3)
+project(uwsimbenchmarks)
 
-rosbuild_init()
-rosbuild_gensrv()
+find_package(catkin REQUIRED COMPONENTS
+  std_srvs
+  pcl
+  pcl_ros
+  topic_tools 
+  rospy
+  std_msgs
+  message_generation
+)
 
-#set the default path for built executables to the "bin" directory
-set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
-#set the default path for built libraries to the "lib" directory
-set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
+find_package(uwsim REQUIRED)
+find_package(uwsim_osgocean REQUIRED)
+find_package(uwsim_osgworks REQUIRED)
+find_package(uwsim_osgbullet REQUIRED)
+find_package(uwsim_bullet REQUIRED)
+
+add_service_files(
+  FILES
+  GTpublish.srv
+)
+
+generate_messages(
+  DEPENDENCIES
+  roscpp
+  std_msgs
+)
+
+catkin_package(
+  CATKIN_DEPENDS
+    std_srvs
+    pcl
+    pcl_ros
+    topic_tools
+  DEPENDS
+    roscpp
+    message_runtime
+    uwsim
+    libmuparser
+    uwsim_bullet
+    uwsim_osgocean
+    uwsim_osgworks
+)
 
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/CMakeModules;{CMAKE_MODULE_PATH}")
-set(BUILD_ROS_INTERFACES 1)
+SET(UWSIMBENCHMARKS_ROOT_PATH "${CMAKE_INSTALL_PREFIX}/${CATKIN_PACKAGE_SHARE_DESTINATION}")
 
-FIND_PACKAGE ( OpenSceneGraph COMPONENTS osgSim osgUtil osgDB osgFX osgGA osgTerrain osgViewer osgText osgWidget osgManipulator osg)
+CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/src/BenchmarksConfig.h.cmake
+  ${PROJECT_SOURCE_DIR}/src/BenchmarksConfig.h
+)
 
+FIND_PACKAGE ( OpenSceneGraph COMPONENTS osgSim osgUtil osgDB osgFX osgGA osgTerrain osgViewer osgText osgWidget osg)
+
+
+find_package(PkgConfig)
 pkg_check_modules(LIBXML++ REQUIRED libxml++-2.6)
-pkg_check_modules(LIBMUPARSER REQUIRED libmuparser)
 
-INCLUDE_DIRECTORIES(${OPENSCENEGRAPH_INCLUDE_DIRS} ${LIBXML++_INCLUDE_DIRS})
-LINK_DIRECTORIES(${LIBXML++_LIBRARY_DIRS})
+find_package(PCL REQUIRED)
+
+include_directories(${PCL_INCLUDE_DIRS})
+
+link_directories(${PCL_LIBRARY_DIRS})
+
+INCLUDE_DIRECTORIES(${BULLET_INCLUDE_DIRS}  ${OSGWORKS_INCLUDE_DIR} ${OSGBULLET_INCLUDE_DIR} ${OSGOCEAN_INCLUDE_DIRS} ${OPENSCENEGRAPH_INCLUDE_DIRS} ${LIBXML++_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS} ${uwsim_INCLUDE_DIRS})
 
 # this disables the warnings that come mostly from osg
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-ignored-qualifiers")
 
 
-rosbuild_add_executable(UWSimBenchmarks src/main.cpp
+
+add_executable(uwsimbenchmarks src/main.cpp
 src/Measures.cpp
 src/SceneUpdater.cpp
 src/Trigger.cpp
@@ -34,4 +79,16 @@ src/Benchmark.cpp
 src/BenchmarkROSInterfaces.cpp)
 
 
-TARGET_LINK_LIBRARIES(UWSimBenchmarks ${OPENSCENEGRAPH_LIBRARIES} ${LIBXML++_LIBRARIES} -lmuparser GLU)
+TARGET_LINK_LIBRARIES(uwsimbenchmarks  ${PCL_LIBRARIES} ${uwsim_LIBRARIES} ${catkin_LIBRARIES} ${OPENSCENEGRAPH_LIBRARIES}  ${OSGOCEAN_LIBRARIES} ${OSGWORKS_LIBRARIES} ${OSGBULLET_LIBRARIES} ${BULLET_LIBRARIES} ${LIBXML++_LIBRARIES} -lmuparser GLU)
+
+install(
+  TARGETS
+    uwsimbenchmarks
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+install(DIRECTORY data/
+   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/data
+)

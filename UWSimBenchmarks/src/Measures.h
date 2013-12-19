@@ -6,10 +6,10 @@
 #include <ros/ros.h>
 #include <iostream>
 #include "Trigger.h"
-#include "BulletPhysics.h"
+#include "uwsim/uwsim/BulletPhysics.h"
 #include <osg/ComputeBoundsVisitor>
 
-#include <UWSimBenchmarks/GTpublish.h>
+#include <uwsimbenchmarks/GTpublish.h>
 
 
 //Abstract class for holding Benchmarking measures

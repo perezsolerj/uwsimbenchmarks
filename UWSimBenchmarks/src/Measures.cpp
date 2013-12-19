@@ -279,7 +279,7 @@ std::vector<double> EuclideanNorm::ObjectCornersInCam::getGT(){
   target->accept(cbv);
   osg::BoundingBox box = cbv.getBoundingBox(); 
 
-  osg::Matrixd * pos=getWorldCoords(target); 
+  boost::shared_ptr<osg::Matrixd> pos=getWorldCoords(target); 
 
   //std::cout<<"BOX: "<<box.xMin()<<" "<<box.xMax()<<" "<<box.yMin()<<" "<<box.yMax()<<" "<<box.zMin()<<" "<<box.zMax()<<" "<<std::endl;
   //std::cout<<"BOX position: "<<pos->getTrans().x()<<" "<<pos->getTrans().y()<<" "<<pos->getTrans().z()<<" "<<std::endl;
@@ -397,7 +397,7 @@ std::vector<double> EuclideanNorm::ObjectCentroidInCam::getGT(){
   target->accept(cbv);
   osg::BoundingBox box = cbv.getBoundingBox(); 
 
-  osg::Matrixd * pos=getWorldCoords(target); 
+  boost::shared_ptr<osg::Matrixd> pos=getWorldCoords(target); 
 
   osg::Vec3 posIn2D = pos->getTrans() * MVPW;
 
@@ -422,8 +422,8 @@ std::vector<double> EuclideanNorm::RelativeLocation::getGT(){
   std::vector<double> groundTruth;
   groundTruth.resize(3);
 
-  osg::Matrixd * fromMat=getWorldCoords(from); 
-  osg::Matrixd * toMat=getWorldCoords(to); 
+  boost::shared_ptr<osg::Matrixd> fromMat=getWorldCoords(from); 
+  boost::shared_ptr<osg::Matrixd> toMat=getWorldCoords(to); 
   fromMat->invert(*fromMat);
 
   osg::Matrixd  res=*toMat * *fromMat;
@@ -453,11 +453,11 @@ void EuclideanNorm::start(void){
   topic->getVector(estimated); //Clears previous measures on topic
   if(publishOn!=""){
     estimated=gt->getGT();
-    UWSimBenchmarks::GTpublish::Request req;
+    uwsimbenchmarks::GTpublish::Request req;
     req.groundTruth.clear();
     for(int i=0; i< estimated.size();i++)
       req.groundTruth.push_back(estimated[i]);
-    UWSimBenchmarks::GTpublish::Response res;
+    uwsimbenchmarks::GTpublish::Response res;
     ros::service::call(publishOn,req, res);
   }
 }
@@ -560,7 +560,7 @@ double ObjectCenteredOnCam::getMeasure(void){
   target->accept(cbv);
   osg::BoundingBox box = cbv.getBoundingBox(); 
 
-  osg::Matrixd * pos=getWorldCoords(target); 
+  boost::shared_ptr<osg::Matrixd> pos=getWorldCoords(target); 
 
   osg::Vec3 posIn2D = pos->getTrans() * MVPW;
 
@@ -576,7 +576,7 @@ std::vector<double> ObjectCenteredOnCam::getMeasureDetails(void){
   target->accept(cbv);
   osg::BoundingBox box = cbv.getBoundingBox(); 
 
-  osg::Matrixd * pos=getWorldCoords(target); 
+  boost::shared_ptr<osg::Matrixd> pos=getWorldCoords(target); 
 
   osg::Vec3 posIn2D = pos->getTrans() * MVPW;
 

@@ -1,0 +1,7 @@
+#ifndef BENCHMARKCONFIG_H
+#define BENCHMARKCONFIG_H
+
+//UWSim root folder
+#cmakedefine UWSIMBENCHMARKS_ROOT_PATH "${UWSIMBENCHMARKS_ROOT_PATH}"
+
+#endif

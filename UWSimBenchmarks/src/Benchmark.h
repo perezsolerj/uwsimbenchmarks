@@ -8,7 +8,7 @@ using namespace std;
 #include "Measures.h"
 #include "BenchmarkXMLParser.h"
 #include "SceneUpdater.h"
-#include "SceneBuilder.h"
+#include "uwsim/uwsim/SceneBuilder.h"
 
 class Benchmark{
 private:
@@ -43,7 +43,7 @@ private:
   std::vector<std::list<double> > logging;
   std::vector<std::list<double> > timeLogging;
   std::list<double> iterationStart;
-  ROSTopicToShapeShifter* asd;
+  //ROSTopicToShapeShifter* asd;
 public:
   Benchmark(BenchmarkXMLParser * bench,SceneBuilder * builder,BulletPhysics * physics);
   Benchmark();

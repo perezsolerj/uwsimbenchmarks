@@ -105,7 +105,7 @@ SceneUpdater * Benchmark::createSceneUpdater(SceneUpdaterInfo su, SceneBuilder *
     return new SceneFogUpdater(su.initialFog, su.finalFog, su.step, su.interval,camerasFog,builder->scene);
   }
 
-  else if(su.type==SceneUpdaterInfo::CurrentForceUpdater){
+ /* else if(su.type==SceneUpdaterInfo::CurrentForceUpdater){
     SimulatedIAUV * vehicle=NULL;
     for(unsigned int i=0;i<builder->iauvFile.size();i++)
       if(builder->iauvFile[i]->name==su.target)
@@ -119,7 +119,7 @@ SceneUpdater * Benchmark::createSceneUpdater(SceneUpdaterInfo su, SceneBuilder *
       exit(1);
     }    
     return new CurrentForceUpdater(su.initialCurrent, su.finalCurrent, su.step, su.interval,vehicle,builder->current);
-  }
+  }*/
 
   else if(su.type==SceneUpdaterInfo::ArmMoveUpdater){
     SimulatedIAUV * vehicle=NULL;

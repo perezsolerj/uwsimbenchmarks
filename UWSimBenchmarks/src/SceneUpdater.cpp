@@ -86,16 +86,13 @@ std::string SceneFogUpdater::getName(){
 
 /*Current Force Updater*/
 
-void CurrentForceUpdater::updateScene(){
+/*void CurrentForceUpdater::updateScene(){
   //std::cout<<"Updated "<<std::endl;
   restartTimer();
   initialCurrent+=step;
   vehicle->setOffset(0,0,0);
   vehicle->setVehiclePosition(m);
   current->changeCurrentForce(initialCurrent,1);
-
-  /*std_srvs::Empty::Request request, response;
-  ros::service::call("Dynamics/reset_navigation",request, response);*/
 }
 
 int CurrentForceUpdater::finished(){
@@ -119,7 +116,7 @@ double CurrentForceUpdater::getReference(){
 
 std::string CurrentForceUpdater::getName(){
   return "Current";
-}
+}*/
 
 /*Arm Move Updater*/
 

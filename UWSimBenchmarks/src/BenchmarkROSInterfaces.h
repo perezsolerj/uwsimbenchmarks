@@ -1,7 +1,7 @@
 #ifndef BENCHMARKROSINTERFACE_H_
 #define BENCHMARKROSINTERFACE_H_
 
-#include "ROSInterface.h"
+#include <uwsim/uwsim/ROSInterface.h>
 class ServiceTrigger;
 #include "Trigger.h"
 
@@ -32,14 +32,14 @@ public:
 	~ROSArrayToEuclideanNorm();
 };
 
-class ROSTopicToShapeShifter: public ROSSubscriberInterface {
+/*class ROSTopicToShapeShifter: public ROSSubscriberInterface {
 
 public:
 	ROSTopicToShapeShifter(std::string topic);
 	virtual void createSubscriber(ros::NodeHandle &nh);
 	virtual void processData(const  topic_tools::ShapeShifter::ConstPtr& msg);
 	~ROSTopicToShapeShifter();
-};
+};*/
 
 class ROSServiceTrigger {
   ServiceTrigger * trigger;

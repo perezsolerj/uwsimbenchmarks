@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<package>
+  <name>uwsimbenchmarks</name>
+  <version>0.2.0</version>
+  <description>
+     UWSimBenchmarks, Benchmarks package for UWSim.
+  </description>
+
+  <author email="perezsolerj@gmail.com">Javier Perez</author>
+  <maintainer email="perezsolerj@gmail.com">Javier Perez</maintainer>
+
+  <license>GPL</license>
+  <url> </url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>uwsim</build_depend>
+  <build_depend>std_srvs</build_depend>
+  <build_depend>pcl</build_depend>
+  <build_depend>pcl_ros</build_depend>
+  <build_depend>topic_tools</build_depend>
+  <build_depend>libmuparser</build_depend>
+  <build_depend>message_generation</build_depend>
+  <build_depend>roscpp</build_depend>
+
+  <run_depend>uwsim</run_depend>
+  <run_depend>message_runtime</run_depend>
+  <run_depend>roscpp</run_depend>
+  <run_depend>std_srvs</run_depend>
+  <run_depend>pcl</run_depend>
+  <run_depend>pcl_ros</run_depend>
+  <run_depend>topic_tools</run_depend>
+  <run_depend>libmuparser</run_depend>
+
+</package>

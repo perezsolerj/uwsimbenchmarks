@@ -1,4 +1,5 @@
 #include "BenchmarkXMLParser.h"
+#include <osgDB/FileUtils>
 
 
   void BenchmarkXMLParser::esPi(string in, double * param){
@@ -336,12 +337,21 @@ BenchmarkXMLParser::BenchmarkXMLParser(const std::string &fName){
       xmlpp::DomParser parser;
       parser.set_validate();
       parser.set_substitute_entities(); //We just want the text to be resolved/unescaped automatically.
-      parser.parse_file(fName);
-      if(parser)
+      std::string fName_fullpath = osgDB::findDataFile(fName);
+      if (fName_fullpath != std::string(""))
       {
-        //Walk the tree:
-        const xmlpp::Node* pNode = parser.get_document()->get_root_node(); //deleted by DomParser.
-        processXML(pNode);
+        parser.parse_file(fName_fullpath);
+        if(parser)
+        {
+          //Walk the tree:
+          const xmlpp::Node* pNode = parser.get_document()->get_root_node(); //deleted by DomParser.
+          processXML(pNode);
+        }
+      }
+      else
+      {
+        std::cerr << "Cannot locate file " << fName << std::endl;
+        exit(0);
       }
     }
     catch(const std::exception& ex)

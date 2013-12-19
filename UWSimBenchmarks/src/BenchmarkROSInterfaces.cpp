@@ -47,7 +47,7 @@ int ROSArrayToEuclideanNorm::getVector(std::vector<double> &estim){
 ROSArrayToEuclideanNorm::~ROSArrayToEuclideanNorm(){}
 
 
-ROSTopicToShapeShifter::ROSTopicToShapeShifter(std::string topic): ROSSubscriberInterface(topic) {
+/*ROSTopicToShapeShifter::ROSTopicToShapeShifter(std::string topic): ROSSubscriberInterface(topic) {
   std::cout<<"CREADITO "<<topic<<std::endl;
 }
 
@@ -59,7 +59,7 @@ void ROSTopicToShapeShifter::processData(const  topic_tools::ShapeShifter::Const
   std::cout<<"************NEW DATA**********"<<std::endl<<"datatype: "<<msg->getDataType()<<" definition: "<< msg->getMessageDefinition()<<std::endl;
 }
 
-/*const char* ShapeShifterGetDataType(const topic_tools::ShapeShifter::ConstPtr message)
+const char* ShapeShifterGetDataType(const topic_tools::ShapeShifter::ConstPtr message)
   {
       string info = message->getDataType();
 
@@ -87,9 +87,9 @@ void ROSTopicToShapeShifter::processData(const  topic_tools::ShapeShifter::Const
   unsigned int ShapeShifterGetDataLength(const topic_tools::ShapeShifter::ConstPtr message)
   {
       return message->size();
-  }*/
+  }
 
-ROSTopicToShapeShifter::~ROSTopicToShapeShifter(){}
+ROSTopicToShapeShifter::~ROSTopicToShapeShifter(){}*/
 
 ROSServiceTrigger::ROSServiceTrigger(std::string service,ServiceTrigger * trigger) {
   this->trigger=trigger;
