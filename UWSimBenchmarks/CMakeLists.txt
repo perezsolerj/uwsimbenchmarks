@@ -38,7 +38,7 @@ catkin_package(
     roscpp
     message_runtime
     uwsim
-    libmuparser
+    muparser
     uwsim_bullet
     uwsim_osgocean
     uwsim_osgworks
