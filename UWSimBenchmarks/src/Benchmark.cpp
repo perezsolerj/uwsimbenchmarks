@@ -1,6 +1,6 @@
 #include "Benchmark.h"
 
-#include <muParser.h>  //Used to evaluate mathematical expresions on benchmark scores
+#include "muParser/muParser.h" //Used to evaluate mathematical expresions on benchmark scores
 
 Benchmark::Benchmark(){
 numMeasures=0;
