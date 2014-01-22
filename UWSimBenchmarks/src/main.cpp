@@ -3,12 +3,12 @@
 #include <string>
 #include <vector>
 
-#include "uwsim/uwsim/ConfigXMLParser.h"
-#include "uwsim/uwsim/SceneBuilder.h"
-#include "uwsim/uwsim/ViewBuilder.h"
-#include "uwsim/uwsim/PhysicsBuilder.h"
+#include "uwsim/ConfigXMLParser.h"
+#include "uwsim/SceneBuilder.h"
+#include "uwsim/ViewBuilder.h"
+#include "uwsim/PhysicsBuilder.h"
 
-#include "uwsim/uwsim/UWSimUtils.h"
+#include "uwsim/UWSimUtils.h"
 #include "osgbCollision/GLDebugDrawer.h"
 #include "Benchmark.h"
 #include "BenchmarksConfig.h"

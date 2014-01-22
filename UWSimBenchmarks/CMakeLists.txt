@@ -8,9 +8,9 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
   message_generation
+  uwsim
 )
 
-find_package(uwsim REQUIRED)
 find_package(uwsim_osgocean REQUIRED)
 find_package(uwsim_osgworks REQUIRED)
 find_package(uwsim_osgbullet REQUIRED)
@@ -32,10 +32,10 @@ catkin_package(
     std_srvs
     pcl_ros
     topic_tools
+    uwsim
   DEPENDS
     roscpp
     message_runtime
-    uwsim
     muparser
     uwsim_bullet
     uwsim_osgocean
@@ -61,12 +61,10 @@ include_directories(${PCL_INCLUDE_DIRS})
 
 link_directories(${PCL_LIBRARY_DIRS})
 
-INCLUDE_DIRECTORIES(${BULLET_INCLUDE_DIRS}  ${OSGWORKS_INCLUDE_DIR} ${OSGBULLET_INCLUDE_DIR} ${OSGOCEAN_INCLUDE_DIRS} ${OPENSCENEGRAPH_INCLUDE_DIRS} ${LIBXML++_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS} ${uwsim_INCLUDE_DIRS})
+INCLUDE_DIRECTORIES( ${OPENSCENEGRAPH_INCLUDE_DIRS} ${LIBXML++_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS} ${OSGOCEAN_INCLUDE_DIRS} ${OSGBULLET_INCLUDE_DIR} ${BULLET_INCLUDE_DIRS} ${OSGWORKS_INCLUDE_DIR} )
 
 # this disables the warnings that come mostly from osg
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-ignored-qualifiers")
-
-
 
 add_executable(uwsimbenchmarks src/main.cpp
 src/Measures.cpp
@@ -77,7 +75,7 @@ src/Benchmark.cpp
 src/BenchmarkROSInterfaces.cpp)
 
 
-TARGET_LINK_LIBRARIES(uwsimbenchmarks  ${PCL_LIBRARIES} ${uwsim_LIBRARIES} ${catkin_LIBRARIES} ${OPENSCENEGRAPH_LIBRARIES}  ${OSGOCEAN_LIBRARIES} ${OSGWORKS_LIBRARIES} ${OSGBULLET_LIBRARIES} ${BULLET_LIBRARIES} ${LIBXML++_LIBRARIES} -lmuparser GLU)
+TARGET_LINK_LIBRARIES(uwsimbenchmarks   ${OSGOCEAN_LIBRARIES} ${PCL_LIBRARIES} ${catkin_LIBRARIES} ${OPENSCENEGRAPH_LIBRARIES} ${LIBXML++_LIBRARIES}  ${BULLET_LIBRARIES} ${OSGBULLET_LIBRARIES} ${OSGWORKS_LIBRARIES} -lmuparser GLU)
 
 install(
   TARGETS

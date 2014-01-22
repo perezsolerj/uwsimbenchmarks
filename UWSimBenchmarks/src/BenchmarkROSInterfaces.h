@@ -1,7 +1,7 @@
 #ifndef BENCHMARKROSINTERFACE_H_
 #define BENCHMARKROSINTERFACE_H_
 
-#include <uwsim/uwsim/ROSInterface.h>
+#include <uwsim/ROSInterface.h>
 class ServiceTrigger;
 #include "Trigger.h"
 

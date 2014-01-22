@@ -14,7 +14,7 @@ using namespace std;
 #include <list>
 #include <osg/Matrixd>
 
-#include "uwsim/uwsim/SimulatorConfig.h"
+#include "uwsim/SimulatorConfig.h"
 
 struct TriggerInfo{
   typedef enum { Topic, AlwaysOn, AlwaysOff, Service, OnMove, OnNoMove, Position } TriggerType;

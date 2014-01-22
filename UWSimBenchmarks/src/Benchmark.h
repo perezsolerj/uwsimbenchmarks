@@ -8,7 +8,7 @@ using namespace std;
 #include "Measures.h"
 #include "BenchmarkXMLParser.h"
 #include "SceneUpdater.h"
-#include "uwsim/uwsim/SceneBuilder.h"
+#include "uwsim/SceneBuilder.h"
 
 class Benchmark{
 private:

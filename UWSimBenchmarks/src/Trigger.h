@@ -5,7 +5,7 @@
 class ROSTrigger;
 class ROSServiceTrigger;
 #include "BenchmarkROSInterfaces.h"
-#include "uwsim/uwsim/UWSimUtils.h"
+#include "uwsim/UWSimUtils.h"
 
 #define POSITION_THRESHOLD 0.3 //Distance from defined position to real position threshold for position triggers.
 #define MOVE_THRESHOLD 0.2  //Distance from start point to position for move and no move triggers.

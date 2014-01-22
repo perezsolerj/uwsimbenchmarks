@@ -3,8 +3,8 @@
 
 #include <ros/ros.h>
 #include <osg/Fog>
-#include "uwsim/uwsim/osgOceanScene.h"
-#include "uwsim/uwsim/SimulatedIAUV.h"
+#include "uwsim/osgOceanScene.h"
+#include "uwsim/SimulatedIAUV.h"
 //#include "uwsim/uwsim/Current.h"
 
 class SceneUpdater{
