@@ -16,7 +16,6 @@
 
   <build_depend>uwsim</build_depend>
   <build_depend>std_srvs</build_depend>
-  <build_depend>pcl</build_depend>
   <build_depend>pcl_ros</build_depend>
   <build_depend>topic_tools</build_depend>
   <build_depend>muparser</build_depend>
@@ -27,7 +26,6 @@
   <run_depend>message_runtime</run_depend>
   <run_depend>roscpp</run_depend>
   <run_depend>std_srvs</run_depend>
-  <run_depend>pcl</run_depend>
   <run_depend>pcl_ros</run_depend>
   <run_depend>topic_tools</run_depend>
   <run_depend>muparser</run_depend>

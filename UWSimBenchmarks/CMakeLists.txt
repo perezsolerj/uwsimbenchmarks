@@ -3,7 +3,6 @@ project(uwsimbenchmarks)
 
 find_package(catkin REQUIRED COMPONENTS
   std_srvs
-  pcl
   pcl_ros
   topic_tools 
   rospy
@@ -31,7 +30,6 @@ generate_messages(
 catkin_package(
   CATKIN_DEPENDS
     std_srvs
-    pcl
     pcl_ros
     topic_tools
   DEPENDS
