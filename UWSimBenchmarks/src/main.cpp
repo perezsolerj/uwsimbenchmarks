@@ -79,6 +79,7 @@ int main(int argc, char *argv[])
 	//Add Benchmark folders to path
         osgDB::Registry::instance()->getDataFilePathList().push_back(std::string(UWSIMBENCHMARKS_ROOT_PATH));
         osgDB::Registry::instance()->getDataFilePathList().push_back(std::string(UWSIMBENCHMARKS_ROOT_PATH) + "/data");
+        osgDB::Registry::instance()->getDataFilePathList().push_back(std::string(UWSIMBENCHMARKS_ROOT_PATH) + "/data/scenes");
 
 	//Add dataPath folder to path
 	if (dataPath!=std::string("")) {
