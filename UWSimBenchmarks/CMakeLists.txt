@@ -72,7 +72,8 @@ src/SceneUpdater.cpp
 src/Trigger.cpp
 src/BenchmarkXMLParser.cpp
 src/Benchmark.cpp
-src/BenchmarkROSInterfaces.cpp)
+src/BenchmarkROSInterfaces.cpp
+src/Current.cpp)
 
 
 TARGET_LINK_LIBRARIES(uwsimbenchmarks   ${OSGOCEAN_LIBRARIES} ${PCL_LIBRARIES} ${catkin_LIBRARIES} ${OPENSCENEGRAPH_LIBRARIES} ${LIBXML++_LIBRARIES}  ${BULLET_LIBRARIES} ${OSGBULLET_LIBRARIES} ${OSGWORKS_LIBRARIES} -lmuparser GLU)

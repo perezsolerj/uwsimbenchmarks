@@ -86,11 +86,10 @@ std::string SceneFogUpdater::getName(){
 
 /*Current Force Updater*/
 
-/*void CurrentForceUpdater::updateScene(){
+void CurrentForceUpdater::updateScene(){
   //std::cout<<"Updated "<<std::endl;
   restartTimer();
   initialCurrent+=step;
-  vehicle->setOffset(0,0,0);
   vehicle->setVehiclePosition(m);
   current->changeCurrentForce(initialCurrent,1);
 }
@@ -99,15 +98,17 @@ int CurrentForceUpdater::finished(){
   return initialCurrent>finalCurrent;
 }
 
-CurrentForceUpdater::CurrentForceUpdater(double initialCurrent, double finalCurrent, double step, double interval, SimulatedIAUV *  vehicle,boost::shared_ptr<Current>  current): SceneUpdater(interval){
+CurrentForceUpdater::CurrentForceUpdater(double initialCurrent, double finalCurrent, double step, double interval, SimulatedIAUV *  vehicle,CurrentInfo currentInfo): SceneUpdater(interval){
   this->initialCurrent=initialCurrent;
   this->finalCurrent=finalCurrent;
   this->step=step;
   this->vehicle=vehicle;
-  this->current=current;
+  this->current=(boost::shared_ptr<Current>) new Current(initialCurrent, currentInfo.dir,currentInfo.forceVar,currentInfo.forcePer,currentInfo.dirVar,currentInfo.dirPer,currentInfo.random);
   m=vehicle->baseTransform->getMatrix();
+}
 
-  vehicle->setOffset(0,0,0);
+void CurrentForceUpdater::tick(){
+  current->applyCurrent(vehicle);
 }
 
 double CurrentForceUpdater::getReference(){
@@ -116,7 +117,7 @@ double CurrentForceUpdater::getReference(){
 
 std::string CurrentForceUpdater::getName(){
   return "Current";
-}*/
+}
 
 /*Arm Move Updater*/
 

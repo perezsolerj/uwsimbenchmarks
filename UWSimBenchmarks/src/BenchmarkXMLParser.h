@@ -37,14 +37,27 @@ struct MeasureInfo{
   TriggerInfo startOn, stopOn;
 };
 
+struct CurrentInfo{
+  double dir[2];
+  double forceVar;
+  double forcePer;
+  double dirVar[2];
+  double dirPer[2];
+  double random;
+
+};
+
 struct SceneUpdaterInfo{
   typedef enum { None, SceneFogUpdater, CurrentForceUpdater, ArmMoveUpdater} SceneUpdaterType;
   SceneUpdaterType type;
   double initialFog, finalFog, step, interval; //needed for SceneFogUpdater
   double initialCurrent, finalCurrent;
+  CurrentInfo currentInfo; //needed for currentforce
   std::list<std::vector <double> > armPositions;
   std::string target;
 };
+
+
 
 class BenchmarkXMLParser{
   private:
@@ -55,6 +68,7 @@ class BenchmarkXMLParser{
     void extractUIntChar(const xmlpp::Node* node, unsigned int * param);
     void extractStringChar(const xmlpp::Node* node,string * param);
     void extractPositionOrColor(const xmlpp::Node* node,double * param);
+    void extractSphericalDirection(const xmlpp::Node* node,double param[2]);
 
     void processXML(const xmlpp::Node* node);
     void processVector(const xmlpp::Node* node, std::vector<double> &groundTruth);

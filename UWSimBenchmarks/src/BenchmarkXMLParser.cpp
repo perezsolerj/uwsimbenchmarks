@@ -263,6 +263,18 @@ void BenchmarkXMLParser::processSceneUpdaters(const xmlpp::Node* node,SceneUpdat
       extractFloatChar(child,&su->initialCurrent);
     else if(child->get_name()=="finalCurrent")
       extractFloatChar(child,&su->finalCurrent);
+    else if(child->get_name()=="sphericalDirection")
+      extractSphericalDirection(child,su->currentInfo.dir);
+    else if(child->get_name()=="directionVariation")
+      extractSphericalDirection(child,su->currentInfo.dirVar);
+    else if(child->get_name()=="directionPeriod")
+      extractSphericalDirection(child,su->currentInfo.dirPer);
+    else if(child->get_name()=="forceVariation")
+      extractFloatChar(child,&su->currentInfo.forceVar);
+    else if(child->get_name()=="forcePeriod")
+      extractFloatChar(child,&su->currentInfo.forcePer);
+    else if(child->get_name()=="random")
+      extractFloatChar(child,&su->currentInfo.random);
     else if(child->get_name()=="target")
       extractStringChar(child,&su->target);
     else if(child->get_name()=="armPosition"){
@@ -274,6 +286,17 @@ void BenchmarkXMLParser::processSceneUpdaters(const xmlpp::Node* node,SceneUpdat
   }
 }
 
+void BenchmarkXMLParser::extractSphericalDirection(const xmlpp::Node* node,double param[2]){
+  xmlpp::Node::NodeList list = node->get_children();
+  for(xmlpp::Node::NodeList::iterator iter = list.begin(); iter != list.end(); ++iter){
+    xmlpp::Node* child=dynamic_cast<const xmlpp::Node*>(*iter);
+
+    if(child->get_name()=="theta")
+      extractFloatChar(child,&param[0]);
+    else if(child->get_name()=="phi")
+      extractFloatChar(child,&param[1]);
+  }
+}
 
 void BenchmarkXMLParser::processXML(const xmlpp::Node* node){
 

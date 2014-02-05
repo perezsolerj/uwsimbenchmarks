@@ -46,7 +46,7 @@
 <!ELEMENT none EMPTY>
 
 <!ELEMENT sceneFogUpdater (initialFog, finalFog, step, interval)>
-<!ELEMENT currentForceUpdater (initialCurrent, finalCurrent, step, interval, target)>
+<!ELEMENT currentForceUpdater (initialCurrent, finalCurrent, sphericalDirection, forceVariation, forcePeriod, directionVariation, directionPeriod, random, step, interval, target)>
 <!ELEMENT armMoveUpdater (armPosition+, step, interval, target)>
 <!ELEMENT armPosition (joint+)>
 <!ELEMENT joint (#PCDATA)>
@@ -57,3 +57,12 @@
 <!ELEMENT step (#PCDATA)>
 <!ELEMENT interval (#PCDATA)>
 
+<!-- Current -->
+<!ELEMENT sphericalDirection (theta, phi)>
+<!ELEMENT directionVariation (theta, phi)>
+<!ELEMENT directionPeriod (theta, phi)>
+<!ELEMENT theta (#PCDATA)>
+<!ELEMENT phi (#PCDATA)>
+<!ELEMENT forceVariation (#PCDATA)>
+<!ELEMENT forcePeriod (#PCDATA)>
+<!ELEMENT random (#PCDATA)>

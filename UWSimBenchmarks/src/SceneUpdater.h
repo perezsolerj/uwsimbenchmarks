@@ -5,7 +5,8 @@
 #include <osg/Fog>
 #include "uwsim/osgOceanScene.h"
 #include "uwsim/SimulatedIAUV.h"
-//#include "uwsim/uwsim/Current.h"
+#include "Current.h"
+#include "BenchmarkXMLParser.h"
 
 class SceneUpdater{
 private:
@@ -17,6 +18,7 @@ protected:
 public:
 void start();
 virtual int needsUpdate();
+virtual void tick(){};
 SceneUpdater(double interval);
 SceneUpdater(){};
 
@@ -55,7 +57,7 @@ std::string getName();
 void update(){};
 };
 
-/*class CurrentForceUpdater: public SceneUpdater{
+class CurrentForceUpdater: public SceneUpdater{
 private:
   double initialCurrent,finalCurrent,step;
   SimulatedIAUV *  vehicle;
@@ -65,10 +67,11 @@ public:
   void updateScene();
   int finished();
   void update(){};
-  CurrentForceUpdater(double initialCurrent, double finalCurrent, double step, double interval,SimulatedIAUV *  vehicle, boost::shared_ptr<Current>  current);
+  CurrentForceUpdater(double initialCurrent, double finalCurrent, double step, double interval,SimulatedIAUV *  vehicle,CurrentInfo currentInfo);
   double getReference();
+  void tick();
   std::string getName();
-};*/
+};
 
 class ArmMoveUpdater: public SceneUpdater{
 private:
