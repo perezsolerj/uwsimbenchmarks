@@ -313,7 +313,7 @@ void Benchmark::printResults(){
   std::vector<double> benchResult;
   std::ofstream outdata;
 
-  outdata.open("benchmarkOutput.dat");
+  outdata.open((std::string(getenv("HOME")) + "/.uwsim/benchmarkOutput.dat").c_str());
   if(!outdata){
     std::cerr<<"Couldn't open benchmark output file."<<std::endl;
     exit(1);
@@ -335,7 +335,7 @@ void Benchmark::printResults(){
   //Logging
   for (int i=0;i<numMeasures;i++){
     if(measures[i]->log!=-1){
-      outdata.open(("benchmark-"+measures[i]->name+".data").c_str());
+      outdata.open((std::string(getenv("HOME")) + "/.uwsim/benchmark-"+measures[i]->name+".data").c_str());
       if(!outdata){
         std::cerr<<"Couldn't open benchmark output file."<<std::endl;
         exit(1);
