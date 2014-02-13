@@ -13,7 +13,6 @@ before_install:
   - export ROS_DISTRO=hydro
   - export CI_SOURCE_PATH=$(pwd)
   - export REPOSITORY_NAME=${PWD##*/}
-  - rm -rf perezsolerj
   - echo "Testing branch $TRAVIS_BRANCH of $REPOSITORY_NAME"
   - sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu precise main" > /etc/apt/sources.list.d/ros-latest.list'
   - wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
@@ -30,6 +29,8 @@ install:
   - git clone -b benchmarks-$ROS_DISTRO https://github.com/perezsolerj/underwater_simulation.git benchmarks
   - rm -rf $REPOSITORY_NAME
   - ln -s $CI_SOURCE_PATH . # Link the repo we are testing to the new workspace
+  - ls
+  - ls underwater_simulation
   - cd ../
   # Install dependencies for source repos
   - rosdep install --from-paths src --ignore-src --rosdistro $ROS_DISTRO -y
