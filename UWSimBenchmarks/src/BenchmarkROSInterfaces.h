@@ -7,6 +7,7 @@ class ServiceTrigger;
 
 #include <std_msgs/Float32MultiArray.h>
 #include <std_msgs/Bool.h>
+#include <std_msgs/String.h>
 #include <std_srvs/Empty.h>
 #include <topic_tools/shape_shifter.h>
 
@@ -40,6 +41,21 @@ public:
 	virtual void processData(const  topic_tools::ShapeShifter::ConstPtr& msg);
 	~ROSTopicToShapeShifter();
 };*/
+
+class BenchmarkInfoToROSString : public ROSPublisherInterface
+{
+  std::string stringToPublish;
+public:
+  BenchmarkInfoToROSString(std::string topic, int rate);
+
+  void createPublisher(ros::NodeHandle &nh);
+
+  void publish();
+
+  void changeMessage(std::string newString);
+
+  ~BenchmarkInfoToROSString();
+};
 
 class ROSServiceTrigger {
   ServiceTrigger * trigger;

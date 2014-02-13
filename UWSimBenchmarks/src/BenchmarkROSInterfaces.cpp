@@ -91,6 +91,30 @@ const char* ShapeShifterGetDataType(const topic_tools::ShapeShifter::ConstPtr me
 
 ROSTopicToShapeShifter::~ROSTopicToShapeShifter(){}*/
 
+BenchmarkInfoToROSString::BenchmarkInfoToROSString(std::string topic, int rate) :
+    ROSPublisherInterface(topic, rate){
+  stringToPublish="";
+}
+
+void BenchmarkInfoToROSString::createPublisher(ros::NodeHandle &nh){
+  ROS_INFO("Benchmark information publisher on topic %s", topic.c_str());
+  pub_ = nh.advertise < std_msgs::String > (topic, 1);
+}
+
+void BenchmarkInfoToROSString::publish(){
+  std_msgs::String msg;
+  msg.data=stringToPublish;
+  pub_.publish(msg);
+  stringToPublish="";
+}
+
+void BenchmarkInfoToROSString::changeMessage(std::string newString){
+  stringToPublish=newString;
+}
+
+BenchmarkInfoToROSString::~BenchmarkInfoToROSString(){
+}
+
 ROSServiceTrigger::ROSServiceTrigger(std::string service,ServiceTrigger * trigger) {
   this->trigger=trigger;
 

@@ -45,6 +45,7 @@ Benchmark::Benchmark(BenchmarkXMLParser *bench,SceneBuilder * builder,BulletPhys
   stopOn= createTrigger(bench->stopOn,builder->root);
   sceneUpdater= createSceneUpdater(bench->sceneUpdater,builder);
   activeBenchmark=0;
+  benchmarkInfo =new BenchmarkInfoToROSString("BenchmarkInfo",10);
   //asd = new  ROSTopicToShapeShifter("/dataNavigator");
 
 }
@@ -301,6 +302,8 @@ void Benchmark::updateMeasures(){
 void Benchmark::reset(){
   for(int i=0; i<numMeasures ;i++)
     measures[i]->reset();
+  //Send reset signal to nodes.
+  benchmarkInfo->changeMessage("newiteration");
   //startOn->reset();
   //stopOn->reset();
 }

@@ -16,6 +16,7 @@ private:
   int numMeasures;
   ros::WallTime time;
   int * active; // 0 if measure was off last iteration,1 if it was on (Measures)
+  BenchmarkInfoToROSString * benchmarkInfo;
 
   Measures * createTimeMeasure(MeasureInfo measureInfo);
   Measures * createPositionErrorMeasure(MeasureInfo measureInfo,osg::Group * root);

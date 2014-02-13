@@ -82,7 +82,7 @@
       </directionPeriod>
       <random> 0.01 </random>
       <step>0.01</step>
-      <interval>20</interval>
+      <interval>120</interval>
       <target>girona500</target>
     </currentForceUpdater>
   </sceneUpdater>
