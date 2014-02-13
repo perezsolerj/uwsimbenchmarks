@@ -13,6 +13,7 @@ before_install:
   - export ROS_DISTRO=hydro
   - export CI_SOURCE_PATH=$(pwd)
   - export REPOSITORY_NAME=${PWD##*/}
+  - rm -rf perezsolerj
   - echo "Testing branch $TRAVIS_BRANCH of $REPOSITORY_NAME"
   - sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu precise main" > /etc/apt/sources.list.d/ros-latest.list'
   - wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
@@ -22,7 +23,6 @@ before_install:
   - rosdep update
 install:
   # Create workspace
-  - rm -rf perezsolerj
   - mkdir -p ~/ros/ws_uwsim/src
   - cd ~/ros/ws_uwsim/src
   - wstool init .
