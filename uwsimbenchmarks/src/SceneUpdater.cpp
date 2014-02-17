@@ -5,15 +5,21 @@
 SceneUpdater::SceneUpdater(double interval){
   this->interval=interval;
   started=0;
+  child=NULL;
 }
 
 void SceneUpdater::start(){
   init = ros::WallTime::now();
   started=1;
+  if(child)
+    child->start();
 }
 
 int SceneUpdater::needsUpdate(){
-  if(started){
+  //Check lowest level needs update
+  if(child)
+    return child->needsUpdate();
+  else if(started){
     update();
     ros::WallDuration t_diff = ros::WallTime::now() - init;
     return t_diff.toSec() > interval;
@@ -26,14 +32,29 @@ void SceneUpdater::restartTimer(){
   started=0;
 }
 
+void SceneUpdater::tick(){
+  if(child)
+    child->tick();
+}
+
+void SceneUpdater::getReferences(std::vector<double> &refs){
+  for(SceneUpdater * iterator=this;iterator!=NULL;iterator=iterator->child)
+    refs.push_back(iterator->getReference());
+}
+
+void SceneUpdater::getNames(std::vector<std::string> &names){
+  for(SceneUpdater * iterator=this;iterator!=NULL;iterator=iterator->child)
+    names.push_back(iterator->getName());
+}
 /*NULL SCENE UPDATER*/
 
 int NullSceneUpdater::needsUpdate(){
   return 0;
 }
 
-void NullSceneUpdater::updateScene(){
+int NullSceneUpdater::updateScene(){
   finish=1;
+  return 1;
 }
 
 int NullSceneUpdater::finished(){
@@ -50,22 +71,30 @@ std::string NullSceneUpdater::getName(){
 
 /*SCENE FOG UPDATER*/
 
-void SceneFogUpdater::updateScene(){
-//std::cout<<"Updated "<<initialFog<<std::endl;
-restartTimer();
-initialFog+=step;
+int SceneFogUpdater::updateScene(){
+  
+  if(!child || child->finished()){
+    restartTimer();
+    fog+=step;
 
-for(unsigned int i=0;i<camerasFog.size();i++)
-  camerasFog[i]->setDensity(initialFog);
-scene->getOceanScene()->setUnderwaterFog(initialFog, osg::Vec4f(0,0.05,0.3,1) );
+    for(unsigned int i=0;i<camerasFog.size();i++)
+      camerasFog[i]->setDensity(fog);
+      scene->getOceanScene()->setUnderwaterFog(fog, osg::Vec4f(0,0.05,0.3,1) );
+    if(child)
+      child->restart();
+    return 1;
+  }
+  else
+    return child->updateScene() +1;
 }
 
 int SceneFogUpdater::finished(){
-  return initialFog>finalFog;
+  return fog>finalFog;
 }
 
 SceneFogUpdater::SceneFogUpdater(double initialFog, double finalFog, double step, double interval, std::vector<osg::Fog *>  camerasFog, osg::ref_ptr<osgOceanScene> scene): SceneUpdater(interval){
 this->initialFog=initialFog;
+this->fog=initialFog;
 this->finalFog=finalFog;
 this->step=step;
 this->camerasFog=camerasFog;
@@ -77,29 +106,40 @@ scene->getOceanScene()->setUnderwaterFog(initialFog, osg::Vec4f(0,0.05,0.3,1) );
 }
 
 double SceneFogUpdater::getReference(){
-  return initialFog;
+  return fog;
 }
 
 std::string SceneFogUpdater::getName(){
   return "Fog";
 }
 
+void SceneFogUpdater::restart(){
+  fog=initialFog;
+}
+
 /*Current Force Updater*/
 
-void CurrentForceUpdater::updateScene(){
-  //std::cout<<"Updated "<<std::endl;
-  restartTimer();
-  initialCurrent+=step;
-  vehicle->setVehiclePosition(m);
-  current->changeCurrentForce(initialCurrent,1);
+int CurrentForceUpdater::updateScene(){
+  if(!child || child->finished()){
+    restartTimer();
+    myCurrent+=step;
+    vehicle->setVehiclePosition(m);
+    current->changeCurrentForce(myCurrent,1);
+    if(child)
+      child->restart();
+    return 1;
+  }
+  else
+    return child->updateScene() +1;
 }
 
 int CurrentForceUpdater::finished(){
-  return initialCurrent>finalCurrent;
+  return myCurrent>finalCurrent;
 }
 
 CurrentForceUpdater::CurrentForceUpdater(double initialCurrent, double finalCurrent, double step, double interval, SimulatedIAUV *  vehicle,CurrentInfo currentInfo): SceneUpdater(interval){
   this->initialCurrent=initialCurrent;
+  this->myCurrent=initialCurrent;
   this->finalCurrent=finalCurrent;
   this->step=step;
   this->vehicle=vehicle;
@@ -108,24 +148,37 @@ CurrentForceUpdater::CurrentForceUpdater(double initialCurrent, double finalCurr
 }
 
 void CurrentForceUpdater::tick(){
+  if(child)
+    child->tick();
   current->applyCurrent(vehicle);
 }
 
 double CurrentForceUpdater::getReference(){
-  return initialCurrent;
+  return myCurrent;
 }
 
 std::string CurrentForceUpdater::getName(){
   return "Current";
 }
 
+void CurrentForceUpdater::restart(){
+  myCurrent=initialCurrent;
+}
+
 /*Arm Move Updater*/
 
-void ArmMoveUpdater::updateScene(){
-  restartTimer();
+int ArmMoveUpdater::updateScene(){
+  if(!child || child->finished()){
+    restartTimer();
 
-  vehicle->urdf->setJointPosition(armPositions.front());
-  armPositions.pop_front();
+    vehicle->urdf->setJointPosition(armPositions.front());
+    armPositions.pop_front();
+    if(child)
+      child->restart();
+    return 1;
+  }
+  else
+    return child->updateScene() +1;
 }
 
 int ArmMoveUpdater::finished(){
@@ -163,4 +216,8 @@ double ArmMoveUpdater::getReference(){
 
 std::string ArmMoveUpdater::getName(){
   return "ArmPosition";
+}
+
+void ArmMoveUpdater::restart(){
+  std::cout<<"WARNING: ARMMOVEUPDATER RESTART NOT IMPLEMENTED"<<std::endl;
 }

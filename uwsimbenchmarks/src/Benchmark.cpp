@@ -93,6 +93,7 @@ Trigger * Benchmark::createTrigger(TriggerInfo triggerInfo,osg::Group * root){
 }
 
 SceneUpdater * Benchmark::createSceneUpdater(SceneUpdaterInfo su, SceneBuilder * builder){
+  SceneUpdater * sceneUpdater;
   if(su.type==SceneUpdaterInfo::None)
     return new NullSceneUpdater();
   else if(su.type==SceneUpdaterInfo::SceneFogUpdater){
@@ -103,7 +104,7 @@ SceneUpdater * Benchmark::createSceneUpdater(SceneUpdaterInfo su, SceneBuilder *
         camerasFog.push_back((osg::Fog *) builder->iauvFile[i]->camview[j].textureCamera->getOrCreateStateSet()->getAttribute(osg::StateAttribute::FOG));
       }
      }
-    return new SceneFogUpdater(su.initialFog, su.finalFog, su.step, su.interval,camerasFog,builder->scene);
+    sceneUpdater = new SceneFogUpdater(su.initialFog, su.finalFog, su.step, su.interval,camerasFog,builder->scene);
   }
 
   else if(su.type==SceneUpdaterInfo::CurrentForceUpdater){
@@ -115,7 +116,7 @@ SceneUpdater * Benchmark::createSceneUpdater(SceneUpdaterInfo su, SceneBuilder *
       std::cerr<<"Target "<<su.target<<" for current force scene updater NOT found"<<std::endl;
       exit(1);
     }
-    return new CurrentForceUpdater(su.initialCurrent, su.finalCurrent, su.step, su.interval,vehicle,su.currentInfo);
+    sceneUpdater = new CurrentForceUpdater(su.initialCurrent, su.finalCurrent, su.step, su.interval,vehicle,su.currentInfo);
   }
 
   else if(su.type==SceneUpdaterInfo::ArmMoveUpdater){
@@ -127,12 +128,16 @@ SceneUpdater * Benchmark::createSceneUpdater(SceneUpdaterInfo su, SceneBuilder *
       std::cerr<<"Target "<<su.target<<" for arm move scene updater NOT found"<<std::endl;
       exit(1);
     }   
-    return new ArmMoveUpdater(su.armPositions, su.step, su.interval, vehicle);
+    sceneUpdater = new ArmMoveUpdater(su.armPositions, su.step, su.interval, vehicle);
   }
   else{
     std::cerr<<"Unknown scene updater"<<std::endl;
     exit(1);  
   }
+  if(su.child)
+    sceneUpdater->addSceneUpdaterChild(createSceneUpdater(*su.child,builder));
+
+  return sceneUpdater;
 }
 
 Measures * Benchmark::createTimeMeasure(MeasureInfo measureInfo){
@@ -240,9 +245,11 @@ Measures * Benchmark::createObjectCenteredOnCam(MeasureInfo measureInfo, SceneBu
 void Benchmark::stopMeasures(){
   mu::Parser parser;
   std::vector<double> benchResult;
-  benchResult.resize(numMeasures+3); //measures+reference+globalresult+time
-  benchResult[0]=sceneUpdater->getReference();
-  benchResult[numMeasures+2]=(ros::WallTime::now()-time).toSec()+iterationStart.back();
+  sceneUpdater->getReferences(benchResult);
+  int sceneupdaters=benchResult.size();
+  benchResult.resize(numMeasures+sceneupdaters+2); //measures+reference+globalresult+time
+  //benchResult[0]=sceneUpdater->getReference();
+  benchResult[numMeasures+sceneupdaters+1]=(ros::WallTime::now()-time).toSec()+iterationStart.back();
   int error=0;
 
   //std::cout<<"Num measures: "<<numMeasures<<std::endl;
@@ -250,8 +257,8 @@ void Benchmark::stopMeasures(){
     if(measures[i]->isOn() || active[i]==1)
       measures[i]->stop();
     active[i]=0;
-    benchResult[i+1]=measures[i]->getMeasure();
-    parser.DefineConst(measures[i]->name, benchResult[i+1]);
+    benchResult[i+sceneupdaters]=measures[i]->getMeasure();
+    parser.DefineConst(measures[i]->name, benchResult[i+sceneupdaters]);
     error+=measures[i]->error();
     //std::cout<<"MEASURE "<<" "<<measures[i]->name<<" "<<measures[i]->getMeasure()<<" "<<measures[i]->isOn()<<std::endl;  
   }
@@ -261,7 +268,7 @@ void Benchmark::stopMeasures(){
   //Print result??
     parser.SetExpr(function);
     try{
-      benchResult[numMeasures+1]=parser.Eval();
+      benchResult[numMeasures+sceneupdaters]=parser.Eval();
       //std::cout<<"Benchmark stopped, result: "<<parser.Eval()<<std::endl;
     }
     catch (mu::Parser::exception_type &e)
@@ -299,11 +306,11 @@ void Benchmark::updateMeasures(){
 
 }
 
-void Benchmark::reset(){
+void Benchmark::reset(int suLevel){
   for(int i=0; i<numMeasures ;i++)
     measures[i]->reset();
   //Send reset signal to nodes.
-  benchmarkInfo->changeMessage("newiteration");
+  benchmarkInfo->changeMessage("Updated scene "+  boost::lexical_cast<std::string>(suLevel));
   //startOn->reset();
   //stopOn->reset();
 }
@@ -317,7 +324,12 @@ void Benchmark::printResults(){
     std::cerr<<"Couldn't open benchmark output file."<<std::endl;
     exit(1);
   }
-  outdata<<sceneUpdater->getName()<<"\t";
+
+  std::vector<std::string> names;
+  sceneUpdater->getNames(names);
+  for(int i=0;i<names.size();i++){
+    outdata<<names[i]<<"\t";
+  }
   for(int i=0;i<numMeasures;i++)
     outdata<<measures[i]->name<<"\t";
   outdata<<"TOTAL\tSimTime"<<std::endl;
@@ -374,26 +386,26 @@ void Benchmark::step(){
     stopMeasures();
     activeBenchmark=0;
     iterationStart.push_back((ros::WallTime::now()-time).toSec()+iterationStart.back());
-    sceneUpdater->updateScene();
+    int suLevel =sceneUpdater->updateScene();
     if(sceneUpdater->finished()){
       printResults();
       ROS_INFO("Benchmark finished.");
     }
     else
-      reset();
+      reset(suLevel);
   }
 
-  if(sceneUpdater->needsUpdate()){ //Scene Updater needs update
+  if(sceneUpdater->needsUpdate() && activeBenchmark==1){ //Scene Updater needs update
     stopMeasures(); 
     activeBenchmark=0;
     iterationStart.push_back((ros::WallTime::now()-time).toSec()+iterationStart.back());
-    sceneUpdater->updateScene();
+    int suLevel =sceneUpdater->updateScene();
     if(sceneUpdater->finished()){
       printResults();
       ROS_INFO("Benchmark finished.");
     }
     else
-      reset();
+      reset(suLevel);
   }
 
 }

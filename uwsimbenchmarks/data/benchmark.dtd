@@ -45,9 +45,9 @@
 
 <!ELEMENT none EMPTY>
 
-<!ELEMENT sceneFogUpdater (initialFog, finalFog, step, interval)>
-<!ELEMENT currentForceUpdater (initialCurrent, finalCurrent, sphericalDirection, forceVariation, forcePeriod, directionVariation, directionPeriod, random, step, interval, target)>
-<!ELEMENT armMoveUpdater (armPosition+, step, interval, target)>
+<!ELEMENT sceneFogUpdater (initialFog, finalFog, step, interval,sceneUpdater?)>
+<!ELEMENT currentForceUpdater (initialCurrent, finalCurrent, sphericalDirection, forceVariation, forcePeriod, directionVariation, directionPeriod, random, step, interval, target,sceneUpdater?)>
+<!ELEMENT armMoveUpdater (armPosition+, step, interval, target,sceneUpdater?)>
 <!ELEMENT armPosition (joint+)>
 <!ELEMENT joint (#PCDATA)>
 <!ELEMENT initialFog (#PCDATA)>

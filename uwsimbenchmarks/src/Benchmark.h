@@ -37,7 +37,7 @@ private:
 
   void stopMeasures();
   void updateMeasures();
-  void reset();
+  void reset(int suLevel);
   void printResults();
 
   std::list<std::vector<double> > results;

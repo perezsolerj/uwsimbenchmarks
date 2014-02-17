@@ -55,6 +55,7 @@ struct SceneUpdaterInfo{
   CurrentInfo currentInfo; //needed for currentforce
   std::list<std::vector <double> > armPositions;
   std::string target;
+  SceneUpdaterInfo * child;
 };
 
 

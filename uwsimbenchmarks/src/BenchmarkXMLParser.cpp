@@ -223,6 +223,7 @@ void BenchmarkXMLParser::processMeasures(const xmlpp::Node* node){
 
 void BenchmarkXMLParser::processSceneUpdater(const xmlpp::Node* node,SceneUpdaterInfo * su){
 
+  su->child=NULL;
   xmlpp::Node::NodeList list = node->get_children();
   for(xmlpp::Node::NodeList::iterator iter = list.begin(); iter != list.end(); ++iter){
     xmlpp::Node* child=dynamic_cast<const xmlpp::Node*>(*iter);
@@ -281,6 +282,10 @@ void BenchmarkXMLParser::processSceneUpdaters(const xmlpp::Node* node,SceneUpdat
       std::vector<double> armPosition;
       processVector(child,armPosition);
       su->armPositions.push_back(armPosition);
+    }
+    else if(child->get_name()=="sceneUpdater"){
+      su->child = new SceneUpdaterInfo;
+      processSceneUpdater(child,su->child);
     }
 
   }
