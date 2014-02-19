@@ -96,4 +96,17 @@ public:
   void restart();
 };
 
+class RepeatUpdater: public SceneUpdater{
+private:
+  int iterations, current;
+public:
+  int updateScene();
+  int finished();
+  void update(){};
+  RepeatUpdater(int iterations, double interval);
+  double getReference();
+  std::string getName();
+  void restart();
+};
+
 #endif

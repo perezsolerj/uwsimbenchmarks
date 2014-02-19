@@ -79,9 +79,11 @@ int SceneFogUpdater::updateScene(){
 
     for(unsigned int i=0;i<camerasFog.size();i++)
       camerasFog[i]->setDensity(fog);
-      scene->getOceanScene()->setUnderwaterFog(fog, osg::Vec4f(0,0.05,0.3,1) );
+    scene->getOceanScene()->setUnderwaterFog(fog, osg::Vec4f(0,0.05,0.3,1) );
     if(child)
       child->restart();
+    if(finished())
+      restart();
     return 1;
   }
   else
@@ -115,6 +117,10 @@ std::string SceneFogUpdater::getName(){
 
 void SceneFogUpdater::restart(){
   fog=initialFog;
+
+  for(unsigned int i=0;i<camerasFog.size();i++)
+    camerasFog[i]->setDensity(fog);
+  scene->getOceanScene()->setUnderwaterFog(fog, osg::Vec4f(0,0.05,0.3,1) );
 }
 
 /*Current Force Updater*/
@@ -124,9 +130,11 @@ int CurrentForceUpdater::updateScene(){
     restartTimer();
     myCurrent+=step;
     vehicle->setVehiclePosition(m);
-    current->changeCurrentForce(myCurrent,1);
+    current->changeCurrentForce(myCurrent,2);
     if(child)
       child->restart();
+    if(finished())
+      restart();
     return 1;
   }
   else
@@ -175,6 +183,8 @@ int ArmMoveUpdater::updateScene(){
     armPositions.pop_front();
     if(child)
       child->restart();
+    if(finished())
+      restart();
     return 1;
   }
   else
@@ -220,4 +230,40 @@ std::string ArmMoveUpdater::getName(){
 
 void ArmMoveUpdater::restart(){
   std::cout<<"WARNING: ARMMOVEUPDATER RESTART NOT IMPLEMENTED"<<std::endl;
+}
+
+/*Repeat Updater*/
+
+int RepeatUpdater::updateScene(){
+  if(!child || child->finished()){
+    restartTimer();
+    current++;
+    if(child)
+      child->restart();
+    return 1;
+  }
+  else
+    return child->updateScene() +1;
+}
+
+int RepeatUpdater::finished(){
+  return current>=iterations;
+}
+
+RepeatUpdater::RepeatUpdater(int iterations, double interval): SceneUpdater(interval){
+
+  this->iterations=iterations;
+  current=0;
+}
+
+double RepeatUpdater::getReference(){
+  return current;
+}
+
+std::string RepeatUpdater::getName(){
+  return "Iteration";
+}
+
+void RepeatUpdater::restart(){
+  current=0;
 }

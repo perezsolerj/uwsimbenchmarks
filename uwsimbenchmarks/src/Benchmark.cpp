@@ -130,6 +130,10 @@ SceneUpdater * Benchmark::createSceneUpdater(SceneUpdaterInfo su, SceneBuilder *
     }   
     sceneUpdater = new ArmMoveUpdater(su.armPositions, su.step, su.interval, vehicle);
   }
+
+  else if(su.type==SceneUpdaterInfo::Repeat){
+    sceneUpdater = new RepeatUpdater(su.iterations, su.interval);
+  }
   else{
     std::cerr<<"Unknown scene updater"<<std::endl;
     exit(1);  

@@ -242,6 +242,10 @@ void BenchmarkXMLParser::processSceneUpdater(const xmlpp::Node* node,SceneUpdate
       su->type=SceneUpdaterInfo::ArmMoveUpdater;
       processSceneUpdaters(child,su);
     }
+    else if(child->get_name()=="repeat"){
+      su->type=SceneUpdaterInfo::Repeat;
+      processSceneUpdaters(child,su);
+    }
   }
 
 }
@@ -278,6 +282,8 @@ void BenchmarkXMLParser::processSceneUpdaters(const xmlpp::Node* node,SceneUpdat
       extractFloatChar(child,&su->currentInfo.random);
     else if(child->get_name()=="target")
       extractStringChar(child,&su->target);
+    else if(child->get_name()=="iterations")
+      extractIntChar(child,&su->iterations);
     else if(child->get_name()=="armPosition"){
       std::vector<double> armPosition;
       processVector(child,armPosition);

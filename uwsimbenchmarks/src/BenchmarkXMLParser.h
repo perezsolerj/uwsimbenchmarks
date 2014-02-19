@@ -48,7 +48,7 @@ struct CurrentInfo{
 };
 
 struct SceneUpdaterInfo{
-  typedef enum { None, SceneFogUpdater, CurrentForceUpdater, ArmMoveUpdater} SceneUpdaterType;
+  typedef enum { None, SceneFogUpdater, CurrentForceUpdater, ArmMoveUpdater, Repeat} SceneUpdaterType;
   SceneUpdaterType type;
   double initialFog, finalFog, step, interval; //needed for SceneFogUpdater
   double initialCurrent, finalCurrent;
@@ -56,6 +56,7 @@ struct SceneUpdaterInfo{
   std::list<std::vector <double> > armPositions;
   std::string target;
   SceneUpdaterInfo * child;
+  int iterations; //Needed for repeat 
 };
 
 
