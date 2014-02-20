@@ -72,7 +72,10 @@ std::string NullSceneUpdater::getName(){
 /*SCENE FOG UPDATER*/
 
 int SceneFogUpdater::updateScene(){
-  
+  int updateLevel;
+
+  if(child)
+    updateLevel= child->updateScene() +1;
   if(!child || child->finished()){
     restartTimer();
     fog+=step;
@@ -82,13 +85,10 @@ int SceneFogUpdater::updateScene(){
     scene->getOceanScene()->setUnderwaterFog(fog, osg::Vec4f(0,0.05,0.3,1) );
     if(child)
       child->restart();
-    if(finished())
-      restart();
     return 1;
   }
-  else
-    return child->updateScene() +1;
-}
+  return updateLevel;
+} 
 
 int SceneFogUpdater::finished(){
   return fog>finalFog;
@@ -126,6 +126,10 @@ void SceneFogUpdater::restart(){
 /*Current Force Updater*/
 
 int CurrentForceUpdater::updateScene(){
+  int updateLevel;
+
+  if(child)
+    updateLevel= child->updateScene() +1;
   if(!child || child->finished()){
     restartTimer();
     myCurrent+=step;
@@ -133,12 +137,9 @@ int CurrentForceUpdater::updateScene(){
     current->changeCurrentForce(myCurrent,2);
     if(child)
       child->restart();
-    if(finished())
-      restart();
     return 1;
   }
-  else
-    return child->updateScene() +1;
+  return updateLevel;
 }
 
 int CurrentForceUpdater::finished(){
@@ -176,6 +177,10 @@ void CurrentForceUpdater::restart(){
 /*Arm Move Updater*/
 
 int ArmMoveUpdater::updateScene(){
+  int updateLevel;
+
+  if(child)
+    updateLevel= child->updateScene() +1;
   if(!child || child->finished()){
     restartTimer();
 
@@ -183,12 +188,9 @@ int ArmMoveUpdater::updateScene(){
     armPositions.pop_front();
     if(child)
       child->restart();
-    if(finished())
-      restart();
     return 1;
   }
-  else
-    return child->updateScene() +1;
+  return updateLevel;
 }
 
 int ArmMoveUpdater::finished(){
@@ -235,6 +237,10 @@ void ArmMoveUpdater::restart(){
 /*Repeat Updater*/
 
 int RepeatUpdater::updateScene(){
+  int updateLevel;
+
+  if(child)
+    updateLevel= child->updateScene() +1;
   if(!child || child->finished()){
     restartTimer();
     current++;
@@ -242,8 +248,7 @@ int RepeatUpdater::updateScene(){
       child->restart();
     return 1;
   }
-  else
-    return child->updateScene() +1;
+  return updateLevel;
 }
 
 int RepeatUpdater::finished(){
