@@ -49,13 +49,40 @@
     
   <function>corners+centroid</function>
 
+
   <sceneUpdater> 
-    <sceneFogUpdater>
-      <initialFog>0</initialFog>
-      <finalFog>2.0</finalFog>
-      <step>0.05</step>
-      <interval>5</interval>
-    </sceneFogUpdater>
+    <currentForceUpdater>
+      <initialCurrent>0.05</initialCurrent>
+      <finalCurrent>0.05</finalCurrent>
+      <sphericalDirection>
+      <theta> 1.57 </theta>
+        <phi> 0 </phi>
+        </sphericalDirection>
+      <forceVariation> 0.01 </forceVariation>
+      <forcePeriod> 1 </forcePeriod>
+      <directionVariation>
+	<theta> 0 </theta>
+	<phi> 2.43 </phi>	
+      </directionVariation>
+      <directionPeriod>
+  	<theta> 4 </theta>
+  	<phi> 4 </phi>	
+      </directionPeriod>
+      <random> 0.1 </random>
+      <step>0.02</step>
+      <interval>10</interval>
+      <target>girona500</target>
+      <sceneUpdater> 
+        <sceneFogUpdater>
+          <initialFog>0</initialFog>
+          <finalFog>2.0</finalFog>
+          <step>0.05</step>
+          <interval>5</interval>
+        </sceneFogUpdater>
+      </sceneUpdater>
+    </currentForceUpdater>
   </sceneUpdater>
 
+    </repeat>
+  </sceneUpdater>
 </benchmark>
