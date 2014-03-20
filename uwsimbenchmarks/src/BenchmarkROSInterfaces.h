@@ -9,7 +9,9 @@ class ServiceTrigger;
 #include <std_msgs/Bool.h>
 #include <std_msgs/String.h>
 #include <std_srvs/Empty.h>
+#include <geometry_msgs/WrenchStamped.h>
 #include <topic_tools/shape_shifter.h>
+#include "Current.h"
 
 class TopicTrigger;
 
@@ -55,6 +57,20 @@ public:
   void changeMessage(std::string newString);
 
   ~BenchmarkInfoToROSString();
+};
+
+class CurrentToROSWrenchStamped : public ROSPublisherInterface
+{
+  boost::shared_ptr<Current> current;
+  SimulatedIAUV *  vehicle;
+public:
+  CurrentToROSWrenchStamped(std::string topic, int rate,   boost::shared_ptr<Current> current, SimulatedIAUV *  vehicle);
+
+  void createPublisher(ros::NodeHandle &nh);
+
+  void publish();
+
+  ~CurrentToROSWrenchStamped();
 };
 
 class ROSServiceTrigger {

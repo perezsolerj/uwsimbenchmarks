@@ -116,7 +116,7 @@ SceneUpdater * Benchmark::createSceneUpdater(SceneUpdaterInfo su, SceneBuilder *
       std::cerr<<"Target "<<su.target<<" for current force scene updater NOT found"<<std::endl;
       exit(1);
     }
-    sceneUpdater = new CurrentForceUpdater(su.initialCurrent, su.finalCurrent, su.step, su.interval,vehicle,su.currentInfo);
+    sceneUpdater = new CurrentForceUpdater(su.initialCurrent, su.finalCurrent, su.step, su.interval,vehicle,su.currentInfo,su.publishAs);
   }
 
   else if(su.type==SceneUpdaterInfo::ArmMoveUpdater){

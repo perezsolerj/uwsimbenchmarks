@@ -135,6 +135,8 @@ int CurrentForceUpdater::updateScene(){
     myCurrent+=step;
     vehicle->setVehiclePosition(m);
     current->changeCurrentForce(myCurrent,2);
+    std_srvs::Empty::Request request, response;
+    ros::service::call("dynamics/reset",request, response); //Call to dynamics reset
     if(child)
       child->restart();
     return 1;
@@ -146,7 +148,7 @@ int CurrentForceUpdater::finished(){
   return myCurrent>finalCurrent;
 }
 
-CurrentForceUpdater::CurrentForceUpdater(double initialCurrent, double finalCurrent, double step, double interval, SimulatedIAUV *  vehicle,CurrentInfo currentInfo): SceneUpdater(interval){
+CurrentForceUpdater::CurrentForceUpdater(double initialCurrent, double finalCurrent, double step, double interval, SimulatedIAUV *  vehicle,CurrentInfo currentInfo,int publishAs): SceneUpdater(interval){
   this->initialCurrent=initialCurrent;
   this->myCurrent=initialCurrent;
   this->finalCurrent=finalCurrent;
@@ -154,12 +156,17 @@ CurrentForceUpdater::CurrentForceUpdater(double initialCurrent, double finalCurr
   this->vehicle=vehicle;
   this->current=(boost::shared_ptr<Current>) new Current(initialCurrent, currentInfo.dir,currentInfo.forceVar,currentInfo.forcePer,currentInfo.dirVar,currentInfo.dirPer,currentInfo.random);
   m=vehicle->baseTransform->getMatrix();
+  pub=NULL;
+  if(publishAs)
+    pub= new CurrentToROSWrenchStamped("currentForce", 100, current, vehicle);
+
 }
 
 void CurrentForceUpdater::tick(){
   if(child)
     child->tick();
-  current->applyCurrent(vehicle);
+  if(!pub)
+    current->applyCurrent(vehicle);
 }
 
 double CurrentForceUpdater::getReference(){

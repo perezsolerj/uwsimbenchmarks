@@ -115,6 +115,49 @@ void BenchmarkInfoToROSString::changeMessage(std::string newString){
 BenchmarkInfoToROSString::~BenchmarkInfoToROSString(){
 }
 
+
+CurrentToROSWrenchStamped::CurrentToROSWrenchStamped(std::string topic, int rate,   boost::shared_ptr<Current> current, SimulatedIAUV *  vehicle):
+    ROSPublisherInterface(topic, rate){
+  this->current=current;
+  this->vehicle=vehicle;
+}
+
+void CurrentToROSWrenchStamped::createPublisher(ros::NodeHandle &nh){
+  ROS_INFO("Current to Wrench Stamped publisher on topic %s", topic.c_str());
+  pub_ = nh.advertise < geometry_msgs::WrenchStamped > (topic, 1);
+}
+
+void CurrentToROSWrenchStamped::publish(){
+  geometry_msgs::WrenchStamped msg;
+  double velocity[3];
+
+  current->getCurrentVelocity(velocity);
+
+  msg.header.stamp = getROSTime();
+  msg.header.frame_id ="Currents";
+
+  //Drag equation
+  // Fd=0.5 * p * v^2 * Cd * A
+  // p= fluid density
+  // v= relative velocity
+  // Cd= drag coefficient
+  // A= cross-sectional area
+  msg.wrench.force.x=500*velocity[0]*velocity[0]*0.82*1;
+  msg.wrench.force.y=500*velocity[1]*velocity[1]*0.82*1;
+  msg.wrench.force.z=500*velocity[2]*velocity[2]*0.82*1;
+
+  msg.wrench.torque.x=0;
+  msg.wrench.torque.y=0;
+  msg.wrench.torque.z=0;
+
+
+  pub_.publish(msg);
+}
+
+CurrentToROSWrenchStamped::~CurrentToROSWrenchStamped(){
+}
+
+
 ROSServiceTrigger::ROSServiceTrigger(std::string service,ServiceTrigger * trigger) {
   this->trigger=trigger;
 

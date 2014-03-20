@@ -11,6 +11,7 @@ private:
 public:
 
   Current(double module, double direction[], double moduleVariation, double modulePeriod, double directionVariation[], double directionPeriod[], double randomNoise);
+  void getCurrentVelocity(double velocity[3]);
   void applyCurrent(SimulatedIAUV * vehicle);
   void changeCurrentForce(double modul,double wait=0);
 };

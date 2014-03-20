@@ -7,6 +7,7 @@
 #include "uwsim/SimulatedIAUV.h"
 #include "Current.h"
 #include "BenchmarkXMLParser.h"
+#include "BenchmarkROSInterfaces.h"
 
 class SceneUpdater{
 private:
@@ -70,11 +71,12 @@ private:
   SimulatedIAUV *  vehicle;
   osg::Matrixd m;
   boost::shared_ptr<Current> current;
+  CurrentToROSWrenchStamped * pub;
 public:
   int updateScene();
   int finished();
   void update(){};
-  CurrentForceUpdater(double initialCurrent, double finalCurrent, double step, double interval,SimulatedIAUV *  vehicle,CurrentInfo currentInfo);
+  CurrentForceUpdater(double initialCurrent, double finalCurrent, double step, double interval,SimulatedIAUV *  vehicle,CurrentInfo currentInfo, int publishAs);
   double getReference();
   void tick();
   std::string getName();

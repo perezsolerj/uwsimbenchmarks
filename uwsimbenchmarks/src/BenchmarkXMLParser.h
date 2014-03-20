@@ -57,6 +57,7 @@ struct SceneUpdaterInfo{
   std::string target;
   SceneUpdaterInfo * child;
   int iterations; //Needed for repeat 
+  int publishAs; //Used in CurrentForceUpdater
 };
 
 

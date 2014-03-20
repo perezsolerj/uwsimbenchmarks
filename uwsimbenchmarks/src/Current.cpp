@@ -19,14 +19,8 @@ Current::Current(double module, double direction[], double moduleVariation, doub
   waitFor=0;
 }
 
-void Current::applyCurrent(SimulatedIAUV * vehicle){
-
+void Current::getCurrentVelocity(double velocity[3]){
   double elapsedFromBeg=ros::WallTime::now().toSec();
-  double elapsed=(ros::WallTime::now()-last).toSec();
-  if(elapsed>MAX_ELAPSED) //We assume it's too much time (It happens in first iteration if scene is complex)
-    elapsed=0;
-  if((last-init).toSec()<waitFor) //Used to wait for X seconds until current starts (useful for benchmarks)
-    elapsed=0;
   double random;
 
   //Compute current function, (a more realistic function should be created)
@@ -38,16 +32,26 @@ void Current::applyCurrent(SimulatedIAUV * vehicle){
   random=(rand()/(RAND_MAX/(randomNoise*2)))-randomNoise; //Random number in range [-randomNoise,randomNoise]
   double dir2=(direction[1]+directionVariation[1]*sin(fmod(elapsedFromBeg,directionPeriod[1])/directionPeriod[1]*2*3.14))*(1+random);
 
+  //Get current velocity in cartesians  TODO check why the vector is remapped!
+  velocity[1]=sin(dir1)*cos(dir2)*force;
+  velocity[0]=-sin(dir1)*sin(dir2)*force;
+  velocity[2]=cos(dir1)*force;
+
+}
+
+void Current::applyCurrent(SimulatedIAUV * vehicle){
+  double elapsed=(ros::WallTime::now()-last).toSec();
+  if(elapsed>MAX_ELAPSED) //We assume it's too much time (It happens in first iteration if scene is complex)
+    elapsed=0;
+  if((last-init).toSec()<waitFor) //Used to wait for X seconds until current starts (useful for benchmarks)
+    elapsed=0;
+
   //Apply current to vehicles (current may be in function of vehicle position)
   //for(unsigned int i=0; i<iauvFile.size();i++){ //Used to be a vector of vehicles
 
-    //Get direction vector for current
-    double x=sin(dir1)*cos(dir2);
-    double y=sin(dir1)*sin(dir2);
-    double z=cos(dir1);
-    //std::cout<<x<<" "<<y<<" "<<z<<" sacado de: "<<dir1<<" "<<dir2<<std::endl;
-    //Get displacement
-    osg::Vec3f displacement=(osg::Vec3f(y,-x,z))*elapsed*force;
+    double velocity[3];
+    getCurrentVelocity(velocity);
+    osg::Vec3f displacement=(osg::Vec3f(velocity[0],velocity[1],velocity[2]))*elapsed;
 
     //Apply displacement to vehicle
     osg::Matrix transf;

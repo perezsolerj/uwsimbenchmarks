@@ -236,6 +236,11 @@ void BenchmarkXMLParser::processSceneUpdater(const xmlpp::Node* node,SceneUpdate
     }
     else if(child->get_name()=="currentForceUpdater"){
       su->type=SceneUpdaterInfo::CurrentForceUpdater;
+      xmlpp::Attribute * atrib =  dynamic_cast<const xmlpp::Element*>(child)->get_attribute("publishAsForce");
+      su->publishAs=0;
+      if(atrib->get_value()=="true"){
+        su->publishAs=1;
+      }
       processSceneUpdaters(child,su);
     }
     else if(child->get_name()=="armMoveUpdater"){

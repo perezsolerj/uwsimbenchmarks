@@ -47,6 +47,7 @@
 
 <!ELEMENT sceneFogUpdater (initialFog, finalFog, step, interval,sceneUpdater?)>
 <!ELEMENT currentForceUpdater (initialCurrent, finalCurrent, sphericalDirection, forceVariation, forcePeriod, directionVariation, directionPeriod, random, step, interval, target,sceneUpdater?)>
+<!ATTLIST currentForceUpdater publishAsForce (true|false) "false">
 <!ELEMENT armMoveUpdater (armPosition+, step, interval, target,sceneUpdater?)>
 <!ELEMENT repeat (iterations, interval,sceneUpdater?)>
 <!ELEMENT armPosition (joint+)>
