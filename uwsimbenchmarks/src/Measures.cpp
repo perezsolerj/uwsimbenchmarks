@@ -98,13 +98,24 @@ void Collisions::update(void){
   for(int i=0;i<physics->getNumCollisions() && !colliding;i++){
     btPersistentManifold * col = physics->getCollision(i);
 
+    #if BT_BULLET_VERSION <= 279
     //Get objects colliding
     btRigidBody* obA = static_cast<btRigidBody*>(col->getBody0());
-    btRigidBody* obB = static_cast<btRigidBody*>(col->getBody1());  
+    btRigidBody* obB = static_cast<btRigidBody*>(col->getBody1());
 
     //Check if target is involved in collision
-    CollisionDataType * data=(CollisionDataType *)obA->getUserPointer();  
-    CollisionDataType * data2=(CollisionDataType *)obB->getUserPointer();
+    CollisionDataType * data = (CollisionDataType *)obA->getUserPointer();
+    CollisionDataType * data2 = (CollisionDataType *)obB->getUserPointer();
+
+    #else
+    //Get objects colliding
+    const btRigidBody* obA = btRigidBody::upcast(col->getBody0());
+    const btRigidBody* obB = btRigidBody::upcast(col->getBody1());
+
+    //Check if target is involved in collision
+    CollisionDataType * data = (CollisionDataType *)col->getBody0()->getUserPointer();
+    CollisionDataType * data2 = (CollisionDataType *)col->getBody0()->getUserPointer();
+    #endif
 
     if(target== data->getObjectName() || target==data2->getObjectName()){
 
