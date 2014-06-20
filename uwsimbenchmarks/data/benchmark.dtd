@@ -6,6 +6,7 @@
 <!ELEMENT startOn (type,target?,position?)>
 <!ELEMENT stopOn (type,target?,position?)>
 <!ELEMENT function (#PCDATA)>
+<!ATTLIST function publishResult (true|false) "false">
 
 <!-- Measures -->
 <!ELEMENT time (name,log?,startOn,stopOn)>

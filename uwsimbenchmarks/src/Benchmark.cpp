@@ -48,6 +48,11 @@ Benchmark::Benchmark(BenchmarkXMLParser *bench,SceneBuilder * builder,BulletPhys
   benchmarkInfo =new BenchmarkInfoToROSString("BenchmarkInfo",10);
   //asd = new  ROSTopicToShapeShifter("/dataNavigator");
 
+  resultsPublisher=NULL;
+  if(bench->publishResult){
+    resultsPublisher= new BenchmarkResultToROSFloat32MultiArray("BenchmarkResults",10); 
+  }
+
 }
 
 Trigger * Benchmark::createTrigger(TriggerInfo triggerInfo,osg::Group * root){
@@ -251,7 +256,7 @@ void Benchmark::stopMeasures(){
   std::vector<double> benchResult;
   sceneUpdater->getReferences(benchResult);
   int sceneupdaters=benchResult.size();
-  benchResult.resize(numMeasures+sceneupdaters+2); //measures+reference+globalresult+time
+  benchResult.resize(numMeasures+sceneupdaters+2); //measures+references+globalresult+time
   //benchResult[0]=sceneUpdater->getReference();
   benchResult[numMeasures+sceneupdaters+1]=(ros::WallTime::now()-time).toSec()+iterationStart.back();
   int error=0;
@@ -286,28 +291,49 @@ void Benchmark::stopMeasures(){
 }
 
 void Benchmark::updateMeasures(){
+    mu::Parser parser;
+    int error=0;
+    float benchResult=0;
+
     for(int i=0; i<numMeasures ;i++){
       if(measures[i]->isOn()){
         if(active[i]==0) // It has started this iteration
           measures[i]->start();
         else 
  	  measures[i]->update();
-      if(measures[i]->log!=-1 && (ros::WallTime::now()-time).toSec()+iterationStart.back()-timeLogging[i].back()>measures[i]->log){ //saving log
-        std::vector<double> results=measures[i]->getMeasureDetails();
-	for(unsigned int j=0;j<results.size();j++){
-          logging[i].push_back(results[j]);
-	}
-        timeLogging[i].push_back((ros::WallTime::now()-time).toSec()+iterationStart.back());
-      }
-      //Cout for debugging!
-      //std::cout<<"MEASURE "<<measures[i]->getMeasure()<<" "<<measures[i]->isOn()<<" "<<active[i]<<std::endl;
+        if(measures[i]->log!=-1 && (ros::WallTime::now()-time).toSec()+iterationStart.back()-timeLogging[i].back()>measures[i]->log){ //saving log
+          std::vector<double> results=measures[i]->getMeasureDetails();
+	  for(unsigned int j=0;j<results.size();j++){
+            logging[i].push_back(results[j]);
+	  }
+          timeLogging[i].push_back((ros::WallTime::now()-time).toSec()+iterationStart.back());
+        }
+        //Cout for debugging!
+        //std::cout<<"MEASURE "<<measures[i]->getMeasure()<<" "<<measures[i]->isOn()<<" "<<active[i]<<std::endl;
       }
       else
         if(active[i]==1) //It has stopped this iteration
 	  measures[i]->stop();
       active[i]=measures[i]->isOn();
+
+      if(resultsPublisher){ //add Measure to publisher
+        parser.DefineConst(measures[i]->name, measures[i]->getMeasure());
+        error+=measures[i]->error();
+      }
     }
 
+  if(resultsPublisher and error==0){
+    parser.SetExpr(function);
+    try{
+      benchResult=parser.Eval();
+      //std::cout<<"Benchmark stopped, result: "<<parser.Eval()<<std::endl;
+    }
+    catch (mu::Parser::exception_type &e)
+    {
+      std::cerr<<"Error on benchmark function: "<< e.GetMsg() << std::endl;
+    }
+    resultsPublisher->newDataToPublish(sceneUpdater->getReference(),benchResult,(ros::WallTime::now()-time).toSec()+iterationStart.back()); //not tested for multisceneupdaters
+  }
 }
 
 void Benchmark::reset(int suLevel){

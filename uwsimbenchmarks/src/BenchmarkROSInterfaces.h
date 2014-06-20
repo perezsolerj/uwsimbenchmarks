@@ -73,6 +73,22 @@ public:
   ~CurrentToROSWrenchStamped();
 };
 
+class BenchmarkResultToROSFloat32MultiArray : public ROSPublisherInterface
+{
+  std::vector<float> toPublish;
+  int publishing;
+public:
+  BenchmarkResultToROSFloat32MultiArray(std::string topic, int rate);
+
+  void createPublisher(ros::NodeHandle &nh);
+
+  void publish();
+
+  void newDataToPublish(float reference, float measure, float time);
+
+  ~BenchmarkResultToROSFloat32MultiArray();
+};
+
 class ROSServiceTrigger {
   ServiceTrigger * trigger;
   ros::NodeHandle nh;

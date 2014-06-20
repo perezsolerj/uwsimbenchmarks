@@ -157,6 +157,38 @@ void CurrentToROSWrenchStamped::publish(){
 CurrentToROSWrenchStamped::~CurrentToROSWrenchStamped(){
 }
 
+BenchmarkResultToROSFloat32MultiArray::BenchmarkResultToROSFloat32MultiArray(std::string topic, int rate) :
+    ROSPublisherInterface(topic, rate){
+  toPublish.clear();
+  publishing=0;
+}
+
+void BenchmarkResultToROSFloat32MultiArray::createPublisher(ros::NodeHandle &nh){
+  ROS_INFO("Benchmark Results publisher on topic %s", topic.c_str());
+  pub_ = nh.advertise < std_msgs::Float32MultiArray > (topic, 1);
+}
+
+void BenchmarkResultToROSFloat32MultiArray::publish(){
+  std_msgs::Float32MultiArray msg;
+  msg.data.clear();
+  publishing=1;
+  for(int i=0;i<toPublish.size();i++)
+    msg.data.push_back(toPublish[i]);
+  toPublish.clear();
+  publishing=0;
+  pub_.publish(msg);
+}
+
+void BenchmarkResultToROSFloat32MultiArray::newDataToPublish(float reference, float measure, float time){
+  while (publishing);
+  toPublish.push_back(reference);
+  toPublish.push_back(measure);
+  toPublish.push_back(time);
+}
+
+BenchmarkResultToROSFloat32MultiArray::~BenchmarkResultToROSFloat32MultiArray(){
+}
+
 
 ROSServiceTrigger::ROSServiceTrigger(std::string service,ServiceTrigger * trigger) {
   this->trigger=trigger;

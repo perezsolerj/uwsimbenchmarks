@@ -329,8 +329,14 @@ void BenchmarkXMLParser::processXML(const xmlpp::Node* node){
         processTrigger(child,&startOn);
       else if(child->get_name()=="stopOn")
         processTrigger(child,&stopOn);
-      else if(child->get_name()=="function")
+      else if(child->get_name()=="function"){
+        xmlpp::Attribute * atrib =  dynamic_cast<const xmlpp::Element*>(child)->get_attribute("publishResult");
+        publishResult=0;
+        if(atrib->get_value()=="true"){
+          publishResult=1;
+        }
         extractStringChar(child,&function);
+      }
       else if(child->get_name()=="sceneUpdater")
 	processSceneUpdater(child,&sceneUpdater);
     }

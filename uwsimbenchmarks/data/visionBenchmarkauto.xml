@@ -47,7 +47,7 @@
      <type>never</type>
   </stopOn> 
     
-  <function>corners+centroid</function>
+  <function publishResult="true">corners+centroid</function>
 
   <sceneUpdater> 
     <sceneFogUpdater>
