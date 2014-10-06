@@ -294,6 +294,12 @@ void Benchmark::updateMeasures(){
     mu::Parser parser;
     int error=0;
     float benchResult=0;
+    std::vector <double> publishedResults;
+
+    if(resultsPublisher){
+      sceneUpdater->getReferences(publishedResults);
+      publishedResults.push_back((ros::WallTime::now()-time).toSec()+iterationStart.back());
+    }
 
     for(int i=0; i<numMeasures ;i++){
       if(measures[i]->isOn()){
@@ -317,8 +323,10 @@ void Benchmark::updateMeasures(){
       active[i]=measures[i]->isOn();
 
       if(resultsPublisher){ //add Measure to publisher
-        parser.DefineConst(measures[i]->name, measures[i]->getMeasure());
+        std::vector <double> meas=measures[i]->getMeasureDetails();
+        parser.DefineConst(measures[i]->name, meas[0]);
         error+=measures[i]->error();
+        publishedResults.insert(publishedResults.end(), meas.begin(), meas.end());
       }
     }
 
@@ -332,7 +340,8 @@ void Benchmark::updateMeasures(){
     {
       std::cerr<<"Error on benchmark function: "<< e.GetMsg() << std::endl;
     }
-    resultsPublisher->newDataToPublish(sceneUpdater->getReference(),benchResult,(ros::WallTime::now()-time).toSec()+iterationStart.back()); //not tested for multisceneupdaters
+    publishedResults.push_back(benchResult);
+    resultsPublisher->newDataToPublish(publishedResults); //not tested for multisceneupdaters
   }
 }
 

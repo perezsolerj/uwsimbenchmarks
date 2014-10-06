@@ -84,7 +84,7 @@ public:
 
   void publish();
 
-  void newDataToPublish(float reference, float measure, float time);
+  void newDataToPublish(std::vector<double> data);
 
   ~BenchmarkResultToROSFloat32MultiArray();
 };

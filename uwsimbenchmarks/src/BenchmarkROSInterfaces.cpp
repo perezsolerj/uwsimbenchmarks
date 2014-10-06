@@ -179,11 +179,9 @@ void BenchmarkResultToROSFloat32MultiArray::publish(){
   pub_.publish(msg);
 }
 
-void BenchmarkResultToROSFloat32MultiArray::newDataToPublish(float reference, float measure, float time){
+void BenchmarkResultToROSFloat32MultiArray::newDataToPublish(std::vector<double> data){
   while (publishing);
-  toPublish.push_back(reference);
-  toPublish.push_back(measure);
-  toPublish.push_back(time);
+  toPublish.insert(toPublish.end(), data.begin(), data.end());
 }
 
 BenchmarkResultToROSFloat32MultiArray::~BenchmarkResultToROSFloat32MultiArray(){
