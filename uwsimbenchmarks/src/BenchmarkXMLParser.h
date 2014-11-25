@@ -24,13 +24,15 @@ struct TriggerInfo{
 };
 
 struct MeasureInfo{ 
-  typedef enum { Unknown, Time, Collisions, PositionError, Distance, EuclideanNorm , ObjectCenteredOnCam} type_t;
+  typedef enum { Unknown, Time, Collisions, PositionError, Distance, EuclideanNorm , ObjectCenteredOnCam, Reconstruction3D} type_t;
   typedef enum { Constant, CornersFromCam, CentroidFromCam, RelativeLocation } type_s;
   type_t type;
   type_s subtype; //Subtype for euclideanNorm
   string name,target;
   double log;
   string camera,object,publishOn; //Needed for EuclideanNorm
+  string topic; //Needed for Reconstruction 3D
+  double lod; //Needed for Reconstruction 3D
   string from, to; //Needed for EuclideanNorm (relativePosition)
   double position[3]; //needed for PositionError
   std::vector<double>  groundTruth; //Used in euclideanNorm

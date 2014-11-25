@@ -32,6 +32,8 @@ Benchmark::Benchmark(BenchmarkXMLParser *bench,SceneBuilder * builder,BulletPhys
       measures[i]=createEuclideanNormMeasure(measureInfo,builder);
     else if(measureInfo.type == MeasureInfo::ObjectCenteredOnCam)
       measures[i]=createObjectCenteredOnCam(measureInfo,builder);
+    else if(measureInfo.type == MeasureInfo::Reconstruction3D)
+      measures[i]=createReconstruction3D(measureInfo,builder);
 
     measures[i]->setTriggers(createTrigger(measureInfo.startOn,builder->root),createTrigger(measureInfo.stopOn,builder->root));
     measures[i]->setName(measureInfo.name);
@@ -249,6 +251,17 @@ Measures * Benchmark::createObjectCenteredOnCam(MeasureInfo measureInfo, SceneBu
   }
 
   return new ObjectCenteredOnCam(camera,first);
+}
+
+Measures * Benchmark::createReconstruction3D(MeasureInfo measureInfo, SceneBuilder * builder){
+
+  osg::Node * first= findRN(measureInfo.target,builder->root);
+  if(first==NULL){
+    std::cerr<<"Can't find target "<<measureInfo.target<<" in measure "<<measureInfo.name<<" check benchmark's XML."<<std::endl;
+    exit(1);
+  }
+
+  return new Reconstruction3D(measureInfo.topic,first,measureInfo.lod);
 }
 
 void Benchmark::stopMeasures(){

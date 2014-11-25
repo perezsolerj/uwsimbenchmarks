@@ -47,6 +47,29 @@ int ROSArrayToEuclideanNorm::getVector(std::vector<double> &estim){
 ROSArrayToEuclideanNorm::~ROSArrayToEuclideanNorm(){}
 
 
+ROSPointCloudTo3DReconstruction::ROSPointCloudTo3DReconstruction(std::string topic): ROSSubscriberInterface(topic) {
+}
+
+void ROSPointCloudTo3DReconstruction::createSubscriber(ros::NodeHandle &nh) {
+  sub_ = nh.subscribe<sensor_msgs::PointCloud>(topic, 10, &ROSPointCloudTo3DReconstruction::processData, this);
+}
+
+void ROSPointCloudTo3DReconstruction::processData(const sensor_msgs::PointCloud::ConstPtr& msg) {
+   for(unsigned int i=0;i<msg->points.size();i++){
+     osg::Vec3f data(msg->points[i].x,msg->points[i].y,msg->points[i].z);
+     points.push_back(data);
+   }
+}
+
+int ROSPointCloudTo3DReconstruction::get3DPoints(std::vector<osg::Vec3f> &points){
+  points.swap(this->points);
+  this->points.clear();
+  return 0;
+}
+
+ROSPointCloudTo3DReconstruction::~ROSPointCloudTo3DReconstruction(){}
+
+
 /*ROSTopicToShapeShifter::ROSTopicToShapeShifter(std::string topic): ROSSubscriberInterface(topic) {
   std::cout<<"CREADITO "<<topic<<std::endl;
 }

@@ -143,6 +143,10 @@ void BenchmarkXMLParser::processMeasure(const xmlpp::Node* node,MeasureInfo * me
         extractStringChar(child,&measure->target);
       else if(child->get_name()=="camera")
         extractStringChar(child,&measure->camera);
+      else if(child->get_name()=="topic")
+        extractStringChar(child,&measure->topic);
+      else if(child->get_name()=="levelOfDetail")
+        extractFloatChar(child,&measure->lod);
       else if(child->get_name()=="position")
         extractPositionOrColor(child,measure->position);
       else if(child->get_name()=="groundTruth"){
@@ -195,6 +199,7 @@ void BenchmarkXMLParser::processMeasures(const xmlpp::Node* node){
     MeasureInfo measure;
     measure.type=MeasureInfo::Unknown;
     measure.log=-1;
+    measure.lod=0.003;
     if(child->get_name()=="time"){
       measure.type=MeasureInfo::Time;
     }
@@ -213,7 +218,9 @@ void BenchmarkXMLParser::processMeasures(const xmlpp::Node* node){
     else if(child->get_name()=="objectCenteredOnCam"){
       measure.type=MeasureInfo::ObjectCenteredOnCam;
     }
-
+    else if(child->get_name()=="reconstruction3D"){
+      measure.type=MeasureInfo::Reconstruction3D;
+    }
     if(measure.type!=MeasureInfo::Unknown){
       processMeasure(child,&measure);
       measures.push_back(measure);	

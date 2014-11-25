@@ -11,6 +11,7 @@ class ServiceTrigger;
 #include <std_srvs/Empty.h>
 #include <geometry_msgs/WrenchStamped.h>
 #include <topic_tools/shape_shifter.h>
+#include <sensor_msgs/PointCloud.h>
 #include "Current.h"
 
 class TopicTrigger;
@@ -33,6 +34,17 @@ public:
 	virtual void processData(const std_msgs::Float32MultiArray::ConstPtr& msg);
         int getVector(std::vector<double> &estim);
 	~ROSArrayToEuclideanNorm();
+};
+
+class ROSPointCloudTo3DReconstruction : public ROSSubscriberInterface
+{
+  std::vector<osg::Vec3f> points;
+public:
+  ROSPointCloudTo3DReconstruction(std::string topic);
+  virtual void createSubscriber(ros::NodeHandle &nh);
+  virtual void processData(const sensor_msgs::PointCloud::ConstPtr& msg);
+  int get3DPoints(std::vector<osg::Vec3f> &points);
+  ~ROSPointCloudTo3DReconstruction();
 };
 
 /*class ROSTopicToShapeShifter: public ROSSubscriberInterface {

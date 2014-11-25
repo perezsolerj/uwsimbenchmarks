@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE benchmark SYSTEM "benchmark.dtd" >
+
+<benchmark>
+  <measures>
+
+    <reconstruction3D>
+      <name>reconstruction</name>	
+      <target> blackbox </target>
+      <topic> /reconstruction </topic>
+      <levelOfDetail>0.003</levelOfDetail>
+      <log>0.1</log>
+      <startOn>
+	<type>onInit</type>
+      </startOn>
+      <stopOn>
+	<type>never</type>
+      </stopOn>
+    </reconstruction3D>
+
+  </measures>
+
+  <startOn>
+     <type>service</type>
+     <target> startBench </target>
+  </startOn>
+
+  <stopOn>
+     <type>never</type>
+  </stopOn> 
+    
+  <function publishResult="true">reconstruction</function>
+
+  <sceneUpdater> 
+    <sceneFogUpdater>
+      <initialFog>0</initialFog>
+      <finalFog>2.0</finalFog>
+      <step>0.05</step>
+      <interval>5</interval>
+    </sceneFogUpdater>
+  </sceneUpdater>
+
+</benchmark>

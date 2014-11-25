@@ -624,3 +624,241 @@ int ObjectCenteredOnCam::error(){ //TODO: check if target is outside the cameraÂ
   return 0;
 }
 
+//******************Reconstruction 3D ***************
+
+Reconstruction3D::Reconstruction3D(std::string topic, osg::Node * target, double resolution){
+  this->topic=new ROSPointCloudTo3DReconstruction(topic);
+  this->target=target;
+
+  osg::ComputeBoundsVisitor cbv;
+  target->accept(cbv);
+  box = cbv.getBoundingBox();
+
+
+  //Adjust resolution to closest multiple for each axis
+  this->resolution[0]=resolution + fmod((double)(box.xMax()-box.xMin()),resolution) / (double)floor((box.xMax()-box.xMin())/resolution);
+  this->resolution[1]=resolution + fmod((double)(box.yMax()-box.yMin()),resolution) / (double)floor((box.yMax()-box.yMin())/resolution);
+  this->resolution[2]=resolution + fmod((double)(box.zMax()-box.zMin()),resolution) / (double)floor((box.zMax()-box.zMin())/resolution);
+  
+  occupancyDim[0]=(box.xMax()-box.xMin())/(this->resolution[0])+1;
+  occupancyDim[1]=(box.yMax()-box.yMin())/(this->resolution[1])+1;
+  occupancyDim[2]=(box.zMax()-box.zMin())/(this->resolution[2])+1;
+
+  //set up occupancy matrix
+  occupancy= new bool**[occupancyDim[0]];
+  for(int i=0;i<occupancyDim[0];i++){
+    occupancy[i]=new bool*[occupancyDim[1]];
+    for(int j=0;j<occupancyDim[1];j++){
+      occupancy[i][j]=new bool[occupancyDim[2]];
+      memset(occupancy[i][j], false, occupancyDim[2] * sizeof(bool));
+    }
+  }
+
+  //Surface points (not taking into account ground face)
+  gridPoints=occupancyDim[0]*occupancyDim[1]*2+occupancyDim[0]*occupancyDim[2]+occupancyDim[1]*occupancyDim[2]*2;
+
+  //Substract shared faces points + corners
+  gridPoints=gridPoints - (occupancyDim[0] *2) - (occupancyDim[1]*4) - (occupancyDim[2]*2) +4;
+
+  npoints=0;
+  meanError=0;
+  errorVariance=0;
+  gridOccupiedPoints=0;
+}
+
+void Reconstruction3D::start(void){
+  std::vector<osg::Vec3f> points;
+  topic->get3DPoints(points); //clear 3DPoints
+}
+
+void Reconstruction3D::update(void){
+}
+
+void Reconstruction3D::stop(void){
+}
+
+void Reconstruction3D::processPoints(void){
+  //Do something
+  boost::shared_ptr<osg::Matrixd> pos=getWorldCoords(target); 
+
+  std::vector<osg::Vec3f> points;
+  topic->get3DPoints(points);
+  for(int i=0;i<points.size();i++){
+    //Translate points from world frame to object frame
+    //std::cout<< points[i].x();
+
+    //Distance point to box
+    double dx=std::max(std::max((double)box.xMin() - points[i].x(), 0.0), (double)points[i].x() - box.xMax());
+    double dy=std::max(std::max((double)box.yMin() - points[i].y(), 0.0), (double)points[i].y() - box.yMax());
+    double dz=std::max(std::max((double)box.zMin() - points[i].z(), 0.0), (double)points[i].z() - box.zMax());
+
+    double distancePointObject=sqrt(dx*dx+dy*dy+dz*dz);
+
+    double minLinearDistance=std::min( std::min(abs(box.xMin() - points[i].x()),abs(box.xMax() - points[i].x())),
+                             std::min( std::min(abs(box.yMin() - points[i].y()),abs(box.yMax() - points[i].y())),
+                                        std::min(abs(box.zMin() - points[i].z()),abs(box.zMax() - points[i].z()))));
+
+    double distancePointSurface=std::max(distancePointObject,minLinearDistance);
+
+    //Distance ground plane to Object, we guess there is a ground plane under the object, these points must be discarded as error
+
+    //By default ground plane is on zMin
+
+    if(abs(box.zMin() - points[i].z())>=distancePointSurface and abs(box.zMin() - points[i].z())< 0.1){  //We consider the point to further processing
+      npoints++;
+      double delta=distancePointSurface-meanError;
+      meanError=meanError + delta/npoints;
+      errorVariance= errorVariance + delta * (distancePointSurface - meanError);
+    }
+
+    //CHECK occupancy grid points
+    double gridProjected[3];
+    gridProjected[0]=(points[i].x()-box.xMin())/resolution[0];
+    gridProjected[1]=(points[i].y()-box.yMin())/resolution[1];
+    gridProjected[2]=(points[i].z()-box.zMin())/resolution[2];
+
+    //set to true nearest points
+    if(0<= floor(gridProjected[0]) and floor(gridProjected[0]) < occupancyDim[0]){
+      if(0<= floor(gridProjected[1]) and floor(gridProjected[1]) < occupancyDim[1]){
+        if(0<=floor(gridProjected[2]) and floor(gridProjected[2]) < occupancyDim[2]){
+
+          if( occupancy[(int)floor(gridProjected[0])][(int)floor(gridProjected[1])][(int)floor(gridProjected[2])]==false and
+                (floor(gridProjected[0])==0 or floor(gridProjected[0])== occupancyDim[0]-1 or
+                floor(gridProjected[1])==0 or floor(gridProjected[1])== occupancyDim[1]-1 or
+                  floor(gridProjected[2])==occupancyDim[2]-1))
+            gridOccupiedPoints++;
+
+          occupancy[(int)floor(gridProjected[0])][(int)floor(gridProjected[1])][(int)floor(gridProjected[2])]=true;
+        }
+        if(0<= ceil(gridProjected[2]) and ceil(gridProjected[2]) < occupancyDim[2]){
+
+          if( occupancy[(int)floor(gridProjected[0])][(int)floor(gridProjected[1])][(int)ceil(gridProjected[2])]==false and
+                (floor(gridProjected[0])==0 or floor(gridProjected[0])== occupancyDim[0]-1 or
+                floor(gridProjected[1])==0 or floor(gridProjected[1])== occupancyDim[1]-1 or
+                  ceil(gridProjected[2])==occupancyDim[2]-1))
+            gridOccupiedPoints++;
+
+          occupancy[(int)floor(gridProjected[0])][(int)floor(gridProjected[1])][(int)ceil(gridProjected[2])]=true;
+        }
+      }
+      if(0<=ceil(gridProjected[1]) and ceil(gridProjected[1]) < occupancyDim[1]){
+        if(0<=floor(gridProjected[2]) and floor(gridProjected[2]) < occupancyDim[2]){
+
+          if( occupancy[(int)floor(gridProjected[0])][(int)ceil(gridProjected[1])][(int)floor(gridProjected[2])]==false and
+                (floor(gridProjected[0])==0 or floor(gridProjected[0])== occupancyDim[0]-1 or
+                ceil(gridProjected[1])==0 or ceil(gridProjected[1])== occupancyDim[1]-1 or
+                  floor(gridProjected[2])==occupancyDim[2]-1))
+            gridOccupiedPoints++;
+
+          occupancy[(int)floor(gridProjected[0])][(int)ceil(gridProjected[1])][(int)floor(gridProjected[2])]=true;
+        }
+        if(0<=ceil(gridProjected[2]) and ceil(gridProjected[2])<occupancyDim[2]){
+
+          if( occupancy[(int)floor(gridProjected[0])][(int)ceil(gridProjected[1])][(int)ceil(gridProjected[2])]==false and
+                (floor(gridProjected[0])==0 or floor(gridProjected[0])== occupancyDim[0]-1 or
+                ceil(gridProjected[1])==0 or ceil(gridProjected[1])== occupancyDim[1]-1 or
+                  ceil(gridProjected[2])==occupancyDim[2]-1))
+            gridOccupiedPoints++;
+
+          occupancy[(int)floor(gridProjected[0])][(int)ceil(gridProjected[1])][(int)ceil(gridProjected[2])]=true;
+        }
+      } 
+    }
+
+    if(0<=ceil(gridProjected[0]) and ceil(gridProjected[0]) < occupancyDim[0]){
+      if(0<=floor(gridProjected[1]) and floor(gridProjected[1]) < occupancyDim[1]){
+        if(0<=floor(gridProjected[2]) and floor(gridProjected[2]) < occupancyDim[2]){
+
+          if( occupancy[(int)ceil(gridProjected[0])][(int)floor(gridProjected[1])][(int)floor(gridProjected[2])]==false and
+                (ceil(gridProjected[0])==0 or ceil(gridProjected[0])== occupancyDim[0]-1 or
+                floor(gridProjected[1])==0 or floor(gridProjected[1])== occupancyDim[1]-1 or
+                  floor(gridProjected[2])==occupancyDim[2]-1))
+            gridOccupiedPoints++;
+
+          occupancy[(int)ceil(gridProjected[0])][(int)floor(gridProjected[1])][(int)floor(gridProjected[2])]=true;
+        }
+        if(0<=ceil(gridProjected[2]) and ceil(gridProjected[2]) < occupancyDim[2]){
+
+          if( occupancy[(int)ceil(gridProjected[0])][(int)floor(gridProjected[1])][(int)ceil(gridProjected[2])]==false and
+                (ceil(gridProjected[0])==0 or ceil(gridProjected[0])== occupancyDim[0]-1 or
+                floor(gridProjected[1])==0 or floor(gridProjected[1])== occupancyDim[1]-1 or
+                  ceil(gridProjected[2])==occupancyDim[2]-1))
+            gridOccupiedPoints++;
+
+          occupancy[(int)ceil(gridProjected[0])][(int)floor(gridProjected[1])][(int)ceil(gridProjected[2])]=true;
+        }
+      }
+      if(0<=ceil(gridProjected[1]) and ceil(gridProjected[1]) < occupancyDim[1]){
+        if(0<=floor(gridProjected[2]) and floor(gridProjected[2]) < occupancyDim[2]){
+
+          if( occupancy[(int)ceil(gridProjected[0])][(int)ceil(gridProjected[1])][(int)floor(gridProjected[2])]==false and
+                (ceil(gridProjected[0])==0 or ceil(gridProjected[0])== occupancyDim[0]-1 or
+                ceil(gridProjected[1])==0 or ceil(gridProjected[1])== occupancyDim[1]-1 or
+                  floor(gridProjected[2])==occupancyDim[2]-1))
+            gridOccupiedPoints++;
+
+          occupancy[(int)ceil(gridProjected[0])][(int)ceil(gridProjected[1])][(int)floor(gridProjected[2])]=true;
+        }
+        if(0<=ceil(gridProjected[2]) and ceil(gridProjected[2]) < occupancyDim[2]){
+
+          if( occupancy[(int)ceil(gridProjected[0])][(int)ceil(gridProjected[1])][(int)ceil(gridProjected[2])]==false and
+                (ceil(gridProjected[0])==0 or ceil(gridProjected[0])== occupancyDim[0]-1 or
+                ceil(gridProjected[1])==0 or ceil(gridProjected[1])== occupancyDim[1]-1 or
+                  ceil(gridProjected[2])==occupancyDim[2]-1))
+            gridOccupiedPoints++;
+
+          occupancy[(int)ceil(gridProjected[0])][(int)ceil(gridProjected[1])][(int)ceil(gridProjected[2])]=true;
+        }
+      } 
+    } 
+    
+  }//END FOR POINTS
+}
+
+double Reconstruction3D::getMeasure(void){
+  processPoints();
+  return meanError;//errorVariance/(npoints-1);
+}
+
+std::vector<double> Reconstruction3D::getMeasureDetails(void){ //Return meanError, errorVariance & coverage%
+  processPoints();
+  std::vector<double> results;
+  results.push_back(meanError);
+  results.push_back(errorVariance/(npoints-1));
+  results.push_back(gridOccupiedPoints/(double)gridPoints);
+  return results;
+}
+
+std::vector<std::string> Reconstruction3D::getNameDetails(void){
+  std::vector<std::string> results;
+  results.push_back("mean error");
+  results.push_back("error variance");
+  results.push_back("coverage %");
+
+  return results;
+}
+
+int Reconstruction3D::isOn(){
+  return Measures::isOn();
+}
+
+void Reconstruction3D::reset(){
+  Measures::reset();
+
+  npoints=0;
+  meanError=0;
+  errorVariance=0;
+  gridOccupiedPoints=0;
+
+  //Restart occupancy matrix
+  for(int i=0;i<occupancyDim[0];i++){
+    for(int j=0;j<occupancyDim[1];j++){
+      memset(occupancy[i][j], false, occupancyDim[2] * sizeof(bool));
+    }
+  }
+}
+
+int Reconstruction3D::error(){
+  return 0;
+}
+

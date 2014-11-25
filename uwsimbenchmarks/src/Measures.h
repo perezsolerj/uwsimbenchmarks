@@ -25,7 +25,7 @@ public:
   virtual int error()=0;
   virtual std::vector<double> getMeasureDetails(void);
   virtual std::vector<std::string> getNameDetails(void);
-  void reset();
+  virtual void reset()=0;
   void setTriggers(Trigger * start, Trigger * stop);
   void setName(std::string name);
   void setLog(double log);
@@ -186,5 +186,30 @@ public:
   void reset();
   int error();
 };
+
+class Reconstruction3D: public Measures{
+private:
+  ROSPointCloudTo3DReconstruction * topic;
+  osg::BoundingBox box;
+  osg::Node * target;
+  double meanError, errorVariance, resolution[3];
+  int npoints;
+  bool ***occupancy;
+  int occupancyDim[3];
+  int gridPoints, gridOccupiedPoints;
+public:
+  void start(void);
+  void stop(void);
+  void update(void);
+  Reconstruction3D( std::string topic ,osg::Node * target, double resolution=0.003);
+  double getMeasure(void);
+  std::vector<double> getMeasureDetails(void);
+  std::vector<std::string> getNameDetails(void);
+  int isOn();
+  void reset();
+  int error();
+  void processPoints(void);
+};
+
 
 #endif
