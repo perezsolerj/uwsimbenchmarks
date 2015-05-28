@@ -143,6 +143,8 @@ void BenchmarkXMLParser::processMeasure(const xmlpp::Node* node,MeasureInfo * me
         extractStringChar(child,&measure->target);
       else if(child->get_name()=="camera")
         extractStringChar(child,&measure->camera);
+      else if(child->get_name()=="from")
+        extractStringChar(child,&measure->from);
       else if(child->get_name()=="topic")
         extractStringChar(child,&measure->topic);
       else if(child->get_name()=="levelOfDetail")
@@ -200,6 +202,8 @@ void BenchmarkXMLParser::processMeasures(const xmlpp::Node* node){
     measure.type=MeasureInfo::Unknown;
     measure.log=-1;
     measure.lod=0.003;
+    measure.detailedResultsToGlobals=false;
+
     if(child->get_name()=="time"){
       measure.type=MeasureInfo::Time;
     }
@@ -220,10 +224,15 @@ void BenchmarkXMLParser::processMeasures(const xmlpp::Node* node){
     }
     else if(child->get_name()=="reconstruction3D"){
       measure.type=MeasureInfo::Reconstruction3D;
+
+      xmlpp::Attribute * atrib =  dynamic_cast<const xmlpp::Element*>(child)->get_attribute("detailedResultsToGlobals");
+      if(atrib and atrib->get_value()=="true"){
+        measure.detailedResultsToGlobals=true;
+      }
     }
     if(measure.type!=MeasureInfo::Unknown){
       processMeasure(child,&measure);
-      measures.push_back(measure);	
+      measures.push_back(measure);
     }
   }
 }
@@ -258,6 +267,10 @@ void BenchmarkXMLParser::processSceneUpdater(const xmlpp::Node* node,SceneUpdate
       su->type=SceneUpdaterInfo::Repeat;
       processSceneUpdaters(child,su);
     }
+    else if(child->get_name()=="sceneLightUpdater"){
+      su->type=SceneUpdaterInfo::SceneLightUpdater;
+      processSceneUpdaters(child,su);
+    }
   }
 
 }
@@ -268,9 +281,9 @@ void BenchmarkXMLParser::processSceneUpdaters(const xmlpp::Node* node,SceneUpdat
   for(xmlpp::Node::NodeList::iterator iter = list.begin(); iter != list.end(); ++iter){
     xmlpp::Node* child=dynamic_cast<const xmlpp::Node*>(*iter);
     
-    if(child->get_name()=="initialFog")
+    if(child->get_name()=="initialFog" or child->get_name()=="initialLight")
       extractFloatChar(child,&su->initialFog);
-    else if(child->get_name()=="finalFog")
+    else if(child->get_name()=="finalFog" or child->get_name()=="finalLight")
       extractFloatChar(child,&su->finalFog);
     else if(child->get_name()=="step")
       extractFloatChar(child,&su->step);

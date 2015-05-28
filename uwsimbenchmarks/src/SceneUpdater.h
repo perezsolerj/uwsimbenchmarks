@@ -5,6 +5,7 @@
 #include <osg/Fog>
 #include "uwsim/osgOceanScene.h"
 #include "uwsim/SimulatedIAUV.h"
+#include "uwsim/SceneBuilder.h"
 #include "Current.h"
 #include "BenchmarkXMLParser.h"
 #include "BenchmarkROSInterfaces.h"
@@ -108,6 +109,20 @@ public:
   RepeatUpdater(int iterations, double interval);
   double getReference();
   std::string getName();
+  void restart();
+};
+
+class SceneLightUpdater: public SceneUpdater{
+private:
+  double initialLight,finalLight,step,light;
+  SceneBuilder * scene;
+public:
+  int updateScene();
+  int finished();
+  SceneLightUpdater(double initialLight, double finalLight, double step, double interval, SceneBuilder * builder);
+  double getReference();
+  std::string getName();
+  void update(){};
   void restart();
 };
 

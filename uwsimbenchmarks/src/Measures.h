@@ -16,6 +16,7 @@
 class Measures{
 public:
   std::string name;
+  bool addToGlobal;
   double log;
   virtual double getMeasure(void)=0;
   virtual int isOn()=0;
@@ -29,6 +30,7 @@ public:
   void setTriggers(Trigger * start, Trigger * stop);
   void setName(std::string name);
   void setLog(double log);
+  void setAddToGlobal(bool addToGlobal);
 private:
 
 protected:
@@ -191,17 +193,20 @@ class Reconstruction3D: public Measures{
 private:
   ROSPointCloudTo3DReconstruction * topic;
   osg::BoundingBox box;
-  osg::Node * target;
+  osg::Matrix TcF;
   double meanError, errorVariance, resolution[3];
-  int npoints;
+  int npoints, noutliers;
   bool ***occupancy;
   int occupancyDim[3];
   int gridPoints, gridOccupiedPoints;
+  osg::Node * target;
+  osg::ref_ptr<osg::Group> drawPoints;
+  boost::shared_ptr<osg::Matrixd> WcT;
 public:
   void start(void);
   void stop(void);
   void update(void);
-  Reconstruction3D( std::string topic ,osg::Node * target, double resolution=0.003);
+  Reconstruction3D( std::string topic ,osg::Node * target, double resolution, osg::Node * from);
   double getMeasure(void);
   std::vector<double> getMeasureDetails(void);
   std::vector<std::string> getNameDetails(void);

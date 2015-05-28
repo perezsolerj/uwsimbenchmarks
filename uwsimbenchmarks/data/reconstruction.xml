@@ -5,11 +5,14 @@
 <benchmark>
   <measures>
 
-    <reconstruction3D>
+    <reconstruction3D detailedResultsToGlobals="true">
       <name>reconstruction</name>	
       <target> blackbox </target>
-      <topic> /reconstruction </topic>
-      <levelOfDetail>0.003</levelOfDetail>
+      <!--<topic> /stereo_down/points2 </topic>
+      <from> real_stereo_down </from>-->
+      <topic> /LaserReconstructionPointCloud </topic>
+      <from> kinematic_base </from>
+      <levelOfDetail>0.01</levelOfDetail>
       <log>0.1</log>
       <startOn>
 	<type>onInit</type>
@@ -33,12 +36,12 @@
   <function publishResult="true">reconstruction</function>
 
   <sceneUpdater> 
-    <sceneFogUpdater>
-      <initialFog>0</initialFog>
-      <finalFog>2.0</finalFog>
+    <sceneLightUpdater>
+      <initialLight>0.00</initialLight>
+      <finalLight>1.02</finalLight>
       <step>0.05</step>
-      <interval>5</interval>
-    </sceneFogUpdater>
+      <interval>140</interval>
+    </sceneLightUpdater>
   </sceneUpdater>
 
 </benchmark>

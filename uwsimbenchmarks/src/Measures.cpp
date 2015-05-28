@@ -18,6 +18,10 @@ void Measures::setLog(double log){
   this->log=log;
 }
 
+void Measures::setAddToGlobal(bool addToGlobal){
+  this->addToGlobal=addToGlobal;
+}
+
 void Measures::reset(){
   startOn->reset();
   stopOn->reset();
@@ -626,23 +630,51 @@ int ObjectCenteredOnCam::error(){ //TODO: check if target is outside the cameraÂ
 
 //******************Reconstruction 3D ***************
 
-Reconstruction3D::Reconstruction3D(std::string topic, osg::Node * target, double resolution){
+Reconstruction3D::Reconstruction3D(std::string topic, osg::Node * target, double resolution, osg::Node * from){
   this->topic=new ROSPointCloudTo3DReconstruction(topic);
-  this->target=target;
+  WcT=getWorldCoords(target); 
 
   osg::ComputeBoundsVisitor cbv;
   target->accept(cbv);
   box = cbv.getBoundingBox();
 
+  //std::cout<<box.xMin()<<" "<<box.yMin()<<" "<<box.zMin()<<std::endl;
+  //std::cout<<box.xMax()<<" "<<box.yMax()<<" "<<box.zMax()<<std::endl;
+
+  //Rotate the bounding box to be in world coordinates
+  box._min= WcT->getRotate() * box._min;
+  box._max= WcT->getRotate() * box._max;
+
+  if(box.xMin()>box.xMax()){
+    double aux=box._min[0];
+    box._min[0]=box._max[0];
+    box._max[0]=aux;
+  }
+
+  if(box.yMin()>box.yMax()){
+    double aux=box._min[1];
+    box._min[1]=box._max[1];
+    box._max[1]=aux;
+  }
+
+  if(box.zMin()>box.zMax()){
+    double aux=box._min[2];
+    box._min[2]=box._max[2];
+    box._max[2]=aux;
+  }
+
+  //std::cout<<box.xMin()<<" "<<box.yMin()<<" "<<box.zMin()<<std::endl;
+  //std::cout<<box.xMax()<<" "<<box.yMax()<<" "<<box.zMax()<<std::endl;
+
 
   //Adjust resolution to closest multiple for each axis
-  this->resolution[0]=resolution + fmod((double)(box.xMax()-box.xMin()),resolution) / (double)floor((box.xMax()-box.xMin())/resolution);
-  this->resolution[1]=resolution + fmod((double)(box.yMax()-box.yMin()),resolution) / (double)floor((box.yMax()-box.yMin())/resolution);
-  this->resolution[2]=resolution + fmod((double)(box.zMax()-box.zMin()),resolution) / (double)floor((box.zMax()-box.zMin())/resolution);
+  this->resolution[0]=resolution + fmod((double)abs(box.xMax()-box.xMin()),resolution) / (double)floor(abs(box.xMax()-box.xMin())/resolution);
+  this->resolution[1]=resolution + fmod((double)abs(box.yMax()-box.yMin()),resolution) / (double)floor(abs(box.yMax()-box.yMin())/resolution);
+  this->resolution[2]=resolution + fmod((double)abs(box.zMax()-box.zMin()),resolution) / (double)floor(abs(box.zMax()-box.zMin())/resolution);
   
-  occupancyDim[0]=(box.xMax()-box.xMin())/(this->resolution[0])+1;
-  occupancyDim[1]=(box.yMax()-box.yMin())/(this->resolution[1])+1;
-  occupancyDim[2]=(box.zMax()-box.zMin())/(this->resolution[2])+1;
+  occupancyDim[0]=abs(box.xMax()-box.xMin())/(this->resolution[0])+1;
+  occupancyDim[1]=abs(box.yMax()-box.yMin())/(this->resolution[1])+1;
+  occupancyDim[2]=abs(box.zMax()-box.zMin())/(this->resolution[2])+1;
 
   //set up occupancy matrix
   occupancy= new bool**[occupancyDim[0]];
@@ -660,10 +692,24 @@ Reconstruction3D::Reconstruction3D(std::string topic, osg::Node * target, double
   //Substract shared faces points + corners
   gridPoints=gridPoints - (occupancyDim[0] *2) - (occupancyDim[1]*4) - (occupancyDim[2]*2) +4;
 
+  //get Transform TcF (Target to from) so we can get faster TcP(Target to Point)
+  boost::shared_ptr<osg::Matrixd> WcF=getWorldCoords(from);
+  boost::shared_ptr<osg::Matrixd> TcW=getWorldCoords(target);;
+
+  TcW->invert(*TcW);
+  TcF= *WcF * *TcW;
+
   npoints=0;
+  noutliers=0;
   meanError=0;
   errorVariance=0;
   gridOccupiedPoints=0;
+
+  //Initializa debug draw node
+  this->target=target;
+  drawPoints=osg::ref_ptr < osg::Group >(new osg::Group());
+  target->asGroup()->addChild(drawPoints);
+
 }
 
 void Reconstruction3D::start(void){
@@ -677,45 +723,61 @@ void Reconstruction3D::update(void){
 void Reconstruction3D::stop(void){
 }
 
+#include <osg/Point>
 void Reconstruction3D::processPoints(void){
-  //Do something
-  boost::shared_ptr<osg::Matrixd> pos=getWorldCoords(target); 
-
   std::vector<osg::Vec3f> points;
   topic->get3DPoints(points);
+
+  //Initialize draw vectors
+  osg::ref_ptr < osg::Geode > geode = osg::ref_ptr < osg::Geode > (new osg::Geode());
+  osg::ref_ptr < osg::Geometry > geometry = osg::ref_ptr < osg::Geometry > (new osg::Geometry());
+  osg::ref_ptr < osg::Vec3Array > vertices = osg::ref_ptr < osg::Vec3Array > (new osg::Vec3Array());
+  osg::ref_ptr < osg::Vec4Array > colors = osg::ref_ptr < osg::Vec4Array > (new osg::Vec4Array());
+  
   for(int i=0;i<points.size();i++){
-    //Translate points from world frame to object frame
-    //std::cout<< points[i].x();
+
+    osg::Vec3f TcP= points[i] *TcF;
+
+    //Translate points from "from" frame to world frame
+    vertices->push_back(TcP);
+    osg::Vec3f WcP= WcT->getRotate() * TcP;
 
     //Distance point to box
-    double dx=std::max(std::max((double)box.xMin() - points[i].x(), 0.0), (double)points[i].x() - box.xMax());
-    double dy=std::max(std::max((double)box.yMin() - points[i].y(), 0.0), (double)points[i].y() - box.yMax());
-    double dz=std::max(std::max((double)box.zMin() - points[i].z(), 0.0), (double)points[i].z() - box.zMax());
+    double dx=std::max(std::max((double)box.xMin() - WcP.x(), 0.0), (double)WcP.x() - box.xMax());
+    double dy=std::max(std::max((double)box.yMin() - WcP.y(), 0.0), (double)WcP.y() - box.yMax());
+    double dz=std::max(std::max((double)box.zMin() - WcP.z(), 0.0), (double)WcP.z() - box.zMax());
 
     double distancePointObject=sqrt(dx*dx+dy*dy+dz*dz);
 
-    double minLinearDistance=std::min( std::min(abs(box.xMin() - points[i].x()),abs(box.xMax() - points[i].x())),
-                             std::min( std::min(abs(box.yMin() - points[i].y()),abs(box.yMax() - points[i].y())),
-                                        std::min(abs(box.zMin() - points[i].z()),abs(box.zMax() - points[i].z()))));
+    double minLinearDistance=std::min( std::min(abs(box.xMin() - WcP.x()),abs(box.xMax() - WcP.x())),
+                             std::min( std::min(abs(box.yMin() - WcP.y()),abs(box.yMax() - WcP.y())),
+                                        std::min(abs(box.zMin() - WcP.z()),abs(box.zMax() - WcP.z()))));
 
     double distancePointSurface=std::max(distancePointObject,minLinearDistance);
 
     //Distance ground plane to Object, we guess there is a ground plane under the object, these points must be discarded as error
 
-    //By default ground plane is on zMin
+    if(not (abs(box.zMin() - WcP.z())>=distancePointSurface or abs(box.zMin() - WcP.z())>0.10)){  //We consider the point to further processing
+      colors->push_back(osg::Vec4f(0.0f, 0.0f, 0.0f, 1.0f));
+    }
 
-    if(abs(box.zMin() - points[i].z())>=distancePointSurface and abs(box.zMin() - points[i].z())< 0.1){  //We consider the point to further processing
+    else if (distancePointSurface>=0.15){ //Outliers
+      colors->push_back(osg::Vec4f(1.0f, 0.0f, 0.0f, 1.0f));
+      noutliers++;
+    }
+    else{
       npoints++;
       double delta=distancePointSurface-meanError;
       meanError=meanError + delta/npoints;
       errorVariance= errorVariance + delta * (distancePointSurface - meanError);
+      colors->push_back(osg::Vec4f(0.0f, 1.0f, 0.0f, 1.0f));
     }
 
     //CHECK occupancy grid points
     double gridProjected[3];
-    gridProjected[0]=(points[i].x()-box.xMin())/resolution[0];
-    gridProjected[1]=(points[i].y()-box.yMin())/resolution[1];
-    gridProjected[2]=(points[i].z()-box.zMin())/resolution[2];
+    gridProjected[0]=(WcP.x()-box.xMin())/resolution[0];
+    gridProjected[1]=(WcP.y()-box.yMin())/resolution[1];
+    gridProjected[2]=(WcP.z()-box.zMin())/resolution[2];
 
     //set to true nearest points
     if(0<= floor(gridProjected[0]) and floor(gridProjected[0]) < occupancyDim[0]){
@@ -813,6 +875,26 @@ void Reconstruction3D::processPoints(void){
     } 
     
   }//END FOR POINTS
+
+  //Set OSG Geometry vertex and colors
+
+  if(vertices->size()>0){
+    geometry->setVertexArray(vertices.get());
+    geometry->setColorArray(colors.get());
+    geometry->setColorBinding(osg::Geometry::BIND_PER_VERTEX);
+    geometry->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::POINTS, 0, vertices->size()));
+
+    geode->addDrawable(geometry);
+    geode->setNodeMask(0x04);
+    osg::StateSet* state = geometry->getOrCreateStateSet();
+    state->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+    state->setAttributeAndModes(new osg::Program(), osg::StateAttribute::ON); //Unset shader
+
+    osg::Point *point = new osg::Point;
+    point->setSize(4);
+    state->setAttribute(point);
+    drawPoints->addChild(geode);
+  }
 }
 
 double Reconstruction3D::getMeasure(void){
@@ -826,6 +908,7 @@ std::vector<double> Reconstruction3D::getMeasureDetails(void){ //Return meanErro
   results.push_back(meanError);
   results.push_back(errorVariance/(npoints-1));
   results.push_back(gridOccupiedPoints/(double)gridPoints);
+  results.push_back(noutliers>0?(double)noutliers/(npoints+noutliers):0);
   return results;
 }
 
@@ -834,7 +917,7 @@ std::vector<std::string> Reconstruction3D::getNameDetails(void){
   results.push_back("mean error");
   results.push_back("error variance");
   results.push_back("coverage %");
-
+  results.push_back("outliers %");
   return results;
 }
 
@@ -846,6 +929,7 @@ void Reconstruction3D::reset(){
   Measures::reset();
 
   npoints=0;
+  noutliers=0;
   meanError=0;
   errorVariance=0;
   gridOccupiedPoints=0;
@@ -856,6 +940,11 @@ void Reconstruction3D::reset(){
       memset(occupancy[i][j], false, occupancyDim[2] * sizeof(bool));
     }
   }
+
+  //Restart draw points
+  drawPoints->removeChildren(0,drawPoints->getNumChildren());
+  std::cout<<drawPoints->getNumChildren()<<std::endl;
+  
 }
 
 int Reconstruction3D::error(){

@@ -38,6 +38,7 @@ Benchmark::Benchmark(BenchmarkXMLParser *bench,SceneBuilder * builder,BulletPhys
     measures[i]->setTriggers(createTrigger(measureInfo.startOn,builder->root),createTrigger(measureInfo.stopOn,builder->root));
     measures[i]->setName(measureInfo.name);
     measures[i]->setLog(measureInfo.log);
+    measures[i]->setAddToGlobal(measureInfo.detailedResultsToGlobals);
     active[i]=0;
     bench->measures.pop_front();
     i++;
@@ -140,6 +141,9 @@ SceneUpdater * Benchmark::createSceneUpdater(SceneUpdaterInfo su, SceneBuilder *
 
   else if(su.type==SceneUpdaterInfo::Repeat){
     sceneUpdater = new RepeatUpdater(su.iterations, su.interval);
+  }
+  else if(su.type==SceneUpdaterInfo::SceneLightUpdater){
+    sceneUpdater = new SceneLightUpdater(su.initialFog, su.finalFog, su.step, su.interval,builder);
   }
   else{
     std::cerr<<"Unknown scene updater"<<std::endl;
@@ -256,12 +260,19 @@ Measures * Benchmark::createObjectCenteredOnCam(MeasureInfo measureInfo, SceneBu
 Measures * Benchmark::createReconstruction3D(MeasureInfo measureInfo, SceneBuilder * builder){
 
   osg::Node * first= findRN(measureInfo.target,builder->root);
+  osg::Node * from= findRN(measureInfo.from,builder->root);
+
   if(first==NULL){
     std::cerr<<"Can't find target "<<measureInfo.target<<" in measure "<<measureInfo.name<<" check benchmark's XML."<<std::endl;
     exit(1);
   }
 
-  return new Reconstruction3D(measureInfo.topic,first,measureInfo.lod);
+  if(from==NULL){
+    std::cerr<<"'from' target for measure "<<measureInfo.name<<" couldn't be found."<<std::endl;
+    exit(1);
+  }     
+
+  return new Reconstruction3D(measureInfo.topic,first,measureInfo.lod, from);
 }
 
 void Benchmark::stopMeasures(){
@@ -269,9 +280,8 @@ void Benchmark::stopMeasures(){
   std::vector<double> benchResult;
   sceneUpdater->getReferences(benchResult);
   int sceneupdaters=benchResult.size();
-  benchResult.resize(numMeasures+sceneupdaters+2); //measures+references+globalresult+time
+  //benchResult.resize(numMeasures+sceneupdaters+2); //measures+references+globalresult+time (can change with detailed to globals)
   //benchResult[0]=sceneUpdater->getReference();
-  benchResult[numMeasures+sceneupdaters+1]=(ros::WallTime::now()-time).toSec()+iterationStart.back();
   int error=0;
 
   //std::cout<<"Num measures: "<<numMeasures<<std::endl;
@@ -279,8 +289,12 @@ void Benchmark::stopMeasures(){
     if(measures[i]->isOn() || active[i]==1)
       measures[i]->stop();
     active[i]=0;
-    benchResult[i+sceneupdaters]=measures[i]->getMeasure();
-    parser.DefineConst(measures[i]->name, benchResult[i+sceneupdaters]);
+    std::vector <double> meas=measures[i]->getMeasureDetails();
+    if(measures[i]->addToGlobal)
+      benchResult.insert(benchResult.end(), meas.begin(), meas.end());
+    else
+      benchResult.push_back(measures[i]->getMeasure());
+    parser.DefineConst(measures[i]->name, meas[0]);
     error+=measures[i]->error();
     //std::cout<<"MEASURE "<<" "<<measures[i]->name<<" "<<measures[i]->getMeasure()<<" "<<measures[i]->isOn()<<std::endl;  
   }
@@ -290,13 +304,14 @@ void Benchmark::stopMeasures(){
   //Print result??
     parser.SetExpr(function);
     try{
-      benchResult[numMeasures+sceneupdaters]=parser.Eval();
+      benchResult.push_back(parser.Eval());
       //std::cout<<"Benchmark stopped, result: "<<parser.Eval()<<std::endl;
     }
     catch (mu::Parser::exception_type &e)
     {
       std::cerr<<"Error on benchmark function: "<< e.GetMsg() << std::endl;
     }
+    benchResult.push_back((ros::WallTime::now()-time).toSec()+iterationStart.back());
     results.push_back(benchResult);
   }
   else
@@ -382,8 +397,15 @@ void Benchmark::printResults(){
   for(int i=0;i<names.size();i++){
     outdata<<names[i]<<"\t";
   }
-  for(int i=0;i<numMeasures;i++)
-    outdata<<measures[i]->name<<"\t";
+  for(int i=0;i<numMeasures;i++){
+    if(measures[i]->addToGlobal){
+      std::vector<std::string> namedetails=measures[i]->getNameDetails();
+      for(unsigned int j=0;j<namedetails.size();j++)
+	outdata<<namedetails[j]<<"\t";
+    }
+    else
+      outdata<<measures[i]->name<<"\t";
+  }
   outdata<<"TOTAL\tSimTime"<<std::endl;
 
   while(results.size()>0){

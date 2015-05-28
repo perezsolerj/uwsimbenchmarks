@@ -11,7 +11,7 @@ class ServiceTrigger;
 #include <std_srvs/Empty.h>
 #include <geometry_msgs/WrenchStamped.h>
 #include <topic_tools/shape_shifter.h>
-#include <sensor_msgs/PointCloud.h>
+#include <pcl_ros/point_cloud.h>
 #include "Current.h"
 
 class TopicTrigger;
@@ -42,7 +42,7 @@ class ROSPointCloudTo3DReconstruction : public ROSSubscriberInterface
 public:
   ROSPointCloudTo3DReconstruction(std::string topic);
   virtual void createSubscriber(ros::NodeHandle &nh);
-  virtual void processData(const sensor_msgs::PointCloud::ConstPtr& msg);
+  virtual void processData(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& msg);
   int get3DPoints(std::vector<osg::Vec3f> &points);
   ~ROSPointCloudTo3DReconstruction();
 };

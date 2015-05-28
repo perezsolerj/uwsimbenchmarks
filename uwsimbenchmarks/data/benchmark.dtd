@@ -1,6 +1,6 @@
 <!ELEMENT benchmark (measures,startOn,stopOn,function,sceneUpdater)>
 
-<!ELEMENT measures (time*,collision*,positionError*, distance*, euclideanNorm*, objectCenteredOnCam*, reconstruction3D)>
+<!ELEMENT measures (time*,collision*,positionError*, distance*, euclideanNorm*, objectCenteredOnCam*, reconstruction3D*)>
 
 <!-- benchmark -->
 <!ELEMENT startOn (type,target?,position?)>
@@ -15,7 +15,8 @@
 <!ELEMENT distance (name,target,log?,startOn,stopOn)>
 <!ELEMENT euclideanNorm (name,groundTruth,target,log?,startOn,stopOn)>
 <!ELEMENT objectCenteredOnCam (name,target,camera,log?,startOn,stopOn)>
-<!ELEMENT reconstruction3D (name,target, topic, levelOfDetail?, log?,startOn,stopOn)>
+<!ELEMENT reconstruction3D (name,target, topic, from, levelOfDetail?, log?,startOn,stopOn)>
+<!ATTLIST reconstruction3D detailedResultsToGlobals (true|false) "false">
 
 <!-- Trigger -->
 <!ELEMENT type (#PCDATA)>
@@ -47,7 +48,7 @@
 
 <!-- SceneUpdater -->
 
-<!ELEMENT sceneUpdater (none | sceneFogUpdater | currentForceUpdater | armMoveUpdater | repeat)>
+<!ELEMENT sceneUpdater (none | sceneFogUpdater | currentForceUpdater | armMoveUpdater | repeat | sceneLightUpdater)>
 
 <!ELEMENT none EMPTY>
 
@@ -56,10 +57,14 @@
 <!ATTLIST currentForceUpdater publishAsForce (true|false) "false">
 <!ELEMENT armMoveUpdater (armPosition+, step, interval, target,sceneUpdater?)>
 <!ELEMENT repeat (iterations, interval,sceneUpdater?)>
+<!ELEMENT sceneLightUpdater (initialLight, finalLight, step, interval,sceneUpdater?)>
+
 <!ELEMENT armPosition (joint+)>
 <!ELEMENT joint (#PCDATA)>
 <!ELEMENT initialFog (#PCDATA)>
 <!ELEMENT finalFog (#PCDATA)>
+<!ELEMENT initialLight (#PCDATA)>
+<!ELEMENT finalLight (#PCDATA)>
 <!ELEMENT initialCurrent (#PCDATA)>
 <!ELEMENT finalCurrent (#PCDATA)>
 <!ELEMENT step (#PCDATA)>

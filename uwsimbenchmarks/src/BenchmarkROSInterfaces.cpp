@@ -51,13 +51,15 @@ ROSPointCloudTo3DReconstruction::ROSPointCloudTo3DReconstruction(std::string top
 }
 
 void ROSPointCloudTo3DReconstruction::createSubscriber(ros::NodeHandle &nh) {
-  sub_ = nh.subscribe<sensor_msgs::PointCloud>(topic, 10, &ROSPointCloudTo3DReconstruction::processData, this);
+  sub_ = nh.subscribe<pcl::PointCloud<pcl::PointXYZ> >(topic, 10, &ROSPointCloudTo3DReconstruction::processData, this);
 }
 
-void ROSPointCloudTo3DReconstruction::processData(const sensor_msgs::PointCloud::ConstPtr& msg) {
+void ROSPointCloudTo3DReconstruction::processData(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& msg) {
    for(unsigned int i=0;i<msg->points.size();i++){
-     osg::Vec3f data(msg->points[i].x,msg->points[i].y,msg->points[i].z);
-     points.push_back(data);
+     if(msg->points[i].x==msg->points[i].x){
+       osg::Vec3f data(msg->points[i].x,msg->points[i].y,msg->points[i].z);
+       points.push_back(data);
+     }
    }
 }
 
