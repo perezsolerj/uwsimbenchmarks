@@ -99,7 +99,7 @@
       </position>
       <orientation>
         <r>0</r>
-        <p>0</p>
+        <p>3.14</p>
         <y>1.57 </y>
       </orientation>
     </virtualCamera>
