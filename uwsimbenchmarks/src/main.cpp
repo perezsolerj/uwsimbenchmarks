@@ -75,6 +75,7 @@ int main(int argc, char *argv[])
         osgDB::Registry::instance()->getDataFilePathList().push_back(std::string(UWSIM_ROOT_PATH));
         osgDB::Registry::instance()->getDataFilePathList().push_back(std::string(UWSIM_ROOT_PATH) + "/data");
         osgDB::Registry::instance()->getDataFilePathList().push_back(std::string(UWSIM_ROOT_PATH) + "/data/scenes");
+        osgDB::Registry::instance()->getDataFilePathList().push_back(std::string(UWSIM_ROOT_PATH) + "/data/shaders");
 
 	//Add Benchmark folders to path
         osgDB::Registry::instance()->getDataFilePathList().push_back(std::string(UWSIMBENCHMARKS_ROOT_PATH));

@@ -80,8 +80,10 @@ int SceneFogUpdater::updateScene(){
     restartTimer();
     fog+=step;
 
-    for(unsigned int i=0;i<camerasFog.size();i++)
-      camerasFog[i]->setDensity(fog);
+    for(unsigned int i=0;i<cameras.size();i++){
+      ((osg::Fog *)cameras[i]->getOrCreateStateSet()->getAttribute(osg::StateAttribute::FOG))->setDensity(fog);
+      cameras[i]->getOrCreateStateSet()->getUniform("osgOcean_UnderwaterFogDensity")->set(-fog*fog*1.442695f);
+    }
     scene->getOceanScene()->setUnderwaterFog(fog, osg::Vec4f(0,0.05,0.3,1) );
     if(child)
       child->restart();
@@ -94,17 +96,19 @@ int SceneFogUpdater::finished(){
   return fog>finalFog;
 }
 
-SceneFogUpdater::SceneFogUpdater(double initialFog, double finalFog, double step, double interval, std::vector<osg::Fog *>  camerasFog, osg::ref_ptr<osgOceanScene> scene): SceneUpdater(interval){
-this->initialFog=initialFog;
-this->fog=initialFog;
-this->finalFog=finalFog;
-this->step=step;
-this->camerasFog=camerasFog;
-this->scene=scene;
+SceneFogUpdater::SceneFogUpdater(double initialFog, double finalFog, double step, double interval, std::vector<osg::ref_ptr<osg::Camera> > cameras, osg::ref_ptr<osgOceanScene> scene): SceneUpdater(interval){
+  this->initialFog=initialFog;
+  this->fog=initialFog;
+  this->finalFog=finalFog;
+  this->step=step;
+  this->cameras=cameras;
+  this->scene=scene;
 
-for( unsigned int i=0;i<camerasFog.size();i++)
-  camerasFog[i]->setDensity(initialFog);
-scene->getOceanScene()->setUnderwaterFog(initialFog, osg::Vec4f(0,0.05,0.3,1) );
+  for( unsigned int i=0;i<cameras.size();i++){
+    ((osg::Fog *)cameras[i]->getOrCreateStateSet()->getAttribute(osg::StateAttribute::FOG))->setDensity(initialFog);
+    cameras[i]->getOrCreateStateSet()->getUniform("osgOcean_UnderwaterFogDensity")->set(-this->initialFog*this->initialFog*1.442695f);
+  }
+  scene->getOceanScene()->setUnderwaterFog(initialFog, osg::Vec4f(0,0.05,0.3,1) );
 }
 
 double SceneFogUpdater::getReference(){
@@ -118,8 +122,10 @@ std::string SceneFogUpdater::getName(){
 void SceneFogUpdater::restart(){
   fog=initialFog;
 
-  for(unsigned int i=0;i<camerasFog.size();i++)
-    camerasFog[i]->setDensity(fog);
+  for(unsigned int i=0;i<cameras.size();i++){
+    ((osg::Fog *)cameras[i]->getOrCreateStateSet()->getAttribute(osg::StateAttribute::FOG))->setDensity(fog);
+    cameras[i]->getOrCreateStateSet()->getUniform("osgOcean_UnderwaterFogDensity")->set(-fog*fog*1.442695f);
+  }
   scene->getOceanScene()->setUnderwaterFog(fog, osg::Vec4f(0,0.05,0.3,1) );
 }
 

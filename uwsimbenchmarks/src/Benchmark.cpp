@@ -105,14 +105,14 @@ SceneUpdater * Benchmark::createSceneUpdater(SceneUpdaterInfo su, SceneBuilder *
   if(su.type==SceneUpdaterInfo::None)
     return new NullSceneUpdater();
   else if(su.type==SceneUpdaterInfo::SceneFogUpdater){
-    //Get cameras fog
-    std::vector<osg::Fog *>  camerasFog;
+    //Get cameras
+    std::vector<osg::ref_ptr<osg::Camera> > cameras;
     for(unsigned int i=0; i<builder->iauvFile.size();i++){
       for (unsigned int j=0; j<builder->iauvFile[i]->getNumCams(); j++) {
-        camerasFog.push_back((osg::Fog *) builder->iauvFile[i]->camview[j].textureCamera->getOrCreateStateSet()->getAttribute(osg::StateAttribute::FOG));
+        cameras.push_back(builder->iauvFile[i]->camview[j].textureCamera);
       }
      }
-    sceneUpdater = new SceneFogUpdater(su.initialFog, su.finalFog, su.step, su.interval,camerasFog,builder->scene);
+    sceneUpdater = new SceneFogUpdater(su.initialFog, su.finalFog, su.step, su.interval,cameras,builder->scene);
   }
 
   else if(su.type==SceneUpdaterInfo::CurrentForceUpdater){

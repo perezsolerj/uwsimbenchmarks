@@ -53,13 +53,13 @@ void restart(){};
 
 class SceneFogUpdater: public SceneUpdater{
 private:
-double initialFog,finalFog,step,fog;
-std::vector<osg::Fog *>  camerasFog;
+float initialFog,finalFog,step,fog;
+std::vector<osg::ref_ptr<osg::Camera> > cameras;
 osg::ref_ptr<osgOceanScene> scene;
 public:
 int updateScene();
 int finished();
-SceneFogUpdater(double initialFog, double finalFog, double step, double interval,std::vector<osg::Fog *>  camerasFog, osg::ref_ptr<osgOceanScene> scene);
+SceneFogUpdater(double initialFog, double finalFog, double step, double interval,std::vector<osg::ref_ptr<osg::Camera> > cameras, osg::ref_ptr<osgOceanScene> scene);
 double getReference();
 std::string getName();
 void update(){};
