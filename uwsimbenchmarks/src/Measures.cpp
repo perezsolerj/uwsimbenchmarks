@@ -708,6 +708,7 @@ Reconstruction3D::Reconstruction3D(std::string topic, osg::Node * target, double
   //Initializa debug draw node
   this->target=target;
   drawPoints=osg::ref_ptr < osg::Group >(new osg::Group());
+  drawPoints->setNodeMask(0x40);
   target->asGroup()->addChild(drawPoints);
 
 }
