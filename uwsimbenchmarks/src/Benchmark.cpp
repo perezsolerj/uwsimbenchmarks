@@ -143,7 +143,8 @@ SceneUpdater * Benchmark::createSceneUpdater(SceneUpdaterInfo su, SceneBuilder *
     sceneUpdater = new RepeatUpdater(su.iterations, su.interval);
   }
   else if(su.type==SceneUpdaterInfo::SceneLightUpdater){
-    sceneUpdater = new SceneLightUpdater(su.initialFog, su.finalFog, su.step, su.interval,builder);
+    osg::Uniform * lightUnif = builder->root->getOrCreateStateSet()->getUniform("light");
+    sceneUpdater = new SceneLightUpdater(su.initialFog, su.finalFog, su.step, su.interval,lightUnif);
   }
   else{
     std::cerr<<"Unknown scene updater"<<std::endl;

@@ -298,12 +298,7 @@ int SceneLightUpdater::updateScene(){
     light+=step;
 
     //Update light
-    osg::Uniform* lightUniform = new osg::Uniform("light",(float)light);
-    for(int i=0;i<scene->iauvFile.size();i++){
-      for (unsigned int j=0; j<scene->iauvFile[i]->getNumCams(); j++) {
-        scene->iauvFile[i]->camview[j].textureCamera->getOrCreateStateSet()->addUniform(lightUniform);
-      }
-    }
+    lightUnif->set((float)light);
     if(child)
       child->restart();
     return 1;
@@ -315,20 +310,15 @@ int SceneLightUpdater::finished(){
   return light>finalLight;
 }
 
-SceneLightUpdater::SceneLightUpdater(double initialLight, double finalLight, double step, double interval,SceneBuilder * builder): SceneUpdater(interval){
+SceneLightUpdater::SceneLightUpdater(double initialLight, double finalLight, double step, double interval,osg::Uniform * lightUnif): SceneUpdater(interval){
   this->initialLight=initialLight;
   this->light=initialLight;
   this->finalLight=finalLight;
   this->step=step;
-  this->scene=builder;
+  this->lightUnif=lightUnif;
 
   //set Initial light
-  osg::Uniform* lightUniform = new osg::Uniform("light",(float)initialLight);
-  for(int i=0;i<scene->iauvFile.size();i++){
-    for (unsigned int j=0; j<scene->iauvFile[i]->getNumCams(); j++) {
-      builder->iauvFile[i]->camview[j].textureCamera->getOrCreateStateSet()->addUniform(lightUniform);
-    }
-  }
+  lightUnif->set((float)initialLight);
 
 }
 
@@ -345,10 +335,5 @@ void SceneLightUpdater::restart(){
 
 
   //set Light
-  osg::Uniform* lightUniform = new osg::Uniform("light",(float)light);
-  for(int i=0;i<scene->iauvFile.size();i++){
-    for (unsigned int j=0; j<scene->iauvFile[i]->getNumCams(); j++) {
-      scene->iauvFile[i]->camview[j].textureCamera->getOrCreateStateSet()->addUniform(lightUniform);
-    }
-  }
+  lightUnif->set((float)light);
 }

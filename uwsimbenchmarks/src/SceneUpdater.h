@@ -115,11 +115,11 @@ public:
 class SceneLightUpdater: public SceneUpdater{
 private:
   double initialLight,finalLight,step,light;
-  SceneBuilder * scene;
+  osg::Uniform * lightUnif;
 public:
   int updateScene();
   int finished();
-  SceneLightUpdater(double initialLight, double finalLight, double step, double interval, SceneBuilder * builder);
+  SceneLightUpdater(double initialLight, double finalLight, double step, double interval, osg::Uniform * lightUnif);
   double getReference();
   std::string getName();
   void update(){};
