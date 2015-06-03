@@ -230,6 +230,9 @@ void BenchmarkXMLParser::processMeasures(const xmlpp::Node* node){
         measure.detailedResultsToGlobals=true;
       }
     }
+    else if(child->get_name()=="pathFollowing"){
+      measure.type=MeasureInfo::PathFollowing;
+    }
     if(measure.type!=MeasureInfo::Unknown){
       processMeasure(child,&measure);
       measures.push_back(measure);

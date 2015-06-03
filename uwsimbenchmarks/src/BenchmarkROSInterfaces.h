@@ -9,9 +9,11 @@ class ServiceTrigger;
 #include <std_msgs/Bool.h>
 #include <std_msgs/String.h>
 #include <std_srvs/Empty.h>
+#include <std_msgs/Int32.h>
 #include <geometry_msgs/WrenchStamped.h>
 #include <topic_tools/shape_shifter.h>
 #include <pcl_ros/point_cloud.h>
+#include <nav_msgs/Path.h>
 #include "Current.h"
 
 class TopicTrigger;
@@ -45,6 +47,28 @@ public:
   virtual void processData(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& msg);
   int get3DPoints(std::vector<osg::Vec3f> &points);
   ~ROSPointCloudTo3DReconstruction();
+};
+
+class ROSPathToPathFollowing : public ROSSubscriberInterface
+{
+  std::vector<osg::Vec3f> points;
+public:
+  ROSPathToPathFollowing(std::string topic);
+  virtual void createSubscriber(ros::NodeHandle &nh);
+  virtual void processData(const nav_msgs::Path::ConstPtr& msg);
+  int getPath(std::vector<osg::Vec3f> &points);
+  ~ROSPathToPathFollowing();
+};
+
+class ROSIntToPathFollowing : public ROSSubscriberInterface
+{
+  int waypoint;
+public:
+  ROSIntToPathFollowing(std::string topic);
+  virtual void createSubscriber(ros::NodeHandle &nh);
+  virtual void processData(const std_msgs::Int32::ConstPtr& msg);
+  int getWaypoint();
+  ~ROSIntToPathFollowing();
 };
 
 /*class ROSTopicToShapeShifter: public ROSSubscriberInterface {

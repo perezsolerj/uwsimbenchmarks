@@ -72,6 +72,49 @@ int ROSPointCloudTo3DReconstruction::get3DPoints(std::vector<osg::Vec3f> &points
 ROSPointCloudTo3DReconstruction::~ROSPointCloudTo3DReconstruction(){}
 
 
+ROSPathToPathFollowing::ROSPathToPathFollowing(std::string topic): ROSSubscriberInterface(topic) {
+}
+
+void ROSPathToPathFollowing::createSubscriber(ros::NodeHandle &nh) {
+  sub_ = nh.subscribe<nav_msgs::Path>(topic, 10, &ROSPathToPathFollowing::processData, this);
+}
+
+void ROSPathToPathFollowing::processData(const nav_msgs::Path::ConstPtr& msg) {
+   points.clear();
+   for(unsigned int i=0;i<msg->poses.size();i++){
+       osg::Vec3f data(msg->poses[i].pose.position.x,msg->poses[i].pose.position.y,msg->poses[i].pose.position.z);
+       points.push_back(data);
+   }
+}
+
+int ROSPathToPathFollowing::getPath(std::vector<osg::Vec3f> &points){
+  points.swap(this->points);
+  this->points.clear();
+  return 0;
+}
+
+ROSPathToPathFollowing::~ROSPathToPathFollowing(){}
+
+
+
+ROSIntToPathFollowing::ROSIntToPathFollowing(std::string topic): ROSSubscriberInterface(topic) {
+waypoint=1;
+}
+
+void ROSIntToPathFollowing::createSubscriber(ros::NodeHandle &nh) {
+  sub_ = nh.subscribe<std_msgs::Int32>(topic, 10, &ROSIntToPathFollowing::processData, this);
+}
+
+void ROSIntToPathFollowing::processData(const std_msgs::Int32::ConstPtr& msg) {
+   waypoint=msg->data;
+}
+
+int ROSIntToPathFollowing::getWaypoint(){
+  return waypoint;
+}
+
+ROSIntToPathFollowing::~ROSIntToPathFollowing(){}
+
 /*ROSTopicToShapeShifter::ROSTopicToShapeShifter(std::string topic): ROSSubscriberInterface(topic) {
   std::cout<<"CREADITO "<<topic<<std::endl;
 }

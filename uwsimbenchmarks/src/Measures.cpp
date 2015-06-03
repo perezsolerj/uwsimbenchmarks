@@ -952,3 +952,189 @@ int Reconstruction3D::error(){
   return 0;
 }
 
+//******************Path Following ***************
+
+void PathFollowing::drawPath(){
+  osg::Vec3Array *trajectory_points= new osg::Vec3Array;
+
+  trajectory_points->clear();
+  for(unsigned int i=0;i<path.size();i++)
+    trajectory_points->push_back(path[i]);
+
+  osg::ref_ptr<osg::Geometry> trajectory= osg::ref_ptr < osg::Geometry > (new osg::Geometry());
+  trajectory->setVertexArray(trajectory_points);
+
+  osg::Vec4Array* colors = new osg::Vec4Array;
+  colors->push_back(osg::Vec4f(0.0f, 1.0f, 0.0f, 1.0f));
+  trajectory->setColorArray(colors);
+  trajectory->setColorBinding(osg::Geometry::BIND_OVERALL);
+
+  osg::PrimitiveSet *prset= new osg::DrawArrays(osg::PrimitiveSet::LINE_STRIP);
+  trajectory->addPrimitiveSet(prset);
+  trajectory->setUseDisplayList(false);
+
+  osg::ref_ptr<osg::Geode> geode = osg::ref_ptr < osg::Geode > (new osg::Geode());
+  geode->addDrawable(trajectory);
+  osg::LineWidth* linewidth = new osg::LineWidth();
+  linewidth->setWidth(4.0f);
+  geode->getOrCreateStateSet()->setAttributeAndModes(linewidth, osg::StateAttribute::ON);
+
+  geode->getOrCreateStateSet()->setAttributeAndModes(new osg::Program(), osg::StateAttribute::ON); //Unset shader
+  geode->setNodeMask(0x40);
+
+  ((osg::DrawArrays*)prset)->setFirst(0);
+  ((osg::DrawArrays*)prset)->setCount(trajectory_points->size());
+
+  from->asGroup()->addChild(geode);
+
+}
+
+PathFollowing::PathFollowing( std::string topic ,osg::Node * target, osg::Node * from){
+  this->topic=new ROSPathToPathFollowing(topic);
+  this->wptTopic=new ROSIntToPathFollowing("current_waypoint");
+  path.clear();
+  currentPoint=-1;
+  this->from=from;
+  this->target=target;
+}
+
+void PathFollowing::start(void){
+  topic->getPath(path);
+  if(path.size()>0){
+    currentPoint=0;
+    drawPath();
+  }
+  else
+    std::cout<<"PathFollowing measure "<<name<<" has started with no path, it won't measure error until a path is received."<<std::endl;
+
+}
+
+void PathFollowing::update(void){
+}
+
+void PathFollowing::stop(void){
+}
+
+double PathFollowing::getMeasure(void){
+  
+  if(currentPoint==-1){
+    topic->getPath(path);
+    if(path.size()>0){
+      currentPoint=0;
+      drawPath();
+      std::cout<<"PathFollowing measure "<<name<<" has started measuring,  a path has been received."<<std::endl;
+    }
+  }
+
+  currentPoint=wptTopic->getWaypoint()-1;
+
+  boost::shared_ptr<osg::Matrixd> wTf =getWorldCoords(from);
+  boost::shared_ptr<osg::Matrixd> wTt =getWorldCoords(target);
+  osg::Matrixd fTw;
+  fTw.invert(*wTf);
+
+  osg::Matrixd  fTt=*wTt * fTw;
+
+
+  //osg::Vec3 error= wTf->getTrans()+path[currentPoint]-fTt.getTrans();
+
+  double distanceToSegment=0;
+  if(path.size()>currentPoint+1){ //still not the last point in path
+
+    //we need to check the point is inside segment
+    double u = (( fTt.getTrans() - wTf->getTrans()-path[currentPoint] ) * (wTf->getTrans()+path[currentPoint+1] - wTf->getTrans()-path[currentPoint] )) /  //dot product AB * AC
+                (wTf->getTrans()+path[currentPoint+1] - wTf->getTrans()-path[currentPoint] ).length2();  //length^2 AB
+
+    if(u>1) //distance to point B
+      distanceToSegment= (wTf->getTrans()+path[currentPoint+1] - fTt.getTrans()).length();
+    
+    else if(u<0) //distance to point A
+      distanceToSegment= (wTf->getTrans()+path[currentPoint+0] - fTt.getTrans()).length();
+
+    else    //distance line A - B to point C
+      distanceToSegment= ( (wTf->getTrans()+path[currentPoint+1] - wTf->getTrans()-path[currentPoint] ) ^ (fTt.getTrans() - wTf->getTrans()-path[currentPoint]) ).length() / //Cross product AB x AC
+                      sqrt( (wTf->getTrans()+path[currentPoint+1] - wTf->getTrans()-path[currentPoint] ) * (wTf->getTrans()+path[currentPoint+1] - wTf->getTrans()-path[currentPoint]) ); //sqrt (AB * AB)
+
+
+    //std::cout<<" distance to segment: "<<distanceToSegment<<std::endl; 
+  }
+
+
+
+  return distanceToSegment;//
+}
+
+std::vector<double> PathFollowing::getMeasureDetails(void){
+
+  if(currentPoint==-1){
+    topic->getPath(path);
+    if(path.size()>0){
+      currentPoint=0;
+      drawPath();
+      std::cout<<"PathFollowing measure "<<name<<" has started measuring,  a path has been received."<<std::endl;
+    }
+  }
+
+  currentPoint=wptTopic->getWaypoint()-1;
+
+  boost::shared_ptr<osg::Matrixd> wTf =getWorldCoords(from);
+  boost::shared_ptr<osg::Matrixd> wTt =getWorldCoords(target);
+  osg::Matrixd fTw;
+  fTw.invert(*wTf);
+
+  osg::Matrixd  fTt=*wTt * fTw;
+
+
+  //osg::Vec3 error= wTf->getTrans()+path[currentPoint]-fTt.getTrans();
+
+  double distanceToSegment=0;
+  if(path.size()>currentPoint+1){ //still not the last point in path
+
+    //we need to check the point is inside segment
+    double u = (( fTt.getTrans() - wTf->getTrans()-path[currentPoint] ) * (wTf->getTrans()+path[currentPoint+1] - wTf->getTrans()-path[currentPoint] )) /  //dot product AB * AC
+                (wTf->getTrans()+path[currentPoint+1] - wTf->getTrans()-path[currentPoint] ).length2();  //length^2 AB
+
+    if(u>1) //distance to point B
+      distanceToSegment= (wTf->getTrans()+path[currentPoint+1] - fTt.getTrans()).length();
+    
+    else if(u<0) //distance to point A
+      distanceToSegment= (wTf->getTrans()+path[currentPoint+0] - fTt.getTrans()).length();
+
+    else    //distance line A - B to point C
+      distanceToSegment= ( (wTf->getTrans()+path[currentPoint+1] - wTf->getTrans()-path[currentPoint] ) ^ (fTt.getTrans() - wTf->getTrans()-path[currentPoint]) ).length() / //Cross product AB x AC
+                      sqrt( (wTf->getTrans()+path[currentPoint+1] - wTf->getTrans()-path[currentPoint] ) * (wTf->getTrans()+path[currentPoint+1] - wTf->getTrans()-path[currentPoint]) ); //sqrt (AB * AB)
+
+
+    //std::cout<<" distance to segment: "<<distanceToSegment<<std::endl; 
+  }
+
+  std::vector<double> results;
+  results.push_back(distanceToSegment);
+  results.push_back(currentPoint);
+  return results;
+}
+
+std::vector<std::string> PathFollowing::getNameDetails(void){
+  std::vector<std::string> results;
+  results.push_back("distanceToPath");
+  results.push_back("waypoint");
+  return results;
+}
+
+int PathFollowing::isOn(){
+  return Measures::isOn();
+}
+
+void PathFollowing::reset(){
+  Measures::reset();
+
+  path.clear(); //clears the current path
+  currentPoint=-1;
+}
+
+int PathFollowing::error(){
+  if(currentPoint==-1)
+    return -1;
+  return 0;
+}
+

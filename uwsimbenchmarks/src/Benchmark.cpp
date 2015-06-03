@@ -34,6 +34,8 @@ Benchmark::Benchmark(BenchmarkXMLParser *bench,SceneBuilder * builder,BulletPhys
       measures[i]=createObjectCenteredOnCam(measureInfo,builder);
     else if(measureInfo.type == MeasureInfo::Reconstruction3D)
       measures[i]=createReconstruction3D(measureInfo,builder);
+    else if(measureInfo.type == MeasureInfo::PathFollowing)
+      measures[i]=createPathFollowing(measureInfo,builder);
 
     measures[i]->setTriggers(createTrigger(measureInfo.startOn,builder->root),createTrigger(measureInfo.stopOn,builder->root));
     measures[i]->setName(measureInfo.name);
@@ -274,6 +276,24 @@ Measures * Benchmark::createReconstruction3D(MeasureInfo measureInfo, SceneBuild
   }     
 
   return new Reconstruction3D(measureInfo.topic,first,measureInfo.lod, from);
+}
+
+Measures * Benchmark::createPathFollowing(MeasureInfo measureInfo, SceneBuilder * builder){
+
+  osg::Node * first= findRN(measureInfo.target,builder->root);
+  osg::Node * from= findRN(measureInfo.from,builder->root);
+
+  if(first==NULL){
+    std::cerr<<"Can't find target "<<measureInfo.target<<" in measure "<<measureInfo.name<<" check benchmark's XML."<<std::endl;
+    exit(1);
+  }
+
+  if(from==NULL){
+    std::cerr<<"'from' target for measure "<<measureInfo.name<<" couldn't be found."<<std::endl;
+    exit(1);
+  }     
+
+  return new PathFollowing(measureInfo.topic, first , from);
 }
 
 void Benchmark::stopMeasures(){

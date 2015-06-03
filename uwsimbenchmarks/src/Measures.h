@@ -216,5 +216,27 @@ public:
   void processPoints(void);
 };
 
+class PathFollowing: public Measures{
+private:
+  ROSPathToPathFollowing * topic;
+  ROSIntToPathFollowing * wptTopic;
+  std::vector<osg::Vec3f> path;
+  int currentPoint;
+  osg::Node * from, *target;
+public:
+  void start(void);
+  void stop(void);
+  void update(void);
+  PathFollowing( std::string topic ,osg::Node * target, osg::Node * from);
+  double getMeasure(void);
+  std::vector<double> getMeasureDetails(void);
+  std::vector<std::string> getNameDetails(void);
+  int isOn();
+  void reset();
+  int error();
+
+  void drawPath();
+};
+
 
 #endif

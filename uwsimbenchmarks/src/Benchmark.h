@@ -26,6 +26,7 @@ private:
   Measures * createEuclideanNormMeasure(MeasureInfo measureInfo, SceneBuilder * builder);
   Measures * createObjectCenteredOnCam(MeasureInfo measureInfo, SceneBuilder * builder);
   Measures * createReconstruction3D(MeasureInfo measureInfo, SceneBuilder * builder);
+  Measures * createPathFollowing(MeasureInfo measureInfo, SceneBuilder * builder);
 
   std::string function;
 
