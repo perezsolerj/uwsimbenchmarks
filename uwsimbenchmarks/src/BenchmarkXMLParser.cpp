@@ -284,18 +284,14 @@ void BenchmarkXMLParser::processSceneUpdaters(const xmlpp::Node* node,SceneUpdat
   for(xmlpp::Node::NodeList::iterator iter = list.begin(); iter != list.end(); ++iter){
     xmlpp::Node* child=dynamic_cast<const xmlpp::Node*>(*iter);
     
-    if(child->get_name()=="initialFog" or child->get_name()=="initialLight")
-      extractFloatChar(child,&su->initialFog);
-    else if(child->get_name()=="finalFog" or child->get_name()=="finalLight")
-      extractFloatChar(child,&su->finalFog);
+    if(child->get_name()=="initialValue")
+      extractFloatChar(child,&su->initialValue);
+    else if(child->get_name()=="finalValue")
+      extractFloatChar(child,&su->finalValue);
     else if(child->get_name()=="step")
       extractFloatChar(child,&su->step);
     else if(child->get_name()=="interval")
       extractFloatChar(child,&su->interval);
-    else if(child->get_name()=="initialCurrent")
-      extractFloatChar(child,&su->initialCurrent);
-    else if(child->get_name()=="finalCurrent")
-      extractFloatChar(child,&su->finalCurrent);
     else if(child->get_name()=="sphericalDirection")
       extractSphericalDirection(child,su->currentInfo.dir);
     else if(child->get_name()=="directionVariation")

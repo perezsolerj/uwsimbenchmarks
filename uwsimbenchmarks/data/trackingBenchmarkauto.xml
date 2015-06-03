@@ -64,8 +64,8 @@
 
   <sceneUpdater> 
     <currentForceUpdater>
-      <initialCurrent>0</initialCurrent>
-      <finalCurrent>0.2</finalCurrent>
+      <initialValue>0</initialValue>
+      <finalValue>0.2</finalValue>
       <sphericalDirection>
 	<theta> 1.57 </theta>
 	<phi> 0 </phi>

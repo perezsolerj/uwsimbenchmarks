@@ -56,8 +56,8 @@
 
   <sceneUpdater> 
     <sceneFogUpdater>
-      <initialFog>0</initialFog>
-      <finalFog>1.3</finalFog>
+      <initialValue>0</initialValue>
+      <finalValue>1.3</finalValue>
       <step>0.05</step>
       <interval>2</interval>
     </sceneFogUpdater>

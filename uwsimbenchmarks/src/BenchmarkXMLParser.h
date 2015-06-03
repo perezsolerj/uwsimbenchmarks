@@ -53,8 +53,7 @@ struct CurrentInfo{
 struct SceneUpdaterInfo{
   typedef enum { None, SceneFogUpdater, CurrentForceUpdater, ArmMoveUpdater, Repeat, SceneLightUpdater} SceneUpdaterType;
   SceneUpdaterType type;
-  double initialFog, finalFog, step, interval; //needed for SceneFogUpdater / SceneLightUpdater
-  double initialCurrent, finalCurrent;
+  double initialValue, finalValue, step, interval;
   CurrentInfo currentInfo; //needed for currentforce
   std::list<std::vector <double> > armPositions;
   std::string target;

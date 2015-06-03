@@ -114,7 +114,7 @@ SceneUpdater * Benchmark::createSceneUpdater(SceneUpdaterInfo su, SceneBuilder *
         cameras.push_back(builder->iauvFile[i]->camview[j].textureCamera);
       }
      }
-    sceneUpdater = new SceneFogUpdater(su.initialFog, su.finalFog, su.step, su.interval,cameras,builder->scene);
+    sceneUpdater = new SceneFogUpdater(su.initialValue, su.finalValue, su.step, su.interval,cameras,builder->scene);
   }
 
   else if(su.type==SceneUpdaterInfo::CurrentForceUpdater){
@@ -126,7 +126,7 @@ SceneUpdater * Benchmark::createSceneUpdater(SceneUpdaterInfo su, SceneBuilder *
       std::cerr<<"Target "<<su.target<<" for current force scene updater NOT found"<<std::endl;
       exit(1);
     }
-    sceneUpdater = new CurrentForceUpdater(su.initialCurrent, su.finalCurrent, su.step, su.interval,vehicle,su.currentInfo,su.publishAs);
+    sceneUpdater = new CurrentForceUpdater(su.initialValue, su.finalValue, su.step, su.interval,vehicle,su.currentInfo,su.publishAs);
   }
 
   else if(su.type==SceneUpdaterInfo::ArmMoveUpdater){
@@ -146,7 +146,7 @@ SceneUpdater * Benchmark::createSceneUpdater(SceneUpdaterInfo su, SceneBuilder *
   }
   else if(su.type==SceneUpdaterInfo::SceneLightUpdater){
     osg::Uniform * lightUnif = builder->root->getOrCreateStateSet()->getUniform("light");
-    sceneUpdater = new SceneLightUpdater(su.initialFog, su.finalFog, su.step, su.interval,lightUnif);
+    sceneUpdater = new SceneLightUpdater(su.initialValue, su.finalValue, su.step, su.interval,lightUnif);
   }
   else{
     std::cerr<<"Unknown scene updater"<<std::endl;

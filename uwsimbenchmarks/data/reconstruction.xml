@@ -37,10 +37,10 @@
 
   <sceneUpdater> 
     <sceneLightUpdater>
-      <initialLight>0.00</initialLight>
-      <finalLight>1.02</finalLight>
+      <initialValue>0.00</initialValue>
+      <finalValue>1.02</finalValue>
       <step>0.05</step>
-      <interval>140</interval>
+      <interval>20</interval>
     </sceneLightUpdater>
   </sceneUpdater>
 
