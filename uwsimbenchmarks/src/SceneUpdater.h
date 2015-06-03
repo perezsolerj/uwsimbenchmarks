@@ -126,4 +126,18 @@ public:
   void restart();
 };
 
+class CameraNoiseUpdater: public SceneUpdater{
+private:
+  double initialNoise,finalNoise,step,noise;
+  std::vector<osg::ref_ptr<osg::Camera> > cameras;
+public:
+  int updateScene();
+  int finished();
+  CameraNoiseUpdater(double initialNoise, double finalNoise, double step, double interval,std::vector<osg::ref_ptr<osg::Camera> > cameras);
+  double getReference();
+  std::string getName();
+  void update(){};
+  void restart();
+};
+
 #endif

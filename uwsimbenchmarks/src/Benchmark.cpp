@@ -148,6 +148,16 @@ SceneUpdater * Benchmark::createSceneUpdater(SceneUpdaterInfo su, SceneBuilder *
     osg::Uniform * lightUnif = builder->root->getOrCreateStateSet()->getUniform("light");
     sceneUpdater = new SceneLightUpdater(su.initialValue, su.finalValue, su.step, su.interval,lightUnif);
   }
+  else if(su.type==SceneUpdaterInfo::CameraNoiseUpdater){
+    std::vector<osg::ref_ptr<osg::Camera> > cameras;
+    for(unsigned int i=0; i<builder->iauvFile.size();i++){
+      for (unsigned int j=0; j<builder->iauvFile[i]->getNumCams(); j++) {
+        if(builder->iauvFile[i]->camview[j].textureCamera->getOrCreateStateSet()->getUniform("stddev"))
+          cameras.push_back(builder->iauvFile[i]->camview[j].textureCamera);
+      }
+     }
+    sceneUpdater = new CameraNoiseUpdater(su.initialValue, su.finalValue, su.step, su.interval,cameras);
+  }
   else{
     std::cerr<<"Unknown scene updater"<<std::endl;
     exit(1);  

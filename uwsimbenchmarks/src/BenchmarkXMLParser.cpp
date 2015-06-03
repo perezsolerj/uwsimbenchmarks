@@ -274,6 +274,10 @@ void BenchmarkXMLParser::processSceneUpdater(const xmlpp::Node* node,SceneUpdate
       su->type=SceneUpdaterInfo::SceneLightUpdater;
       processSceneUpdaters(child,su);
     }
+    else if(child->get_name()=="cameraNoiseUpdater"){
+      su->type=SceneUpdaterInfo::CameraNoiseUpdater;
+      processSceneUpdaters(child,su);
+    }
   }
 
 }

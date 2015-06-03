@@ -337,3 +337,61 @@ void SceneLightUpdater::restart(){
   //set Light
   lightUnif->set((float)light);
 }
+
+/*CAMERA NOISE UPDATER*/
+
+int CameraNoiseUpdater::updateScene(){
+  int updateLevel;
+
+  if(child)
+    updateLevel= child->updateScene() +1;
+  if(!child || child->finished()){
+    restartTimer();
+    noise+=step;
+
+    //Update noise
+    for( unsigned int i=0;i<cameras.size();i++){
+      cameras[i]->getOrCreateStateSet()->getUniform("stddev")->set((float)this->noise);
+    }
+    if(child)
+      child->restart();
+    return 1;
+  }
+  return updateLevel;
+} 
+
+int CameraNoiseUpdater::finished(){
+  return noise>finalNoise;
+}
+
+CameraNoiseUpdater::CameraNoiseUpdater(double initialNoise, double finalNoise, double step, double interval,std::vector<osg::ref_ptr<osg::Camera> > cameras): SceneUpdater(interval){
+  this->initialNoise=initialNoise;
+  this->noise=initialNoise;
+  this->finalNoise=finalNoise;
+  this->step=step;
+  this->cameras=cameras;
+
+  //set Initial noise
+  for( unsigned int i=0;i<cameras.size();i++){
+    cameras[i]->getOrCreateStateSet()->getUniform("stddev")->set((float)this->initialNoise);
+  }
+
+}
+
+double CameraNoiseUpdater::getReference(){
+  return noise;
+}
+
+std::string CameraNoiseUpdater::getName(){
+  return "Noise";
+}
+
+void CameraNoiseUpdater::restart(){
+  noise=initialNoise;
+
+
+  //set noise
+  for( unsigned int i=0;i<cameras.size();i++){
+    cameras[i]->getOrCreateStateSet()->getUniform("stddev")->set((float)this->noise);
+  }
+}

@@ -49,7 +49,7 @@
 
 <!-- SceneUpdater -->
 
-<!ELEMENT sceneUpdater (none | sceneFogUpdater | currentForceUpdater | armMoveUpdater | repeat | sceneLightUpdater)>
+<!ELEMENT sceneUpdater (none | sceneFogUpdater | currentForceUpdater | armMoveUpdater | repeat | sceneLightUpdater | cameraNoiseUpdater)>
 
 <!ELEMENT none EMPTY>
 
@@ -59,6 +59,7 @@
 <!ELEMENT armMoveUpdater (armPosition+, step, interval, target,sceneUpdater?)>
 <!ELEMENT repeat (iterations, interval,sceneUpdater?)>
 <!ELEMENT sceneLightUpdater (initialValue, finalValue, step, interval,sceneUpdater?)>
+<!ELEMENT cameraNoiseUpdater (initialValue, finalValue, step, interval,sceneUpdater?)>
 
 <!ELEMENT armPosition (joint+)>
 <!ELEMENT joint (#PCDATA)>

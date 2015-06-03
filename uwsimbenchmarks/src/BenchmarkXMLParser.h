@@ -51,7 +51,7 @@ struct CurrentInfo{
 };
 
 struct SceneUpdaterInfo{
-  typedef enum { None, SceneFogUpdater, CurrentForceUpdater, ArmMoveUpdater, Repeat, SceneLightUpdater} SceneUpdaterType;
+  typedef enum { None, SceneFogUpdater, CurrentForceUpdater, ArmMoveUpdater, Repeat, SceneLightUpdater, CameraNoiseUpdater} SceneUpdaterType;
   SceneUpdaterType type;
   double initialValue, finalValue, step, interval;
   CurrentInfo currentInfo; //needed for currentforce
