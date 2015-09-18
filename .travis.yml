@@ -26,7 +26,7 @@ install:
   - cd ~/ros/ws_uwsim/src
   - wstool init .
   - git clone -b $ROS_DISTRO-devel https://github.com/perezsolerj/underwater_simulation.git
-  - git clone -b benchmarks-$ROS_DISTRO https://github.com/perezsolerj/underwater_simulation.git benchmarks
+  - git clone -b $ROS_DISTRO-devel https://github.com/perezsolerj/uwsimbenchmarks.git benchmarks
   - cd ../
   # Install dependencies for source repos
   - rosdep install --from-paths src --ignore-src --rosdistro $ROS_DISTRO -y
