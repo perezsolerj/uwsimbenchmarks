@@ -21,6 +21,9 @@
   <build_depend>muparser</build_depend>
   <build_depend>message_generation</build_depend>
   <build_depend>roscpp</build_depend>
+  <build_depend>osg_interactive_markers</build_depend>
+  <build_depend>osg_markers</build_depend>
+  <build_depend>osg_utils</build_depend>
   <build_depend>uwsim_bullet</build_depend>
   <build_depend>uwsim_osgbullet</build_depend>
   <build_depend>uwsim_osgocean</build_depend>
@@ -33,6 +36,9 @@
   <run_depend>pcl_ros</run_depend>
   <run_depend>topic_tools</run_depend>
   <run_depend>muparser</run_depend>
+  <run_depend>osg_interactive_markers</run_depend>
+  <run_depend>osg_markers</run_depend>
+  <run_depend>osg_utils</run_depend>
   <run_depend>uwsim_bullet</run_depend>
   <run_depend>uwsim_osgbullet</run_depend>
   <run_depend>uwsim_osgocean</run_depend>

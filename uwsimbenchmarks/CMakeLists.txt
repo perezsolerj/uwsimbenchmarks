@@ -15,6 +15,9 @@ find_package(uwsim_osgocean REQUIRED)
 find_package(uwsim_osgworks REQUIRED)
 find_package(uwsim_osgbullet REQUIRED)
 find_package(uwsim_bullet REQUIRED)
+find_package(osg_utils REQUIRED)
+find_package(osg_interactive_markers REQUIRED)
+find_package(osg_markers REQUIRED)
 
 add_service_files(
   FILES
@@ -37,6 +40,9 @@ catkin_package(
     roscpp
     message_runtime
     muparser
+    osg_utils
+    osg_markers
+    osg_interactive_markers
     uwsim_bullet
     uwsim_osgocean
     uwsim_osgworks
@@ -61,7 +67,7 @@ include_directories(${PCL_INCLUDE_DIRS})
 
 link_directories(${PCL_LIBRARY_DIRS})
 
-INCLUDE_DIRECTORIES( ${OPENSCENEGRAPH_INCLUDE_DIRS} ${LIBXML++_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS} ${OSGOCEAN_INCLUDE_DIRS} ${OSGBULLET_INCLUDE_DIR} ${BULLET_INCLUDE_DIRS} ${OSGWORKS_INCLUDE_DIR} )
+INCLUDE_DIRECTORIES( ${OPENSCENEGRAPH_INCLUDE_DIRS} ${LIBXML++_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS} ${OSGOCEAN_INCLUDE_DIRS} ${OSGBULLET_INCLUDE_DIR} ${BULLET_INCLUDE_DIRS} ${OSGWORKS_INCLUDE_DIR})
 
 # this disables the warnings that come mostly from osg
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-ignored-qualifiers")
@@ -76,7 +82,7 @@ src/BenchmarkROSInterfaces.cpp
 src/Current.cpp)
 
 
-TARGET_LINK_LIBRARIES(uwsimbenchmarks   ${OSGOCEAN_LIBRARIES} ${PCL_LIBRARIES} ${catkin_LIBRARIES} ${OPENSCENEGRAPH_LIBRARIES} ${LIBXML++_LIBRARIES}  ${BULLET_LIBRARIES} ${OSGBULLET_LIBRARIES} ${OSGWORKS_LIBRARIES} -lmuparser GLU)
+TARGET_LINK_LIBRARIES(uwsimbenchmarks   ${OSGOCEAN_LIBRARIES} ${PCL_LIBRARIES} ${catkin_LIBRARIES} ${OPENSCENEGRAPH_LIBRARIES} ${LIBXML++_LIBRARIES}  ${BULLET_LIBRARIES} ${OSGBULLET_LIBRARIES} ${OSGWORKS_LIBRARIES} ${OSGUTILS_LIBRARIES} ${OSGINTERACTIVEMARKERS_LIBRARIES} ${OSGMARKERS_LIBRARIES}  -lmuparser GLU)
 
 install(
   TARGETS
