@@ -11,4 +11,4 @@ http://www.irs.uji.es/uwsim
 
 ## Build Status
 
-[![Build Status](https://travis-ci.org/perezsolerj/uwsimbenchmarks.png?branch=hydro-devel)](https://travis-ci.org/perezsolerj/uwsimbenchmarks)
+[![Build Status](https://travis-ci.org/perezsolerj/uwsimbenchmarks.png?branch=indigo-devel)](https://travis-ci.org/perezsolerj/uwsimbenchmarks)
