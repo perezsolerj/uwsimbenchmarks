@@ -1,0 +1,182 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE UWSimScene SYSTEM "UWSimScene.dtd" >
+
+<UWSimScene>
+  <oceanState>
+    <windx> 0.04 </windx>
+    <windy> 0.04 </windy>
+    <windSpeed> 12 </windSpeed>
+    <depth> 1000 </depth>
+    <reflectionDamping> 0.35 </reflectionDamping>
+    <waveScale> 1e-7 </waveScale>
+    <isNotChoppy> 0 </isNotChoppy>
+    <choppyFactor> 2.5 </choppyFactor>
+    <crestFoamHeight> 6 </crestFoamHeight>
+    <oceanSurfaceHeight> 0 </oceanSurfaceHeight>
+    <fog>
+      <density> 0 </density>
+      <color>
+	<r>0</r>
+	<g>0.05</g>
+	<b>0.3</b>
+      </color>
+    </fog>
+    <color>
+      <r>0.0</r>
+      <g>0.05</g>
+      <b>0.3</b>
+    </color>
+    <attenuation>
+      <r>0.015</r>
+      <g>0.0075 </g>
+      <b> 0.005 </b>
+    </attenuation>
+  </oceanState>
+  <simParams>
+    <disableShaders> 0 </disableShaders>
+    <resw> 800 </resw>
+    <resh> 600 </resh>
+    <offsetp>
+      <x>0</x>
+      <y>0</y>
+      <z>0</z>
+    </offsetp>
+    <offsetr>
+      <x> M_PI</x>
+      <y> 0</y>
+      <z> -M_PI_2 </z>
+    </offsetr>
+  </simParams>
+  <camera>
+    <freeMotion> 1 </freeMotion>
+    <objectToTrack>blackbox</objectToTrack>
+    <fov> 60 </fov>
+    <aspectRatio> 1.33 </aspectRatio>
+    <near> 1 </near>
+    <far> 10000 </far>
+    <position>
+      <x>-1</x>
+      <y>-1 </y>
+      <z>-3 </z>
+    </position> 
+    <lookAt>
+      <x>0</x>
+      <y>0 </y>
+      <z>-4 </z>
+    </lookAt>
+  </camera>
+
+  <vehicle>
+    <name>girona500</name>
+    <file>data/scenes/g500ARM5.urdf</file>
+    <jointValues>
+      <joint> 0 </joint>
+      <joint> 0</joint>
+      <joint> 2.2 </joint>
+      <joint> 0 </joint>
+      <joint>0.8 </joint>
+    </jointValues>
+    <position>
+      <x> 3</x>
+      <y> 1.5 </y>
+      <z> 1.5</z>
+    </position>
+    <orientation>
+      <r>0</r>
+      <p>0</p>
+      <y>1.57</y>
+    </orientation>
+    <virtualCamera>
+      <name>bowtech1</name>
+      <relativeTo>part0</relativeTo>
+      <resw> 640 </resw>
+      <resh> 480 </resh>
+      <position>
+        <x>-0.2</x>
+        <y> -0.1 </y>
+        <z> 0 </z>
+      </position>
+      <orientation>
+        <r>0</r>
+        <p>3.14</p>
+        <y>1.57 </y>
+      </orientation>
+    </virtualCamera>
+
+    <dvlSensor>
+      <name>DVLSensor</name>
+      <relativeTo>base_link</relativeTo>
+      <position>
+        <x>-0.75</x>
+        <y>0</y>
+        <z>0</z>
+      </position>  
+      <orientation>
+        <r>0</r>
+        <p>0</p>
+        <y>3.14</y>
+      </orientation>
+      <std>0.0015</std>
+    </dvlSensor>
+
+  </vehicle>
+
+  <object>
+    <name>terrain</name>
+    <file>terrain/CIRS/cirs_trident.osg</file>
+    <position>
+      <x> 0</x>
+      <y> 0 </y>
+      <z> 0 </z>
+    </position>
+    <orientation>
+      <r>0</r>
+      <p>0</p>
+      <y>0</y>
+    </orientation>
+    <offsetp>
+      <x>-1.5</x>
+      <y>-3.0</y>
+      <z>0</z>
+    </offsetp>
+    <offsetr>
+      <x> 3.1415</x>
+      <y> 0</y>
+      <z> -1.57 </z>
+    </offsetr>
+  </object>
+
+  <object>
+    <name> blackbox </name>
+    <file> objects/blackbox_uib_trimesh.osg  </file>
+    <position>
+      <x> 3.0</x>
+      <y> 1.5 </y>
+      <z> 4.72 </z>
+    </position>
+    <orientation>
+      <r>0</r>
+      <p>3.1415</p>
+      <y>0</y>
+    </orientation>
+  </object>
+
+  <rosInterfaces>
+    <VirtualCameraToROSImage> 
+      <cameraName>bowtech1</cameraName>
+      <imageTopic> /uwsim/camera1 </imageTopic>
+      <infoTopic> /uwsim/camera1_info </infoTopic>
+    </VirtualCameraToROSImage>
+    <ROSPoseToPAT>
+      <topic> /g500/pose</topic>
+      <vehicleName> girona500 </vehicleName>
+    </ROSPoseToPAT>
+    <DVLSensorToROS>
+      <name>DVLSensor</name>
+      <topic>g500/dvl</topic>
+      <rate>5</rate>
+    </DVLSensorToROS>
+  </rosInterfaces>
+</UWSimScene>
+

@@ -1,0 +1,90 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE benchmark SYSTEM "benchmark.dtd" >
+
+<benchmark>
+  <measures>
+
+    <euclideanNorm>
+      <name>corners</name>
+      <groundTruth type="cornersFromCamera">
+	<camera>bowtech1</camera>
+	<target>blackbox</target>
+	<publishOn> autoInit</publishOn>
+      </groundTruth>	
+      <target> cornersTopic </target>
+      <startOn>
+	<type>onInit</type>
+      </startOn>
+      <stopOn>
+	<type>never</type>
+      </stopOn>
+    </euclideanNorm>
+
+    <euclideanNorm>
+      <name>centroid</name>
+      <groundTruth type="centroidFromCamera">
+	<camera>bowtech1</camera>
+	<target>blackbox</target>
+      </groundTruth>	
+      <target> centroidTopic </target>
+      <startOn>
+	<type>onInit</type>
+      </startOn>
+      <stopOn>
+	<type>never</type>
+      </stopOn>
+    </euclideanNorm>
+
+    <objectCenteredOnCam>
+      <name>objectCentered</name>
+      <target>blackbox</target>
+      <camera>bowtech1</camera>
+      <log>0.1</log>
+      <startOn>
+	<type>onInit</type>
+      </startOn>
+      <stopOn>
+	<type>never</type>
+      </stopOn>
+    </objectCenteredOnCam>
+
+  </measures>
+
+  <startOn>
+     <type>service</type>
+     <target> startBench </target>
+  </startOn>
+
+  <stopOn>
+     <type>never</type>
+  </stopOn> 
+    
+  <function publishResult="true">corners+centroid</function>
+
+  <sceneUpdater> 
+    <currentForceUpdater publishAsForce="true">
+      <initialValue>0</initialValue>
+      <finalValue>0.4</finalValue>
+      <sphericalDirection>
+	<theta> 1.57 </theta>
+	<phi> 0 </phi>
+      </sphericalDirection>
+      <forceVariation> 0.005 </forceVariation>
+      <forcePeriod> 4 </forcePeriod>
+      <directionVariation>
+	<theta> 0 </theta>
+	<phi> 0.7 </phi>	
+      </directionVariation>
+      <directionPeriod>
+	<theta> 4 </theta>
+	<phi> 30 </phi>	
+      </directionPeriod>
+      <random> 0.01 </random>
+      <step>0.025</step>
+      <interval>120</interval>
+      <target>girona500</target>
+    </currentForceUpdater>
+  </sceneUpdater>
+
+</benchmark>
