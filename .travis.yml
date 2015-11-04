@@ -1,8 +1,8 @@
 # UWSim Benchmarks Travis Continuous Integration Configuration File
+sudo: required
+dist: trusty
 language:
-  - cpp
-compiler:
-  - gcc
+  - generic
 notifications:
   email:
     recipients:
