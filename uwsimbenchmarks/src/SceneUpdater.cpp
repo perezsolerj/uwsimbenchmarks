@@ -1,6 +1,6 @@
 #include "SceneUpdater.h"
 #include <std_srvs/Empty.h>
-
+#include <boost/thread.hpp>
 
 SceneUpdater::SceneUpdater(double interval){
   this->interval=interval;
@@ -394,4 +394,72 @@ void CameraNoiseUpdater::restart(){
   for( unsigned int i=0;i<cameras.size();i++){
     cameras[i]->getOrCreateStateSet()->getUniform("stddev")->set((float)this->noise);
   }
+}
+
+/*SCENE FOG BAG UPDATER*/
+
+int BagFogUpdater::updateScene(){
+  int updateLevel;
+
+  if(child)
+    updateLevel= child->updateScene() +1;
+  if(!child || child->finished()){
+    restartTimer();
+    fog+=step;
+
+    for(unsigned int i=0;i<cameras.size();i++){
+      ((osg::Fog *)cameras[i]->getOrCreateStateSet()->getAttribute(osg::StateAttribute::FOG))->setDensity(fog);
+      cameras[i]->getOrCreateStateSet()->getUniform("osgOcean_UnderwaterFogDensity")->set(-fog*fog*1.442695f);
+    }
+    scene->getOceanScene()->setUnderwaterFog(fog, osg::Vec4f(0,0.05,0.3,1) );
+    fogAdderBP.newFogDensity(fog);
+    if(child)
+      child->restart();
+    return 1;
+  }
+  return updateLevel;
+}
+
+int BagFogUpdater::finished(){
+  return fog>finalFog;
+}
+
+BagFogUpdater::BagFogUpdater(double initialFog, double finalFog, double step, double interval, std::vector<osg::ref_ptr<osg::Camera> > cameras, osg::ref_ptr<osgOceanScene> scene,
+				std::string bag, std::string imageTopic, std::string infoTopic, double imageDepth, std::string imagePub,std::string infoPub)
+: SceneUpdater(interval), fogAdderBP(bag, imageDepth, imageTopic, imagePub, infoPub, infoTopic)
+{
+  this->initialFog=initialFog;
+  this->fog=initialFog;
+  this->finalFog=finalFog;
+  this->step=step;
+  this->cameras=cameras;
+  this->scene=scene;
+
+  for( unsigned int i=0;i<cameras.size();i++){
+    ((osg::Fog *)cameras[i]->getOrCreateStateSet()->getAttribute(osg::StateAttribute::FOG))->setDensity(initialFog);
+    cameras[i]->getOrCreateStateSet()->getUniform("osgOcean_UnderwaterFogDensity")->set(-this->initialFog*this->initialFog*1.442695f);
+  }
+  scene->getOceanScene()->setUnderwaterFog(initialFog, osg::Vec4f(0,0.05,0.3,1) );
+  fogAdderBP.newFogDensity(initialFog);
+
+  boost::thread workerThread (boost::bind(&FogAdderBagPlayer::run,&fogAdderBP));
+}
+
+double BagFogUpdater::getReference(){
+  return fog;
+}
+
+std::string BagFogUpdater::getName(){
+  return "Fog";
+}
+
+void BagFogUpdater::restart(){
+  fog=initialFog;
+
+  for(unsigned int i=0;i<cameras.size();i++){
+    ((osg::Fog *)cameras[i]->getOrCreateStateSet()->getAttribute(osg::StateAttribute::FOG))->setDensity(fog);
+    cameras[i]->getOrCreateStateSet()->getUniform("osgOcean_UnderwaterFogDensity")->set(-fog*fog*1.442695f);
+  }
+  scene->getOceanScene()->setUnderwaterFog(fog, osg::Vec4f(0,0.05,0.3,1) );
+  fogAdderBP.newFogDensity(fog);
 }

@@ -51,7 +51,7 @@ struct CurrentInfo{
 };
 
 struct SceneUpdaterInfo{
-  typedef enum { None, SceneFogUpdater, CurrentForceUpdater, ArmMoveUpdater, Repeat, SceneLightUpdater, CameraNoiseUpdater} SceneUpdaterType;
+  typedef enum { None, SceneFogUpdater, CurrentForceUpdater, ArmMoveUpdater, Repeat, SceneLightUpdater, CameraNoiseUpdater, BagFogUpdater} SceneUpdaterType;
   SceneUpdaterType type;
   double initialValue, finalValue, step, interval;
   CurrentInfo currentInfo; //needed for currentforce
@@ -60,6 +60,9 @@ struct SceneUpdaterInfo{
   SceneUpdaterInfo * child;
   int iterations; //Needed for repeat 
   int publishAs; //Used in CurrentForceUpdater
+
+  std::string bag, imageTopic, infoTopic, imagePub, infoPub; //Bag scene updater
+  double  imageDepth; //Bag scene updater
 };
 
 

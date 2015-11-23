@@ -278,6 +278,11 @@ void BenchmarkXMLParser::processSceneUpdater(const xmlpp::Node* node,SceneUpdate
       su->type=SceneUpdaterInfo::CameraNoiseUpdater;
       processSceneUpdaters(child,su);
     }
+    else if(child->get_name()=="bagFogUpdater"){
+      su->type=SceneUpdaterInfo::BagFogUpdater;
+      processSceneUpdaters(child,su);
+    }
+
   }
 
 }
@@ -321,6 +326,18 @@ void BenchmarkXMLParser::processSceneUpdaters(const xmlpp::Node* node,SceneUpdat
       su->child = new SceneUpdaterInfo;
       processSceneUpdater(child,su->child);
     }
+    else if(child->get_name()=="bag")
+      extractStringChar(child,&su->bag);
+    else if(child->get_name()=="imageTopic")
+      extractStringChar(child,&su->imageTopic);
+    else if(child->get_name()=="infoTopic")
+      extractStringChar(child,&su->infoTopic);
+    else if(child->get_name()=="imagePub")
+      extractStringChar(child,&su->imagePub);
+    else if(child->get_name()=="infoPub")
+      extractStringChar(child,&su->infoPub);
+    else if(child->get_name()=="imageDepth")
+      extractFloatChar(child,&su->imageDepth);
 
   }
 }

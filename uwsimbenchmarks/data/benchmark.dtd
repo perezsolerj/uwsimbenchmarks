@@ -49,11 +49,12 @@
 
 <!-- SceneUpdater -->
 
-<!ELEMENT sceneUpdater (none | sceneFogUpdater | currentForceUpdater | armMoveUpdater | repeat | sceneLightUpdater | cameraNoiseUpdater)>
+<!ELEMENT sceneUpdater (none | sceneFogUpdater | currentForceUpdater | armMoveUpdater | repeat | sceneLightUpdater | cameraNoiseUpdater | bagFogUpdater)>
 
 <!ELEMENT none EMPTY>
 
 <!ELEMENT sceneFogUpdater (initialValue, finalValue, step, interval,sceneUpdater?)>
+<!ELEMENT bagFogUpdater (initialValue, finalValue, step, interval, bag, imageTopic, infoTopic, imageDepth, imagePub?, infoPub?,  sceneUpdater?)>
 <!ELEMENT currentForceUpdater (initialValue, finalValue, sphericalDirection, forceVariation, forcePeriod, directionVariation, directionPeriod, random, step, interval, target,sceneUpdater?)>
 <!ATTLIST currentForceUpdater publishAsForce (true|false) "false">
 <!ELEMENT armMoveUpdater (armPosition+, step, interval, target,sceneUpdater?)>
@@ -68,6 +69,13 @@
 <!ELEMENT step (#PCDATA)>
 <!ELEMENT interval (#PCDATA)>
 <!ELEMENT iterations (#PCDATA)>
+
+<!ELEMENT bag (#PCDATA)>
+<!ELEMENT imageTopic (#PCDATA)>
+<!ELEMENT infoTopic (#PCDATA)>
+<!ELEMENT imageDepth (#PCDATA)>
+<!ELEMENT imagePub (#PCDATA)>
+<!ELEMENT infoPub (#PCDATA)>
 
 <!-- Current -->
 <!ELEMENT sphericalDirection (theta, phi)>

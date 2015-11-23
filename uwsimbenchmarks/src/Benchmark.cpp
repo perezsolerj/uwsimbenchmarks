@@ -158,6 +158,17 @@ SceneUpdater * Benchmark::createSceneUpdater(SceneUpdaterInfo su, SceneBuilder *
      }
     sceneUpdater = new CameraNoiseUpdater(su.initialValue, su.finalValue, su.step, su.interval,cameras);
   }
+  else if(su.type==SceneUpdaterInfo::BagFogUpdater){
+    //Get cameras
+    std::vector<osg::ref_ptr<osg::Camera> > cameras;
+    for(unsigned int i=0; i<builder->iauvFile.size();i++){
+      for (unsigned int j=0; j<builder->iauvFile[i]->getNumCams(); j++) {
+        cameras.push_back(builder->iauvFile[i]->camview[j].textureCamera);
+      }
+     }
+    sceneUpdater = new BagFogUpdater(su.initialValue, su.finalValue, su.step, su.interval,cameras,builder->scene, su.bag, su.imageTopic, su.infoTopic,
+					su.imageDepth, su.imagePub, su.infoPub);
+  }
   else{
     std::cerr<<"Unknown scene updater"<<std::endl;
     exit(1);  

@@ -9,6 +9,7 @@
 #include "Current.h"
 #include "BenchmarkXMLParser.h"
 #include "BenchmarkROSInterfaces.h"
+#include "FogAdderBagPlayer.h"
 
 class SceneUpdater{
 private:
@@ -134,6 +135,23 @@ public:
   int updateScene();
   int finished();
   CameraNoiseUpdater(double initialNoise, double finalNoise, double step, double interval,std::vector<osg::ref_ptr<osg::Camera> > cameras);
+  double getReference();
+  std::string getName();
+  void update(){};
+  void restart();
+};
+
+class BagFogUpdater: public SceneUpdater{
+private:
+  FogAdderBagPlayer fogAdderBP;
+  float initialFog,finalFog,step,fog;
+  std::vector<osg::ref_ptr<osg::Camera> > cameras;
+  osg::ref_ptr<osgOceanScene> scene;
+public:
+  int updateScene();
+  int finished();
+  BagFogUpdater(double initialFog, double finalFog, double step, double interval,std::vector<osg::ref_ptr<osg::Camera> > cameras, osg::ref_ptr<osgOceanScene> scene,
+		std::string bag, std::string imageTopic, std::string infoTopic, double imageDepth, std::string imagePub, std::string infoPub);
   double getReference();
   std::string getName();
   void update(){};

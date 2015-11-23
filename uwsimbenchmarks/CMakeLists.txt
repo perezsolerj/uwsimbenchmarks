@@ -79,7 +79,9 @@ src/Trigger.cpp
 src/BenchmarkXMLParser.cpp
 src/Benchmark.cpp
 src/BenchmarkROSInterfaces.cpp
-src/Current.cpp)
+src/Current.cpp
+src/BagPlayer.cpp
+src/FogAdderBagPlayer.cpp)
 
 
 TARGET_LINK_LIBRARIES(uwsimbenchmarks   ${OSGOCEAN_LIBRARIES} ${PCL_LIBRARIES} ${catkin_LIBRARIES} ${OPENSCENEGRAPH_LIBRARIES} ${LIBXML++_LIBRARIES}  ${BULLET_LIBRARIES} ${OSGBULLET_LIBRARIES} ${OSGWORKS_LIBRARIES} ${OSGUTILS_LIBRARIES} ${OSGINTERACTIVEMARKERS_LIBRARIES} ${OSGMARKERS_LIBRARIES}  -lmuparser GLU)
