@@ -223,6 +223,10 @@ private:
   std::vector<osg::Vec3f> path;
   int currentPoint;
   osg::Node * from, *target;
+  int wptFromTopic;
+  double lastError;
+  double ise;
+  ros::WallTime lastTick;
 public:
   void start(void);
   void stop(void);

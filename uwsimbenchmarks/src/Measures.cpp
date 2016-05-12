@@ -991,15 +991,20 @@ void PathFollowing::drawPath(){
 
 PathFollowing::PathFollowing( std::string topic ,osg::Node * target, osg::Node * from){
   this->topic=new ROSPathToPathFollowing(topic);
-  this->wptTopic=new ROSIntToPathFollowing("current_waypoint");
+  wptFromTopic=0;
+  if (wptFromTopic)
+    this->wptTopic=new ROSIntToPathFollowing("current_waypoint");
   path.clear();
   currentPoint=-1;
   this->from=from;
   this->target=target;
+  lastError=-1;
+  ise=0;
 }
 
 void PathFollowing::start(void){
   topic->getPath(path);
+  lastTick = ros::WallTime::now();
   if(path.size()>0){
     currentPoint=0;
     drawPath();
@@ -1010,6 +1015,85 @@ void PathFollowing::start(void){
 }
 
 void PathFollowing::update(void){
+if(currentPoint==-1){
+    topic->getPath(path);
+    if(path.size()>0){
+      currentPoint=0;
+      drawPath();
+      std::cout<<"PathFollowing measure "<<name<<" has started measuring,  a path has been received."<<std::endl;
+    }
+  }
+
+  if (wptFromTopic)
+    currentPoint=wptTopic->getWaypoint()-1;
+
+  boost::shared_ptr<osg::Matrixd> wTf =getWorldCoords(from);
+  boost::shared_ptr<osg::Matrixd> wTt =getWorldCoords(target);
+  osg::Matrixd fTw;
+  fTw.invert(*wTf);
+
+  osg::Matrixd  fTt=*wTt * fTw;
+
+
+  //osg::Vec3 error= wTf->getTrans()+path[currentPoint]-fTt.getTrans();
+
+  double distanceToSegment=0;
+  if(path.size()>currentPoint+1){ //still not the last point in path
+
+    //we need to check the point is inside segment
+    double u = (( fTt.getTrans() - wTf->getTrans()-path[currentPoint] ) * (wTf->getTrans()+path[currentPoint+1] - wTf->getTrans()-path[currentPoint] )) /  //dot product AB * AC
+                (wTf->getTrans()+path[currentPoint+1] - wTf->getTrans()-path[currentPoint] ).length2();  //length^2 AB
+
+    if(u>1) //distance to point B
+      distanceToSegment= (wTf->getTrans()+path[currentPoint+1] - fTt.getTrans()).length();
+    
+    else if(u<0) //distance to point A
+      distanceToSegment= (wTf->getTrans()+path[currentPoint+0] - fTt.getTrans()).length();
+
+    else    //distance line A - B to point C
+      distanceToSegment= ( (wTf->getTrans()+path[currentPoint+1] - wTf->getTrans()-path[currentPoint] ) ^ (fTt.getTrans() - wTf->getTrans()-path[currentPoint]) ).length() / //Cross product AB x AC
+                      sqrt( (wTf->getTrans()+path[currentPoint+1] - wTf->getTrans()-path[currentPoint] ) * (wTf->getTrans()+path[currentPoint+1] - wTf->getTrans()-path[currentPoint]) ); //sqrt (AB * AB)
+
+
+    //std::cout<<" distance to segment: "<<distanceToSegment<<std::endl; 
+  }
+
+  if (not wptFromTopic){ //Check if we are ahead the currentPoint
+    double distanceToSegment2=-1;
+    currentPoint++;
+    if(path.size()>currentPoint+1){ //still not the previous of the last point in path
+
+      //we need to check the point is inside segment
+      double u = (( fTt.getTrans() - wTf->getTrans()-path[currentPoint] ) * (wTf->getTrans()+path[currentPoint+1] - wTf->getTrans()-path[currentPoint] )) /  //dot product AB * AC
+                  (wTf->getTrans()+path[currentPoint+1] - wTf->getTrans()-path[currentPoint] ).length2();  //length^2 AB
+
+      if(u>1) //distance to point B
+        distanceToSegment2= (wTf->getTrans()+path[currentPoint+1] - fTt.getTrans()).length();
+    
+      else if(u<0) //distance to point A
+        distanceToSegment2= (wTf->getTrans()+path[currentPoint+0] - fTt.getTrans()).length();
+
+      else    //distance line A - B to point C
+        distanceToSegment2= ( (wTf->getTrans()+path[currentPoint+1] - wTf->getTrans()-path[currentPoint] ) ^ (fTt.getTrans() - wTf->getTrans()-path[currentPoint]) ).length() / //Cross product AB x AC
+                      sqrt( (wTf->getTrans()+path[currentPoint+1] - wTf->getTrans()-path[currentPoint] ) * (wTf->getTrans()+path[currentPoint+1] - wTf->getTrans()-path[currentPoint]) ); //sqrt (AB * AB)
+
+
+      //std::cout<<" distance to segment: "<<distanceToSegment<<std::endl; 
+    }
+    if(distanceToSegment2!=-1 and distanceToSegment2<distanceToSegment){ //we are in the next point
+      distanceToSegment=distanceToSegment2;
+    }
+    else{
+      currentPoint--;
+    }
+  }
+  ros::WallTime newTick = ros::WallTime::now();
+  double newElapsedTime = (newTick-lastTick).toSec();
+
+  ise+=distanceToSegment*newElapsedTime;
+
+  lastTick = newTick;
+  lastError=distanceToSegment;
 }
 
 void PathFollowing::stop(void){
@@ -1017,105 +1101,21 @@ void PathFollowing::stop(void){
 
 double PathFollowing::getMeasure(void){
   
-  if(currentPoint==-1){
-    topic->getPath(path);
-    if(path.size()>0){
-      currentPoint=0;
-      drawPath();
-      std::cout<<"PathFollowing measure "<<name<<" has started measuring,  a path has been received."<<std::endl;
-    }
-  }
-
-  currentPoint=wptTopic->getWaypoint()-1;
-
-  boost::shared_ptr<osg::Matrixd> wTf =getWorldCoords(from);
-  boost::shared_ptr<osg::Matrixd> wTt =getWorldCoords(target);
-  osg::Matrixd fTw;
-  fTw.invert(*wTf);
-
-  osg::Matrixd  fTt=*wTt * fTw;
-
-
-  //osg::Vec3 error= wTf->getTrans()+path[currentPoint]-fTt.getTrans();
-
-  double distanceToSegment=0;
-  if(path.size()>currentPoint+1){ //still not the last point in path
-
-    //we need to check the point is inside segment
-    double u = (( fTt.getTrans() - wTf->getTrans()-path[currentPoint] ) * (wTf->getTrans()+path[currentPoint+1] - wTf->getTrans()-path[currentPoint] )) /  //dot product AB * AC
-                (wTf->getTrans()+path[currentPoint+1] - wTf->getTrans()-path[currentPoint] ).length2();  //length^2 AB
-
-    if(u>1) //distance to point B
-      distanceToSegment= (wTf->getTrans()+path[currentPoint+1] - fTt.getTrans()).length();
-    
-    else if(u<0) //distance to point A
-      distanceToSegment= (wTf->getTrans()+path[currentPoint+0] - fTt.getTrans()).length();
-
-    else    //distance line A - B to point C
-      distanceToSegment= ( (wTf->getTrans()+path[currentPoint+1] - wTf->getTrans()-path[currentPoint] ) ^ (fTt.getTrans() - wTf->getTrans()-path[currentPoint]) ).length() / //Cross product AB x AC
-                      sqrt( (wTf->getTrans()+path[currentPoint+1] - wTf->getTrans()-path[currentPoint] ) * (wTf->getTrans()+path[currentPoint+1] - wTf->getTrans()-path[currentPoint]) ); //sqrt (AB * AB)
-
-
-    //std::cout<<" distance to segment: "<<distanceToSegment<<std::endl; 
-  }
-
-
-
-  return distanceToSegment;//
+  return ise;
 }
 
 std::vector<double> PathFollowing::getMeasureDetails(void){
 
-  if(currentPoint==-1){
-    topic->getPath(path);
-    if(path.size()>0){
-      currentPoint=0;
-      drawPath();
-      std::cout<<"PathFollowing measure "<<name<<" has started measuring,  a path has been received."<<std::endl;
-    }
-  }
-
-  currentPoint=wptTopic->getWaypoint()-1;
-
-  boost::shared_ptr<osg::Matrixd> wTf =getWorldCoords(from);
-  boost::shared_ptr<osg::Matrixd> wTt =getWorldCoords(target);
-  osg::Matrixd fTw;
-  fTw.invert(*wTf);
-
-  osg::Matrixd  fTt=*wTt * fTw;
-
-
-  //osg::Vec3 error= wTf->getTrans()+path[currentPoint]-fTt.getTrans();
-
-  double distanceToSegment=0;
-  if(path.size()>currentPoint+1){ //still not the last point in path
-
-    //we need to check the point is inside segment
-    double u = (( fTt.getTrans() - wTf->getTrans()-path[currentPoint] ) * (wTf->getTrans()+path[currentPoint+1] - wTf->getTrans()-path[currentPoint] )) /  //dot product AB * AC
-                (wTf->getTrans()+path[currentPoint+1] - wTf->getTrans()-path[currentPoint] ).length2();  //length^2 AB
-
-    if(u>1) //distance to point B
-      distanceToSegment= (wTf->getTrans()+path[currentPoint+1] - fTt.getTrans()).length();
-    
-    else if(u<0) //distance to point A
-      distanceToSegment= (wTf->getTrans()+path[currentPoint+0] - fTt.getTrans()).length();
-
-    else    //distance line A - B to point C
-      distanceToSegment= ( (wTf->getTrans()+path[currentPoint+1] - wTf->getTrans()-path[currentPoint] ) ^ (fTt.getTrans() - wTf->getTrans()-path[currentPoint]) ).length() / //Cross product AB x AC
-                      sqrt( (wTf->getTrans()+path[currentPoint+1] - wTf->getTrans()-path[currentPoint] ) * (wTf->getTrans()+path[currentPoint+1] - wTf->getTrans()-path[currentPoint]) ); //sqrt (AB * AB)
-
-
-    //std::cout<<" distance to segment: "<<distanceToSegment<<std::endl; 
-  }
-
   std::vector<double> results;
-  results.push_back(distanceToSegment);
+  results.push_back(ise);
+  results.push_back(lastError);
   results.push_back(currentPoint);
   return results;
 }
 
 std::vector<std::string> PathFollowing::getNameDetails(void){
   std::vector<std::string> results;
+  results.push_back("ISE");
   results.push_back("distanceToPath");
   results.push_back("waypoint");
   return results;
@@ -1130,6 +1130,9 @@ void PathFollowing::reset(){
 
   path.clear(); //clears the current path
   currentPoint=-1;
+  lastError=-1;
+  ise=0;
+  lastTick = ros::WallTime::now();
 }
 
 int PathFollowing::error(){
