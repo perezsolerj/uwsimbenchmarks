@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE benchmark SYSTEM "benchmark.dtd" >
+
+<benchmark>
+  <measures>
+
+    <time>
+      <name>taskTime</name>
+      <startOn>
+        <type>onInit</type>
+      </startOn>
+      <stopOn>
+         <type>never</type>
+      </stopOn>
+    </time>
+
+    <pathFollowing>
+      <name>pathFollowing</name>
+      <target> girona500 </target>
+      <topic> path </topic>
+      <from> localizedWorld </from>
+      <log> 0.1 </log>
+      <startOn>
+	<type>onInit</type>
+      </startOn>
+      <stopOn>
+	<type>never</type>
+      </stopOn>
+    </pathFollowing>
+
+  </measures>
+
+  <startOn>
+     <type>service</type>
+     <target> startBench </target>
+  </startOn>
+
+  <stopOn>
+     <type>service</type>
+     <target> stopBench </target>
+  </stopOn> 
+    
+  <function>taskTime</function>
+
+  <sceneUpdater> 
+    <none />
+  </sceneUpdater>
+
+</benchmark>
