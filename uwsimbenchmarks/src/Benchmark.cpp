@@ -55,6 +55,7 @@ Benchmark::Benchmark(BenchmarkXMLParser *bench,SceneBuilder * builder,BulletPhys
 
   resultsPublisher=NULL;
   if(bench->publishResult){
+    publishRate=bench->publishRate;
     resultsPublisher= new BenchmarkResultToROSFloat32MultiArray("BenchmarkResults",10); 
   }
 
@@ -365,10 +366,12 @@ void Benchmark::updateMeasures(){
     int error=0;
     float benchResult=0;
     std::vector <double> publishedResults;
+    int publishNOW=0;
 
-    if(resultsPublisher){
+    if(resultsPublisher and (ros::WallTime::now() - lastResultsPublish).toSec()>publishRate ){
       sceneUpdater->getReferences(publishedResults);
       publishedResults.push_back((ros::WallTime::now()-time).toSec()+iterationStart.back());
+      publishNOW=1;
     }
 
     for(int i=0; i<numMeasures ;i++){
@@ -392,7 +395,7 @@ void Benchmark::updateMeasures(){
 	  measures[i]->stop();
       active[i]=measures[i]->isOn();
 
-      if(resultsPublisher){ //add Measure to publisher
+      if(publishNOW){ //add Measure to publisher
         std::vector <double> meas=measures[i]->getMeasureDetails();
         parser.DefineConst(measures[i]->name, meas[0]);
         error+=measures[i]->error();
@@ -400,7 +403,7 @@ void Benchmark::updateMeasures(){
       }
     }
 
-  if(resultsPublisher and error==0){
+  if(publishNOW and error==0){
     parser.SetExpr(function);
     try{
       benchResult=parser.Eval();
@@ -412,6 +415,7 @@ void Benchmark::updateMeasures(){
     }
     publishedResults.push_back(benchResult);
     resultsPublisher->newDataToPublish(publishedResults); //not tested for multisceneupdaters
+    lastResultsPublish=ros::WallTime::now();
   }
 }
 
@@ -492,7 +496,7 @@ void Benchmark::step(){
   if(startOn->isOn() && !stopOn->isOn() && !sceneUpdater->finished()){
     if(activeBenchmark==0){ //Benchmark started this iteration
       sceneUpdater->start();
-      time=ros::WallTime::now();
+      time=lastResultsPublish=ros::WallTime::now();
     }
     activeBenchmark=1;
     updateMeasures();

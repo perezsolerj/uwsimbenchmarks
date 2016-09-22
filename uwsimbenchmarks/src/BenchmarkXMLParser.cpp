@@ -370,11 +370,19 @@ void BenchmarkXMLParser::processXML(const xmlpp::Node* node){
       else if(child->get_name()=="stopOn")
         processTrigger(child,&stopOn);
       else if(child->get_name()=="function"){
+        publishRate=0.1;
+
         xmlpp::Attribute * atrib =  dynamic_cast<const xmlpp::Element*>(child)->get_attribute("publishResult");
         publishResult=0;
         if(atrib->get_value()=="true"){
           publishResult=1;
         }
+
+        xmlpp::Attribute * atrib2 =  dynamic_cast<const xmlpp::Element*>(child)->get_attribute("publishRate");
+	if (atrib2){
+          publishRate=atof(atrib2->get_value().c_str());
+        }
+
         extractStringChar(child,&function);
       }
       else if(child->get_name()=="sceneUpdater")

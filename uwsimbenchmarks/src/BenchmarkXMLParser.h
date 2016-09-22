@@ -93,6 +93,7 @@ class BenchmarkXMLParser{
     TriggerInfo startOn, stopOn;
     string function;
     int publishResult;
+    double publishRate;
     SceneUpdaterInfo sceneUpdater;
     BenchmarkXMLParser(const std::string &fName);
     BenchmarkXMLParser(); //IF no benchmark defined

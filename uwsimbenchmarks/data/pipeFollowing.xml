@@ -41,7 +41,7 @@
      <target> stopBench </target>
   </stopOn> 
     
-  <function>taskTime</function>
+  <function publishRate="0.5" publishResult="true">taskTime</function>
 
   <sceneUpdater> 
     <none />

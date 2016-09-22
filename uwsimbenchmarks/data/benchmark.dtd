@@ -7,6 +7,7 @@
 <!ELEMENT stopOn (type,target?,position?)>
 <!ELEMENT function (#PCDATA)>
 <!ATTLIST function publishResult (true|false) "false">
+<!ATTLIST function publishRate CDATA #IMPLIED>
 
 <!-- Measures -->
 <!ELEMENT time (name,log?,startOn,stopOn)>

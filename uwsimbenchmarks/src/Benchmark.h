@@ -18,6 +18,8 @@ private:
   int * active; // 0 if measure was off last iteration,1 if it was on (Measures)
   BenchmarkInfoToROSString * benchmarkInfo;
   BenchmarkResultToROSFloat32MultiArray * resultsPublisher;
+  ros::WallTime lastResultsPublish;
+  double publishRate;
 
   Measures * createTimeMeasure(MeasureInfo measureInfo);
   Measures * createPositionErrorMeasure(MeasureInfo measureInfo,osg::Group * root);
