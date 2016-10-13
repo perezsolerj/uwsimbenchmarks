@@ -115,6 +115,32 @@ int ROSIntToPathFollowing::getWaypoint(){
 
 ROSIntToPathFollowing::~ROSIntToPathFollowing(){}
 
+
+ROSPoseToPositionError::ROSPoseToPositionError(std::string topic): ROSSubscriberInterface(topic) {
+  valid=0;
+}
+
+void ROSPoseToPositionError::createSubscriber(ros::NodeHandle &nh){
+  sub_ = nh.subscribe<geometry_msgs::PoseStamped>(topic, 10, &ROSPoseToPositionError::processData, this);
+}
+  
+void ROSPoseToPositionError::processData(const geometry_msgs::PoseStamped::ConstPtr& msg) {
+   valid=1;
+   position[0]=msg->pose.position.x;
+   position[1]=msg->pose.position.y;
+   position[2]=msg->pose.position.z;
+}
+
+int ROSPoseToPositionError::getPosition(double posit[3]){
+   posit[0]=position[0];
+   posit[1]=position[1];
+   posit[2]=position[2];
+
+   return valid;
+}
+  
+ROSPoseToPositionError::~ROSPoseToPositionError(){}
+
 /*ROSTopicToShapeShifter::ROSTopicToShapeShifter(std::string topic): ROSSubscriberInterface(topic) {
   std::cout<<"CREADITO "<<topic<<std::endl;
 }

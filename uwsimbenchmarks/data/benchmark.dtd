@@ -12,7 +12,7 @@
 <!-- Measures -->
 <!ELEMENT time (name,log?,startOn,stopOn)>
 <!ELEMENT collision (name,target,log?,startOn,stopOn)>
-<!ELEMENT positionError (name,target,position,log?,startOn,stopOn)>
+<!ELEMENT positionError (name,target,position,topic?,log?,startOn,stopOn)>
 <!ELEMENT distance (name,target,log?,startOn,stopOn)>
 <!ELEMENT euclideanNorm (name,groundTruth,target,log?,startOn,stopOn)>
 <!ELEMENT objectCenteredOnCam (name,target,camera,log?,startOn,stopOn)>

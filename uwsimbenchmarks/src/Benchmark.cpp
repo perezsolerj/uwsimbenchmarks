@@ -192,7 +192,7 @@ Measures * Benchmark::createPositionErrorMeasure(MeasureInfo measureInfo,osg::Gr
     exit(1);
   }
   else
-    return new PositionError(first,measureInfo.position);
+    return new PositionError(first,measureInfo.position,measureInfo.topic);
 }
 
 Measures * Benchmark::createDistanceMeasure(MeasureInfo measureInfo,osg::Group * root){

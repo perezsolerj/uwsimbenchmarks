@@ -79,13 +79,18 @@ private:
   osg::Node * target;
   osg::Vec3f position;
   double distance;
+  osg::Vec3f distanceDetails;
+  ROSPoseToPositionError * sub;
+  int valid; 
 
 public:
   void start(void);
   void stop(void);
   void update(void);
-  PositionError(osg::Node * targ,double pos[3]);
+  PositionError(osg::Node * targ,double pos[3],std::string topic);
   double getMeasure(void);
+  std::vector<double> getMeasureDetails(void);
+  std::vector<std::string> getNameDetails(void);
   int isOn();
   void reset();
   int error();

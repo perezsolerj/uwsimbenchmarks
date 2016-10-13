@@ -10,6 +10,7 @@ class ServiceTrigger;
 #include <std_msgs/String.h>
 #include <std_srvs/Empty.h>
 #include <std_msgs/Int32.h>
+#include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/WrenchStamped.h>
 #include <topic_tools/shape_shifter.h>
 #include <pcl_ros/point_cloud.h>
@@ -69,6 +70,18 @@ public:
   virtual void processData(const std_msgs::Int32::ConstPtr& msg);
   int getWaypoint();
   ~ROSIntToPathFollowing();
+};
+
+class ROSPoseToPositionError : public ROSSubscriberInterface
+{
+  double position[3];
+  int valid;
+public:
+  ROSPoseToPositionError(std::string topic);
+  virtual void createSubscriber(ros::NodeHandle &nh);
+  virtual void processData(const geometry_msgs::PoseStamped::ConstPtr& msg);
+  int getPosition(double position[3]);
+  ~ROSPoseToPositionError();
 };
 
 /*class ROSTopicToShapeShifter: public ROSSubscriberInterface {

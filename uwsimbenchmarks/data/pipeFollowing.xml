@@ -15,6 +15,23 @@
       </stopOn>
     </time>
 
+    <positionError>	
+      <name>positionError</name>
+      <target> girona500 </target>
+      <position>
+        <x>0</x>
+        <y>0</y>
+        <z>0</z>
+      </position>
+      <topic> position </topic>
+      <startOn>
+	<type>onInit</type>
+      </startOn>
+      <stopOn>
+	<type>never</type>
+      </stopOn>
+    </positionError>
+
     <pathFollowing>
       <name>pathFollowing</name>
       <target> girona500 </target>

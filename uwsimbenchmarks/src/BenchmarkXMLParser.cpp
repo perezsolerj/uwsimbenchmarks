@@ -203,6 +203,7 @@ void BenchmarkXMLParser::processMeasures(const xmlpp::Node* node){
     measure.log=-1;
     measure.lod=0.003;
     measure.detailedResultsToGlobals=false;
+    measure.topic="";
 
     if(child->get_name()=="time"){
       measure.type=MeasureInfo::Time;

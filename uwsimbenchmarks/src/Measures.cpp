@@ -186,27 +186,70 @@ int Collisions::error(){
 
 //******************POSITION ERROR ***************
 
-PositionError::PositionError(osg::Node * targ,double pos[3]){
+PositionError::PositionError(osg::Node * targ,double pos[3],std::string topic){
   target=targ;
   position=osg::Vec3f(pos[0],pos[1],pos[2]);
   distance=100;
+  valid=1;
+
+  if (topic!=""){
+    sub=new ROSPoseToPositionError(topic);
+    valid=0;
+  }
+
 }
 
 void PositionError::start(void){
 }
 
 void PositionError::update(void){
+
+    if(!valid){
+      double posit[3];
+      valid=sub->getPosition(posit);
+      position.x()=posit[0];position.y()=posit[1];position.z()=posit[2];
+
+    }
+
+    if(valid){
+      osg::Vec3f newposition, newscale;
+      osg::Quat newrotation, newrotationScale;
+
+      getWorldCoords(target)->decompose(newposition, newrotation, newscale, newrotationScale);
+
+      distanceDetails=newposition-position;
+      distance=distanceDetails.length();
+
+    }
+    else{
+      distance=-1;
+    }
 }
 
 void PositionError::stop(void){
-    osg::Vec3f newposition, newscale;
-    osg::Quat newrotation, newrotationScale;
 
-    getWorldCoords(target)->decompose(newposition, newrotation, newscale, newrotationScale);
-
-    newposition=newposition-position;
-    distance=newposition.length();
 }
+
+std::vector<double> PositionError::getMeasureDetails(void){
+  std::vector<double> vector;
+  vector.resize(4);
+  vector[0]=distance;
+  vector[1]=distanceDetails.x();
+  vector[2]=distanceDetails.y();
+  vector[3]=distanceDetails.z();
+  return vector;
+}
+
+std::vector<std::string> PositionError::getNameDetails(void){
+  std::vector<std::string> vector;
+  vector.resize(4);
+  vector[0]="total";
+  vector[1]='x';
+  vector[2]='y';
+  vector[3]='z';
+  return vector;
+}
+
 
 double PositionError::getMeasure(void){
   return distance;
