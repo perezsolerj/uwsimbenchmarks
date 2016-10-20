@@ -82,6 +82,7 @@ private:
   osg::Vec3f distanceDetails;
   ROSPoseToPositionError * sub;
   int valid; 
+  osg::Quat originalRot;
 
 public:
   void start(void);

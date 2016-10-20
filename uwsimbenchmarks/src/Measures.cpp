@@ -217,6 +217,8 @@ void PositionError::update(void){
 
       getWorldCoords(target)->decompose(newposition, newrotation, newscale, newrotationScale);
 
+      originalRot= target->asTransform()->asMatrixTransform()->getMatrix().getRotate();
+
       distanceDetails=newposition-position;
       distance=distanceDetails.length();
 
@@ -232,21 +234,30 @@ void PositionError::stop(void){
 
 std::vector<double> PositionError::getMeasureDetails(void){
   std::vector<double> vector;
-  vector.resize(4);
+  vector.resize(8);
   vector[0]=distance;
   vector[1]=distanceDetails.x();
   vector[2]=distanceDetails.y();
   vector[3]=distanceDetails.z();
+
+  vector[4]=originalRot.x();
+  vector[5]=originalRot.y();
+  vector[6]=originalRot.z();
+  vector[7]=originalRot.w();
   return vector;
 }
 
 std::vector<std::string> PositionError::getNameDetails(void){
   std::vector<std::string> vector;
-  vector.resize(4);
+  vector.resize(8);
   vector[0]="total";
   vector[1]='x';
   vector[2]='y';
   vector[3]='z';
+  vector[4]="rx";
+  vector[5]="ry";
+  vector[6]="rz";
+  vector[7]="rw";
   return vector;
 }
 
