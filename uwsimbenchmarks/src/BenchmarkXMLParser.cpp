@@ -68,7 +68,7 @@
   void BenchmarkXMLParser::extractPositionOrColor(const xmlpp::Node* node,double * param){
     xmlpp::Node::NodeList list = node->get_children();
     for(xmlpp::Node::NodeList::iterator iter = list.begin(); iter != list.end(); ++iter){
-      xmlpp::Node* child=dynamic_cast<const xmlpp::Node*>(*iter);
+      const xmlpp::Node* child=dynamic_cast<const xmlpp::Node*>(*iter);
 
       if(child->get_name()=="x" || child->get_name()=="r")
 	extractFloatChar(child,&param[0]);
@@ -83,7 +83,7 @@ void BenchmarkXMLParser::processTrigger(const xmlpp::Node* node,TriggerInfo * tr
 
   xmlpp::Node::NodeList list = node->get_children();
   for(xmlpp::Node::NodeList::iterator iter = list.begin(); iter != list.end(); ++iter){
-    xmlpp::Node* child=dynamic_cast<const xmlpp::Node*>(*iter);
+    const xmlpp::Node* child=dynamic_cast<const xmlpp::Node*>(*iter);
 
     if(child->get_name()=="type"){
       string aux;
@@ -117,7 +117,7 @@ void BenchmarkXMLParser::processVector(const xmlpp::Node* node, std::vector<doub
     groundTruth.resize((list.size()-1)/2);
     int pos=0;
     for(xmlpp::Node::NodeList::iterator iter = list.begin(); iter != list.end(); ++iter){
-      xmlpp::Node* child=dynamic_cast<const xmlpp::Node*>(*iter);
+      const xmlpp::Node* child=dynamic_cast<const xmlpp::Node*>(*iter);
       if(child->get_name()=="value" || child->get_name()=="joint"){
         extractFloatChar(child,&groundTruth[pos++]);
       }
@@ -129,7 +129,7 @@ void BenchmarkXMLParser::processMeasure(const xmlpp::Node* node,MeasureInfo * me
 
     xmlpp::Node::NodeList list = node->get_children();
     for(xmlpp::Node::NodeList::iterator iter = list.begin(); iter != list.end(); ++iter){
-      xmlpp::Node* child=dynamic_cast<const xmlpp::Node*>(*iter);
+      const xmlpp::Node* child=dynamic_cast<const xmlpp::Node*>(*iter);
       //cout<<child->get_name()<<endl;
       if(child->get_name()=="name")
 	extractStringChar(child,&measure->name);
@@ -178,7 +178,7 @@ void BenchmarkXMLParser::processGTFromCam(const xmlpp::Node* node,MeasureInfo * 
 
     xmlpp::Node::NodeList list = node->get_children();
     for(xmlpp::Node::NodeList::iterator iter = list.begin(); iter != list.end(); ++iter){
-      xmlpp::Node* child=dynamic_cast<const xmlpp::Node*>(*iter);
+      const xmlpp::Node* child=dynamic_cast<const xmlpp::Node*>(*iter);
       if(child->get_name()=="target")
 	extractStringChar(child,&measure->object);
       else if(child->get_name()=="camera")
@@ -196,7 +196,7 @@ void BenchmarkXMLParser::processMeasures(const xmlpp::Node* node){
 
   xmlpp::Node::NodeList list = node->get_children();
   for(xmlpp::Node::NodeList::iterator iter = list.begin(); iter != list.end(); ++iter){
-    xmlpp::Node* child=dynamic_cast<const xmlpp::Node*>(*iter);
+    const xmlpp::Node* child=dynamic_cast<const xmlpp::Node*>(*iter);
 
     MeasureInfo measure;
     measure.type=MeasureInfo::Unknown;
@@ -246,7 +246,7 @@ void BenchmarkXMLParser::processSceneUpdater(const xmlpp::Node* node,SceneUpdate
   su->child=NULL;
   xmlpp::Node::NodeList list = node->get_children();
   for(xmlpp::Node::NodeList::iterator iter = list.begin(); iter != list.end(); ++iter){
-    xmlpp::Node* child=dynamic_cast<const xmlpp::Node*>(*iter);
+    const xmlpp::Node* child=dynamic_cast<const xmlpp::Node*>(*iter);
 
     if(child->get_name()=="none")
       su->type=SceneUpdaterInfo::None;
@@ -292,7 +292,7 @@ void BenchmarkXMLParser::processSceneUpdaters(const xmlpp::Node* node,SceneUpdat
 
   xmlpp::Node::NodeList list = node->get_children();
   for(xmlpp::Node::NodeList::iterator iter = list.begin(); iter != list.end(); ++iter){
-    xmlpp::Node* child=dynamic_cast<const xmlpp::Node*>(*iter);
+    const xmlpp::Node* child=dynamic_cast<const xmlpp::Node*>(*iter);
     
     if(child->get_name()=="initialValue")
       extractFloatChar(child,&su->initialValue);
@@ -346,7 +346,7 @@ void BenchmarkXMLParser::processSceneUpdaters(const xmlpp::Node* node,SceneUpdat
 void BenchmarkXMLParser::extractSphericalDirection(const xmlpp::Node* node,double param[2]){
   xmlpp::Node::NodeList list = node->get_children();
   for(xmlpp::Node::NodeList::iterator iter = list.begin(); iter != list.end(); ++iter){
-    xmlpp::Node* child=dynamic_cast<const xmlpp::Node*>(*iter);
+    const xmlpp::Node* child=dynamic_cast<const xmlpp::Node*>(*iter);
 
     if(child->get_name()=="theta")
       extractFloatChar(child,&param[0]);
@@ -362,7 +362,7 @@ void BenchmarkXMLParser::processXML(const xmlpp::Node* node){
   else{
     xmlpp::Node::NodeList list = node->get_children();
     for(xmlpp::Node::NodeList::iterator iter = list.begin(); iter != list.end(); ++iter){
-      xmlpp::Node* child=dynamic_cast<const xmlpp::Node*>(*iter);
+      const xmlpp::Node* child=dynamic_cast<const xmlpp::Node*>(*iter);
       //cout<<child->get_name()<<endl;
       if(child->get_name()=="measures")
         processMeasures(child);

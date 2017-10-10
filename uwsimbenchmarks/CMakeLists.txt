@@ -71,6 +71,8 @@ INCLUDE_DIRECTORIES( ${OPENSCENEGRAPH_INCLUDE_DIRS} ${LIBXML++_INCLUDE_DIRS} ${c
 
 # this disables the warnings that come mostly from osg
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-ignored-qualifiers")
+# Needed for kinetic
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 add_executable(uwsimbenchmarks src/main.cpp
 src/Measures.cpp
